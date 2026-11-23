@@ -2,106 +2,106 @@
 
 ## Status
 
-These are proposed baseline requirements, pending project owner approval. The
-confirmed project uses Astro, Netlify, GitHub, manually managed listings, and
-English and Arabic for a premium Bahrain real estate site on bahrainrealtor.bh.
-The existing site is bahrainrealtor.com. The
-[architecture](website-architecture.md) records intended routes, while the
-[keyword map](keyword-map.md) remains provisional until the original workbook
-is available and analyzed. Neither document authorizes implementation.
+These are the approved planning baseline for a rebuild of the existing site on
+the only production domain, `https://bahrainrealtor.com/`. Do not use
+`bahrainrealtor.bh` or `bahrainrealtot.com` as production domains. The project
+uses Astro, Supabase, Netlify, GitHub, manually managed listings, and English
+and Arabic. Supabase suitability, Astro/Netlify runtime compatibility, vendor
+capabilities, security, privacy requirements and costs remain subject to
+validation. The [architecture](website-architecture.md) records intended
+routes, while the [keyword map](keyword-map.md) remains provisional until the
+original workbook is approved for final ownership. These documents do not
+authorize Phase 1 implementation.
 
 ## Search and content
 
-- Create content for the approved audience and intent of each page. Use its
-  mapped terms naturally in relevant headings, copy, title, and description;
-  avoid keyword stuffing and duplicate pages targeting the same intent.
-- Give each indexable page a descriptive, unique title and meta description,
-  a clear primary heading, and useful internal links to relevant approved pages.
-- Publish accurate, original, useful information. Verify claims, property
-  details, availability, contact information, and business credentials with
-  the owner; never fabricate them.
+- Create content for the approved audience and intent of each page. Use mapped
+  terms naturally and avoid keyword stuffing or duplicate intent pages.
+- Give each indexable page a unique title, meta description, primary heading
+  and useful internal links.
+- Publish accurate, original information. Verify claims, property details,
+  availability, contact information and business credentials; never fabricate.
+- Retain the ten planned article topics, prioritizing the first three and
+  publishing the remainder only after research and cannibalization review.
 
 ## English and Arabic
 
-- Plan equivalent, useful content in English and Arabic with accurate,
-  human-reviewed localization, including titles, descriptions, headings,
-  navigation, and property information. Use appropriate language and text
-  direction, including right-to-left presentation for Arabic.
-- Agree the URL structure and page-to-page language mappings with the owner
-  before implementation. Do not invent Arabic routes or assume every page has
-  a translation.
-- For available equivalent pages, use reciprocal hreflang annotations with
-  appropriate language codes and absolute URLs. Each indexable language page
-  should have a self-referencing canonical; do not canonicalize a translation
-  to the other language. Include an x-default only if a suitable default page
-  is agreed.
-- Allow users and crawlers to access each language URL directly; avoid forced
-  language redirects that prevent discovery. Analyze keyword intent separately
-  for each language when the original workbook is available.
+- Provide useful, human-reviewed English and Arabic content, including
+  metadata, navigation and property information, with RTL presentation for
+  Arabic.
+- Use `/ar/` equivalents with matching English slugs where content is reviewed
+  and approved. Do not assume every page has a translation.
+- For published equivalent pages, use reciprocal hreflang and absolute URLs.
+  Each indexable language page uses a self-referencing canonical; do not
+  canonicalize a translation to the other language.
+- Allow direct access to each language URL and avoid forced language redirects.
+  Analyze keyword intent separately for each language when evidence is
+  available.
 
 ## Answer engine optimization (AEO)
 
-- Answer the page's main question clearly and early, then provide useful
-  supporting detail in descriptive sections. Use FAQs only where they help
-  visitors and the answers can be verified.
-- Make content understandable without relying solely on images or scripts.
-  Use semantic headings and accessible text, and keep information current.
+- Answer the page's main question clearly and early, followed by useful detail.
+- Use semantic headings and accessible text; keep information current.
 - Add structured data only when it accurately describes visible content and
-  is appropriate for the page. Validate it against the relevant schema and
-  search engine requirements; markup does not guarantee a rich result.
+  validate it against relevant requirements.
 
 ## Technical requirements
 
-- Build the approved site with Astro and host it on Netlify, using GitHub for
-  version control. Verify that generated HTML exposes essential content and
-  metadata to crawlers, and that Netlify serves the agreed canonical URLs,
-  status codes, and redirects.
-- Make approved indexable pages discoverable through normal links, return
-  appropriate HTTP status codes, and provide crawlable, renderable content.
-  Set a consistent preferred canonical URL and avoid duplicate URL variants.
+- Build the public site with Astro and host it on Netlify using GitHub.
+  Use a verified SSR/hybrid approach so public properties, articles and FAQs
+  can publish from Supabase without a code redeployment.
+- Verify generated HTML, metadata, canonical URLs, status codes, caching,
+  invalidation and redirects.
 - Provide an XML sitemap containing canonical, indexable URLs and a robots.txt
-  that does not block resources needed to render those pages. Use an
-  appropriate noindex mechanism for pages that should not appear in search;
-  do not rely on robots.txt alone for deindexing.
-- Use HTTPS, responsive layouts, accessible semantic HTML, descriptive link
-  text, and meaningful image alternatives. Optimize images and minimize
-  unnecessary scripts and layout shifts.
-- Measure Core Web Vitals with field data when available, aiming for Google's
-  good thresholds at the 75th percentile: LCP at most 2.5 seconds, INP at
-  most 200 milliseconds, and CLS at most 0.1.
+  that does not block rendering resources. Use noindex for private or
+  non-indexable content; do not rely on robots.txt alone for deindexing.
+- Use HTTPS, responsive accessible HTML, meaningful image alternatives and
+  optimized images. Validate Core Web Vitals with available field data.
 
 ## Manual property management
 
-- Agree on the listing data, publishing workflow, ownership, and review process
-  before implementation. Manage listings manually; do not assume a live feed
-  or third-party integration.
-- Verify details, media rights, translations, and availability before
-  publication, and define how listings are updated or removed when no longer
-  available. Agree how unavailable listing URLs are handled in the migration
-  and redirect plan; do not invent replacement pages.
+- Manage listings through a private single-administrator dashboard; do not
+  assume a live feed or third-party integration.
+- Use **Draft → Preview → Publish**, with independent English and Arabic
+  publication approval. Arabic drafts may be translation-assisted but require
+  human review before publication.
+- Verify details, media rights, translations and availability before
+  publication. Stable `/properties/` URLs use unique immutable IDs.
+- Keep useful sold/rented property URLs with accurate status labels where
+  appropriate, while removing them from active searches. Drafts and private
+  previews must be inaccessible anonymously and absent from public sitemaps.
+
+## Enquiries, resilience and revisions
+
+Store website enquiries securely with property context, consent information,
+anti-abuse controls and email notifications. Do not imply that WhatsApp or
+call clicks are automatically stored as leads. Require database backups,
+separate image backups, revision history and restore testing, subject to
+verification of vendor capabilities, retention, restoration granularity and
+cost.
 
 ## Migration and redirects
 
-1. Inventory the existing bahrainrealtor.com URLs using available crawl,
-   sitemap, analytics, and search data; identify useful pages, language
-   variants, current redirects, and incoming links where data is available.
-2. With the owner, map each useful existing URL to an equivalent approved URL
-   on bahrainrealtor.bh, preserving paths where appropriate. Record exceptions,
-   pages without equivalents, and their agreed handling; do not send unrelated
-   pages to the homepage by default.
-3. Before launch, obtain approval for the mapping and arrange permanent
-   server-side redirects from the old domain to the corresponding new URLs.
-   Confirm control of both domains and their hosting, HTTPS certificates, and
-   the duration of old-domain redirect support.
-4. Test mappings, status codes, redirect chains, canonical URLs, hreflang,
-   internal links, and the new XML sitemap. Update supported search tools and
-   monitor crawl errors, indexing, traffic, and broken links after launch.
+1. Inventory existing `bahrainrealtor.com` URLs using crawl, sitemap, analytics
+   and search data where available. Identify useful pages, language variants,
+   redirects and incoming links.
+2. Map each useful URL to an equivalent approved URL on `bahrainrealtor.com`,
+   preserving paths where appropriate. Record exceptions and pages without
+   equivalents; do not send unrelated pages to the homepage by default.
+3. Before launch, obtain approval for the mapping and configure permanent
+   server-side 301 redirects only where a URL changed. This is a rebuild on
+   the same domain, not a `.com`-to-`.bh` migration. Final mappings remain
+   pending the live-site and search-data audit.
+4. Test mappings, status codes, redirect chains, canonicals, hreflang,
+   internal links and the XML sitemap. Monitor crawl errors, indexing,
+   traffic and broken links after launch.
 
 ## Verification and changes
 
 Before launch, check representative pages for metadata, canonical URLs,
-indexability, structured data where used, mobile usability, accessibility,
-performance, both languages, sitemap entries, and redirects. Record actual
-measurement results rather than promising rankings or results. Obtain owner
-approval before changing this strategy, and update the architecture and keyword
-map when affected.
+indexability, structured data, mobile usability, accessibility, performance,
+both languages, sitemap entries and redirects. Record actual measurements.
+Privacy/legal requirements, retention periods, monitoring ownership and
+provider costs must be validated before implementation. Obtain owner approval
+before changing this strategy, and update the architecture and keyword map
+when affected.

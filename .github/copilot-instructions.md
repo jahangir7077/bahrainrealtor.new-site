@@ -10,10 +10,27 @@ Before designing or implementing the site, read and follow:
 
 ## Confirmed project decisions
 
-- Primary domain: bahrainrealtor.bh; existing website: bahrainrealtor.com.
-- Premium Bahrain real estate website in English and Arabic.
-- Astro framework, Netlify hosting, and GitHub version control.
-- Property listings are managed manually.
+- Production domain: `https://bahrainrealtor.com/`; this is a rebuild of the
+  existing website on the same domain. Do not use `bahrainrealtor.bh` or
+  `bahrainrealtot.com` as production domains.
+- Premium Bahrain real estate website in English and Arabic. Arabic
+  equivalents use `/ar/` with matching English slugs when approved and
+  human-reviewed.
+- Astro for the public website, Supabase for database, authentication and
+  storage, and Netlify for hosting, all subject to runtime, security and cost
+  verification.
+- Production code deployment is manual and approval-gated. Use a separate,
+  access-restricted preview environment.
+- A private dashboard for one administrator manages properties, enquiries,
+  articles and FAQs. Approved content publishes without a code redeployment.
+- Property listings are managed manually. Stable public property URLs use
+  `/properties/` and an immutable unique ID.
+- Content uses Draft → Preview → Publish. English and Arabic publication
+  approval is independent; Arabic drafts may be translation-assisted but
+  require human review.
+- Preserve useful sold/rented pages with accurate status labels. Protect
+  enquiries, backups, image backups and revision history according to the
+  approved architecture, subject to validation.
 
 The route inventory reflects the intended structure; its routes are planned,
 not implemented. The keyword map remains provisional until the original keyword
@@ -23,11 +40,14 @@ implementation; do not treat planned routes or provisional entries as
 implementation approval.
 
 Create, remove, rename, or redirect pages only when the change is explicitly
-approved and reflected in the architecture and keyword map. Preserve existing
-useful URLs through the documented migration and redirect plan. Do not invent
+approved and reflected in the architecture and keyword map. Preserve valuable
+existing `bahrainrealtor.com` URLs and use mapped 301 redirects only where
+necessary; do not redirect unrelated URLs to the homepage. Do not invent
 routes, locations, services, property details, business claims, keyword
-metrics, or search rankings. When requirements or approvals are missing, ask
-the owner instead of making strategic decisions.
+metrics, or search rankings. Treat runtime capabilities, vendor costs,
+privacy/legal requirements and final URL mappings as pending validation unless
+documented as approved. When requirements or approvals are missing, ask the
+owner instead of making strategic decisions.
 
 For any requested change that affects these documents, obtain owner approval
 and keep all three consistent. Implement only the approved scope, preserve
