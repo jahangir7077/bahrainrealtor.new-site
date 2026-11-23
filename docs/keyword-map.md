@@ -2,14 +2,12 @@
 
 ## Status
 
-No keyword research or keyword-to-URL ownership has been approved. The entry
-below is a starting hypothesis for discussion, not a claim about search
-volume, rankings, or the business's services. Validate it and obtain owner
-approval alongside the [website architecture](website-architecture.md).
-
-| URL | Page purpose / search intent | Primary keyword | Supporting keyword | Status |
-| --- | --- | --- | --- | --- |
-| `/` | Find a Bahrain real estate site | Bahrain real estate | property in Bahrain | Proposed; requires research and approval |
+The map is provisional: the original keyword workbook has not yet been made
+available or analyzed, and no keyword-to-URL assignments are approved. Do not
+infer assignments, search volumes, or rankings from the planned URLs in the
+[website architecture](website-architecture.md). Obtain the workbook, analyze
+its English and Arabic terms and search intent, and seek owner approval of the
+resulting map before implementation.
 
 ## Ownership rules
 
@@ -18,8 +16,9 @@ approval alongside the [website architecture](website-architecture.md).
 - Assign each primary keyword and distinct intent to one canonical URL. Do not
   create competing pages for keyword variations; review overlap before adding
   a page.
-- Add a row only for a URL in the approved architecture. Record the intent,
-  primary and supporting terms, and approval status before creating the page.
+- Add a row only for a URL in the approved architecture. Record the language,
+  intent, primary and supporting terms, evidence, and approval status before
+  creating the page. Coordinate language variants with the approved URL plan.
 - Validate terms against actual offerings, audience, language, and search
   evidence. Do not invent keyword metrics or promise rankings.
 - Changes to URL or keyword ownership require owner approval and coordinated
