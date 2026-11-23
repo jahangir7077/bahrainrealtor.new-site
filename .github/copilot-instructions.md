@@ -17,10 +17,12 @@ Before designing or implementing the site, read and follow:
   equivalents use `/ar/` with matching English slugs when approved and
   human-reviewed.
 - Astro for the public website, Supabase for database, authentication and
-  storage, and Netlify for hosting, all subject to runtime, security and cost
-  verification.
+  storage, and Hostinger Business Web Hosting for the rebuild, subject to
+  runtime, security and cost verification. The existing live site remains on
+  Netlify until an explicitly approved cutover.
 - Production code deployment is manual and approval-gated. Use a separate,
-  access-restricted preview environment.
+  access-restricted preview environment. Verify how to prevent automatic
+  production deployments on Hostinger before any implementation.
 - A private dashboard for one administrator manages properties, enquiries,
   articles and FAQs. Approved content publishes without a code redeployment.
 - Property listings are managed manually. Stable public property URLs use

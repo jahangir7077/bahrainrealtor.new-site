@@ -10,9 +10,12 @@ The inventory below records the intended structure supplied by the owner. All
 routes are **planned, not implemented**; their inclusion does not authorize
 site design or implementation before the foundation is approved.
 
-The public site is planned for Astro with Supabase-backed content and Netlify
-hosting. The final SSR/hybrid runtime, caching and live-update behavior,
-vendor capabilities, security controls and costs remain subject to validation.
+The rebuild is planned for Astro with Supabase-backed content on Hostinger
+Business Web Hosting. The existing live site remains on Netlify until an
+explicitly approved cutover; do not change it during planning. The final
+SSR/hybrid runtime, Node.js and adapter compatibility, deployment controls,
+caching and live-update behavior, preview isolation, vendor capabilities,
+security controls and costs remain subject to validation.
 
 ## Planned URL inventory
 
@@ -62,7 +65,7 @@ A private dashboard for one administrator manages properties, images, enquiries,
 articles and FAQs. Content follows **Draft → Preview → Publish**, with
 independent English and Arabic approval states. Human review is required for
 translation-assisted Arabic drafts. Approved content must publish without a
-Netlify code redeployment.
+code redeployment.
 
 Properties may remain available at their stable URLs after being sold or
 rented, with accurate status labels and removal from active searches. Drafts

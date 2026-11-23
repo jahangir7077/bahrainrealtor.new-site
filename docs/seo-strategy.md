@@ -5,10 +5,12 @@
 These are the approved planning baseline for a rebuild of the existing site on
 the only production domain, `https://bahrainrealtor.com/`. Do not use
 `bahrainrealtor.bh` or `bahrainrealtot.com` as production domains. The project
-uses Astro, Supabase, Netlify, GitHub, manually managed listings, and English
-and Arabic. Supabase suitability, Astro/Netlify runtime compatibility, vendor
-capabilities, security, privacy requirements and costs remain subject to
-validation. The [architecture](website-architecture.md) records intended
+uses Astro, Supabase, Hostinger Business Web Hosting, GitHub, manually managed
+listings, and English and Arabic. The existing live site remains on Netlify
+until an approved cutover. Supabase suitability, Astro/Hostinger runtime and
+Node.js compatibility, deployment controls, vendor capabilities, security,
+privacy requirements and costs remain subject to validation. The
+[architecture](website-architecture.md) records intended
 routes, while the [keyword map](keyword-map.md) remains provisional until the
 original workbook is approved for final ownership. These documents do not
 authorize Phase 1 implementation.
@@ -47,14 +49,17 @@ authorize Phase 1 implementation.
 
 ## Technical requirements
 
-- Build the public site with Astro and host it on Netlify using GitHub.
-  Use a verified SSR/hybrid approach so public properties, articles and FAQs
-  can publish from Supabase without a code redeployment.
+- Plan the public site with Astro on Hostinger Business Web Hosting using
+  GitHub. Verify the Node.js runtime, Astro adapter, SSR/hybrid deployment and
+  manual approval-gated production deployment before implementation. Public
+  properties, articles and FAQs must publish from Supabase without a code
+  redeployment; static output alone cannot provide this behavior.
 - Verify generated HTML, metadata, canonical URLs, status codes, caching,
   invalidation and redirects.
-- Provide an XML sitemap containing canonical, indexable URLs and a robots.txt
-  that does not block rendering resources. Use noindex for private or
-  non-indexable content; do not rely on robots.txt alone for deindexing.
+- Provide a dynamic XML sitemap containing canonical, indexable URLs and a
+  robots.txt that does not block rendering resources. Require access control
+  for private previews; use noindex for non-indexable content and do not rely
+  on robots.txt alone for deindexing.
 - Use HTTPS, responsive accessible HTML, meaningful image alternatives and
   optimized images. Validate Core Web Vitals with available field data.
 

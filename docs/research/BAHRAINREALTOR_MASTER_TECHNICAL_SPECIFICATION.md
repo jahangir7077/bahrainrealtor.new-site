@@ -1,12 +1,12 @@
 # BahrainRealtor.com — Master Technical Specification
-Version: Planning draft 1.0 | 23 November 2026 | Status: Proposed specification; implementation NOT authorized
+Version: Planning draft 1.1 | 23 November 2026 | Status: Proposed specification; implementation NOT authorized
 
 ## 1. Project identity and non-negotiable boundaries
 - Canonical production domain: https://bahrainrealtor.com/ (NOT .bh or bahrainrealtot.com).
 - Rebuild the existing website; protect its current production operation and search visibility.
 - Repository: https://github.com/jahangir7077/bahrainrealtor.new-site. Existing planning PR/branch: PR #1, `copilot/add-foundational-project-documents` (verify actual state before acting).
 - Source of truth must be reconciled with `.github/copilot-instructions.md`, `docs/website-architecture.md`, `docs/keyword-map.md`, `docs/seo-strategy.md`, `docs/research/MASTER_PROJECT_INSTRUCTIONS_BAHRAINREALTOR_BH.txt`, and `docs/research/Bahrain_Property_Keyword_Master_PSEO.xlsx`. The historical file name containing BH does not change the approved domain. Preserve original research files and provenance; propose any rename rather than silently rewriting originals.
-- The currently live Netlify website must not be changed, interrupted, redirected, merged, or redeployed without explicit later approval. No Netlify Agent. Code deployment is manual and approval-gated.
+- The owner selected Hostinger Business Web Hosting for the rebuild. The currently live Netlify website remains in place until an explicitly approved cutover and must not be changed, interrupted, redirected, merged, or redeployed without explicit later approval. No Netlify Agent. Production code deployment is manual and approval-gated.
 - GitHub Copilot should implement in reviewable phases only after separate explicit authorization. This document and first prompt authorize documentation/planning only.
 
 ## 2. Business, audience and language
@@ -16,13 +16,19 @@ Version: Planning draft 1.0 | 23 November 2026 | Status: Proposed specification;
 - Do not fabricate property listings, prices, projects, credentials, testimonials, transaction numbers, market data or inventory.
 
 ## 3. Technology and hosting architecture
-- Astro for public site, using a verified Netlify-compatible SSR/hybrid approach where necessary for dynamic, crawlable property and editorial pages.
+- Astro for the public site on Hostinger Business Web Hosting, using a verified SSR/hybrid approach where necessary for dynamic, crawlable property and editorial pages.
 - Supabase for PostgreSQL data, single-administrator authentication and media storage, subject to suitability, pricing and security validation.
 - Private administration interface with access control, MFA, audit logging and secure session handling.
 - Public property detail pages and dynamically published articles/FAQs must return meaningful server-rendered HTML and accurate HTTP statuses without requiring a code redeploy.
-- Verify Astro adapter, Netlify functions/SSR, caching/invalidation, on-demand rendering, sitemap generation, preview isolation and costs before implementation. Do not assume static output can update itself.
+- Verify the selected Hostinger plan and account's Node.js versions and runtime, Astro adapter and SSR/hybrid compatibility, process lifecycle and resource limits, deployment and rollback controls, caching/invalidation, on-demand rendering, dynamic sitemap generation, preview isolation and costs before implementation. Do not assume static output can update itself or that Hostinger offers Netlify features.
 - Secrets in server environment only; service-role keys never shipped to browser. Use least-privilege RLS, validated public read policies, authenticated write policies, abuse prevention, and secure upload handling.
-- Separate development/staging and production configuration. Separate access-restricted Netlify preview site; no indexing of staging, enforced by access controls (robots/noindex alone is insufficient).
+- Separate development/staging and production configuration. Use a separate access-restricted preview environment; no indexing of staging, enforced by access controls (robots/noindex alone is insufficient). Verify the available Hostinger isolation and access controls before implementation.
+
+### Hostinger compatibility research and validation gate
+- Hostinger documents Node.js applications on Business and Cloud plans and lists Astro among supported frameworks; Astro documents its Node adapter for on-demand rendering. These documents do not prove this account supports the selected Astro SSR configuration end to end. Sources: [Hostinger Node.js deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/), [Hostinger Node.js hosting options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/), and [Astro Node adapter](https://docs.astro.build/en/guides/integrations-guide/node/).
+- Hostinger documents shared process and memory limits, a 120-second request limit, and no inbound WebSockets or always-running background workers on its web and cloud plans. Confirm current plan-specific limits, resource usage and suitability before implementation: [Hostinger Node.js limits](https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/).
+- Hostinger documents Git-based automatic deployment and file upload options. Verify a production deployment workflow that is strictly manual and approval-gated, including whether automatic deployment can be disabled. Confirm build and startup commands, supported Node.js versions, environment secrets, process restarts, preview access, rollback, logging, caching and purge capabilities. Do not configure or deploy during Phase 0.
+- Validate Supabase connectivity, request-time metadata and HTTP statuses, private asset access, live publication and dynamic XML sitemap freshness in a separately authorized isolated test before committing to a runtime design. If requirements cannot be met, report the gap to the owner rather than assuming a replacement platform or weakening requirements.
 
 ## 4. Information architecture
 ### Primary navigation
@@ -55,7 +61,7 @@ Publish only real, verified project details; no speculative or empty project det
 - One private administrator at launch. Admin dashboard overview, properties, images, enquiries, articles, FAQs, settings.
 - Property record: immutable internal ID and public reference; sale/rent; title and descriptions per language; location/area; property type; verified price/currency; bedrooms/bathrooms/size; amenities; photos/alt text; features; SEO fields; contact links; created/updated/published timestamps; source/verification and consent metadata where needed.
 - Workflow: draft -> preview -> published; available/reserved/sold/rented/unavailable as appropriate. Separate publication and availability state.
-- New listings and updates publish from dashboard without Netlify code deployment. Support image upload, ordering, cover image, replacement and removal; validate file type/size and avoid exposing unpublished assets inadvertently.
+- New listings and updates publish from dashboard without code deployment. Support image upload, ordering, cover image, replacement and removal; validate file type/size and avoid exposing unpublished assets inadvertently.
 - Sold/rented: retain useful detail URLs with clear status; remove from active searches; suggest genuinely available alternatives; review stale pages periodically. Unpublished/draft must be inaccessible to anonymous users and absent from public sitemap. Removal uses justified 404/410 or appropriate relevant 301 as warranted, never misleading redirects.
 - No seeded fake inventory or fictional production listings.
 
@@ -81,10 +87,10 @@ Publish only real, verified project details; no speculative or empty project det
 
 ## 10. Staging, rollout and manual deployment
 - Maintain existing live bahrainrealtor.com unchanged until explicitly authorized cutover.
-- Separate access-restricted Netlify preview site; staging data and credentials separate from production; no production user data in testing.
+- Separate access-restricted preview environment; staging data and credentials separate from production; no production user data in testing. Validate Hostinger preview isolation and access controls.
 - Manual deployment of code only after review and approval. Database content can update live independently of code deployment once approved and in production.
 - Prelaunch acceptance: all mapped legacy URLs tested, SSR crawlability, dynamic sitemap, English/Arabic equivalence, status codes, login security, RLS, forms and notifications, image uploads, accessibility, mobile UX, Core Web Vitals, backup restore drill, rollback rehearsal and cost assessment.
-- Cutover must have owner, backup, DNS/Netlify configuration plan, smoke tests, monitoring, rollback triggers and explicit written approval.
+- Cutover from the existing Netlify site to Hostinger must have an owner, backup, DNS and hosting configuration plan, smoke tests, monitoring, rollback triggers and explicit written approval.
 
 ## 11. Phased delivery and approval gates
 Phase 0 — Planning-only audit and specification reconciliation (NOW): inspect repository/research files and current architecture; document contradictions, decisions, open questions, proposed technical design, URL inventory approach, acceptance criteria and phased tasks. NO implementation.
@@ -99,7 +105,7 @@ Each phase must have scope, files touched, tests, evidence, risks, costs and exp
 ## 12. Unresolved technical decisions for planning research
 1. Confirm exact repository state, existing PR status and whether planning documents conflict with newly approved decisions.
 2. Inventory live URLs and identify redirects; confirm route names against actual existing URLs and Search Console exports.
-3. Select and validate Netlify/Astro SSR/hybrid architecture, data caching and live updates with accurate SEO metadata.
+3. Validate Hostinger Business Web Hosting with Astro SSR/hybrid and a compatible adapter, data caching, manual deployment controls and live updates with accurate SEO metadata.
 4. Validate Supabase plan capabilities, RLS policies, admin MFA, storage image backups, database backup/restore and realistic monthly costs.
 5. Choose approved translation and email providers, privacy implications, rate limits and costs. No provider integration authorized yet.
 6. Define exact sitemap strategy for SSR pages and editorial content, and noindex/404/410 rules.
@@ -109,4 +115,4 @@ Each phase must have scope, files touched, tests, evidence, risks, costs and exp
 10. Define data retention, privacy policy and consent flows with jurisdiction-appropriate review.
 
 ## 13. Approval rule
-This specification is a planning baseline, not permission to build. Copilot's first task is READ, COMPARE, DOCUMENT and REPORT ONLY. Do not create Astro components, install packages, configure Supabase/Netlify, alter production, merge branches or publish content until a later explicit authorization.
+This specification is a planning baseline, not permission to build. Copilot's first task is READ, COMPARE, DOCUMENT and REPORT ONLY. Do not create Astro components, install packages, configure Supabase, Hostinger or Netlify, alter production, merge branches or publish content until a later explicit authorization.
