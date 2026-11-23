@@ -9,7 +9,7 @@ connection, or production credentials.
 - Astro `7.4.13`
 - `@astrojs/node` `11.1.14` (peer dependency requires Astro `^7.2.1`)
 - Node.js `22.23.4` or newer in the Node 22 line, as required by Astro
-  `7.4.13`. The repository test environment was Node.js `24.22.1`.
+  `7.4.13`; Node.js `24.22.1` was used for local verification.
 - npm `11.19.1` was available locally.
 
 The package versions are pinned for reproducibility. Recheck upstream
@@ -48,9 +48,12 @@ supports a standalone server entry point. This does **not** establish that the
 selected Hostinger account can run this exact SSR build; deployment is not
 authorized as part of this test.
 
-For a future isolated test website, verify the available Node.js selection
-first. Astro `7.4.13` requires Node `>=22.23.4`; use a compatible current
-Node 22 or newer runtime. A Node version below that minimum is not suitable.
+Hostinger documentation lists Node.js `18.x`, `20.x`, `22.x` and `24.x`.
+Astro `7.4.13` requires Node `>=22.23.4`, so 18.x and 20.x are unsuitable.
+For a future isolated test website, verify the exact patch version selected
+in hPanel; the documented major/minor choices alone do not guarantee that the
+22.x runtime meets Astro's patch-level minimum. Node.js `24.22.1` passed the
+local test.
 
 Proposed build and server details, subject to Hostinger dashboard verification:
 
@@ -91,5 +94,6 @@ Hostinger before implementation.
 - [Astro on-demand rendering](https://docs.astro.build/en/guides/on-demand-rendering/)
 - [Hostinger Node.js deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/)
 - [Hostinger Node.js hosting options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/)
+- [Hostinger Node.js version selection](https://www.hostinger.com/support/how-to-select-the-node-js-version-for-your-application/)
 - [Hostinger Node.js limits](https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/)
 - [Hostinger temporary/preview domains](https://www.hostinger.com/support/2489693-how-to-access-your-website-content-without-a-domain-in-hostinger/)
