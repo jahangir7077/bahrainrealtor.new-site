@@ -1,14 +1,12 @@
 # BahrainRealtor.com — Astro foundation
 
-Phase 1B.1 is the completed, isolated non-indexable application foundation.
-Phase 0 is complete, and Phase 1A passed basic Hostinger SSR compatibility.
-Phase 1B.1 is persisted remotely; Phase 1B.2 is implemented, persisted remotely
-and conditionally accepted with its documented limitations. Phase 1B.3,
-bilingual architecture and localization foundation, is explicitly authorized
-for the scope in [website architecture](docs/website-architecture.md);
-Phase 1B.4 and later work remain unauthorized. This authorization reconciliation
-is documentation-only; implementation awaits a separate prompt. This is not
-a production-ready website.
+Phase 0 is complete. Phase 1A passed basic Hostinger SSR compatibility, but
+full production readiness remains unverified. Phase 1B.1 is complete and
+persisted remotely. Phase 1B.2 is implemented, persisted remotely and
+conditionally accepted with documented limitations. Phases 1B.3–1B.7 are
+explicitly authorized as one combined bilingual frontend implementation;
+Phase 1B.8 and later work remain unauthorized. The website is not production
+ready.
 The existing live site remains on Netlify until an approved cutover.
 
 ## Local development

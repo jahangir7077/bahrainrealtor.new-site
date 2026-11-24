@@ -7,11 +7,11 @@ on the only approved production domain, `https://bahrainrealtor.com/`, with
 English and Arabic content. `bahrainrealtor.bh` and `bahrainrealtot.com` are
 not production domains.
 The inventory below records the intended structure supplied by the owner.
-Routes remain planned, except the non-indexable Phase 1B.1 development
-placeholders at `/` and `/ar/`. Phase 1B.2's design system is implemented,
-persisted remotely and conditionally accepted with its documented limitations.
-Phase 1B.3 is explicitly authorized for the bilingual foundation below; this
-does not approve any new public landing page, SEO route or final homepage.
+Phase 1B.2's design system is implemented, persisted remotely and
+conditionally accepted with its documented limitations. Phases 1B.3–1B.7 are
+explicitly authorized as one combined bilingual frontend implementation. This
+includes the existing root homepage in English and Arabic, but does not approve
+new public SEO routes or landing pages.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -37,23 +37,27 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Verify staging access restrictions.
 - Validate Supabase integration in a separately approved phase.
 
-Phase 0 and Phase 1B.1 are complete; Phase 1B.1 is persisted remotely. The
-application itself has not yet been validated on Hostinger. Phase 1B.4 and
-later implementation remain unauthorized. The live Netlify site and DNS are
+Phase 0 and Phase 1B.1 are complete; Phase 1B.1 is persisted remotely. Phases
+1B.3–1B.7 are explicitly authorized for the combined frontend scope. Phase
+1B.8 and later implementation remain unauthorized. The application itself has
+not yet been validated on Hostinger. The live Netlify site and DNS are
 unchanged.
 
 ### Phase 1B.3 bilingual foundation
 
-The owner explicitly authorized bilingual architecture and localization
-foundation work. This authorization reconciliation is documentation-only;
-implementation awaits a separate prompt. The subsequent task may cover
+The owner explicitly authorized the combined Phase 1B.3–1B.7 frontend
+implementation. The bilingual foundation includes
 centralized locale configuration, type-safe interface dictionaries,
 locale-aware routing and language-equivalent resolution, language switching,
 localized metadata, canonical and hreflang utilities, publication eligibility
 rules, currency/number/date/plural formatting, localized HTTP 404 presentation,
 RTL/LTR compatibility, automated tests and bilingual architecture
-documentation. Preserve the approved Phase 1B.2 design system and existing
-foundation protections. No additional public landing pages are authorized.
+documentation. The combined scope also authorizes the global navigation and
+footer, the English and Arabic homepage at `/` and `/ar/`, development-only
+template demonstrations, reusable backend-ready page templates and technical
+SEO utilities. Preserve the approved Phase 1B.2 design system and existing
+noindex and no-store protections. No additional public landing pages are
+authorized.
 
 The approved decisions are:
 

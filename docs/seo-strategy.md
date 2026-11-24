@@ -13,11 +13,11 @@ privacy requirements and costs remain subject to validation. The
 [architecture](website-architecture.md) records intended
 routes, while the [keyword map](keyword-map.md) remains provisional until the
 original workbook is approved for final ownership. Phase 1B.2 is implemented,
-remotely persisted and conditionally accepted. Phase 1B.3 is explicitly
-authorized for the bilingual foundation described in the architecture; this
-documentation reconciliation does not implement it. Its authorization does
-not change keyword targeting, URL architecture or indexability, or authorize
-new public landing pages. Phase 1B.4 and later phases remain unauthorized.
+remotely persisted and conditionally accepted. Phases 1B.3–1B.7 are explicitly
+authorized for a combined bilingual frontend implementation, including the
+existing homepage routes only. This authorization does not change keyword
+targeting, URL architecture or production indexability, and does not authorize
+new public SEO landing pages. Phase 1B.8 and later phases remain unauthorized.
 
 ## Search and content
 

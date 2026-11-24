@@ -17,17 +17,17 @@ Before designing or implementing the site, read and follow:
 - Phase 1B.1 — Astro application foundation: complete and persisted remotely.
 - Phase 1B.2 — design system and visual identity: implemented, persisted
   remotely and conditionally accepted with its documented limitations.
-- Phase 1B.3 — bilingual architecture and localization foundation: explicitly
-  authorized by the owner for the scope in
-  [website architecture](../docs/website-architecture.md).
-- Phase 1B.4 and later phases: not authorized.
+- Phase 1B.3 through Phase 1B.7 — bilingual architecture, frontend navigation,
+  homepage, reusable templates, and technical SEO foundation: explicitly
+  authorized by the owner as one combined frontend implementation.
+- Phase 1B.8 and later phases: not authorized.
 
-Phase 1B.3 does not authorize final homepage, navigation, search, property
-listings, keyword targeting, SEO route changes, Supabase, administration,
-enquiries, publishing, new public landing pages or deployment. This
-reconciliation task is documentation-only; wait for the separate Phase 1B.3
-implementation prompt. Reconcile authorization statements when the owner
-explicitly approves a new phase; never bypass platform permissions.
+This authorization does not permit new public SEO landing pages, changes to
+approved keyword targeting or URL architecture, Supabase, administration,
+actual property listings, enquiry processing, publishing, deployment or any
+Phase 1B.8+ work. Keep frontend demonstrations non-indexable and unavailable
+in production where required. Reconcile authorization statements when the
+owner explicitly approves a new phase; never bypass platform permissions.
 
 - Production domain: `https://bahrainrealtor.com/`; this is a rebuild of the
   existing website on the same domain. Do not use `bahrainrealtor.bh` or
@@ -69,8 +69,9 @@ not implemented. The keyword map remains provisional until the original keyword
 workbook is available and analyzed. Ask the project owner to approve the
 architecture, keyword ownership, and strategy before work outside the
 explicitly authorized phase; do not treat planned routes or provisional
-entries as approval for later implementation. Phase 1B.3 does not authorize
-new SEO pages, keyword targeting, a final homepage, or later-phase features.
+entries as approval for later implementation. The combined Phase 1B.3–1B.7
+authorization includes the root homepage only; it does not authorize new
+public SEO landing pages, keyword targeting or later-phase features.
 
 Create, remove, rename, or redirect pages only when the change is explicitly
 approved and reflected in the architecture and keyword map. Preserve valuable
