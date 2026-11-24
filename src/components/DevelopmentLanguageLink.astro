@@ -1,0 +1,21 @@
+---
+import { detectLanguage, DEVELOPMENT_PLACEHOLDER_EQUIVALENTS, resolveLanguageEquivalent } from '../i18n/routes';
+import { translate } from '../i18n/translate';
+
+const language = detectLanguage(Astro.url.pathname);
+const targetLanguage = language === 'ar' ? 'en' : 'ar';
+const result = language
+  ? resolveLanguageEquivalent(
+      Astro.url.pathname,
+      targetLanguage,
+      DEVELOPMENT_PLACEHOLDER_EQUIVALENTS,
+      'development',
+    )
+  : { available: false as const, reason: 'unsupported-language' as const };
+---
+
+{import.meta.env.DEV && result.available && (
+  <p>
+    <a href={result.href}>{translate(language ?? 'en', `development.languageLink`)}</a>
+  </p>
+)}

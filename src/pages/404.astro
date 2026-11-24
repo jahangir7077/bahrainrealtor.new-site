@@ -1,9 +1,21 @@
 ---
+import DevelopmentLanguageLink from '../components/DevelopmentLanguageLink.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { DEFAULT_LANGUAGE } from '../i18n/config';
+import { detectLanguage } from '../i18n/routes';
+import { translate } from '../i18n/translate';
+
+const language = detectLanguage(Astro.url.pathname) ?? DEFAULT_LANGUAGE;
+const homePath = language === 'ar' ? '/ar/' : '/';
 ---
 
-<BaseLayout title="Page not found" description="The requested page was not found." language="en">
-  <h1>Page not found</h1>
-  <p>The requested page could not be found.</p>
-  <a href="/">Return to the development homepage</a>
+<BaseLayout
+  title={translate(language, 'notFound.title')}
+  description={translate(language, 'notFound.description')}
+  language={language}
+>
+  <h1>{translate(language, 'notFound.title')}</h1>
+  <p>{translate(language, 'notFound.description')}</p>
+  <a href={homePath}>{translate(language, 'notFound.homeLink')}</a>
+  <DevelopmentLanguageLink />
 </BaseLayout>

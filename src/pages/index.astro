@@ -1,16 +1,23 @@
 ---
 import DevelopmentNotice from '../components/DevelopmentNotice.astro';
+import DevelopmentLanguageLink from '../components/DevelopmentLanguageLink.astro';
 import Card from '../components/ui/Card.astro';
 import Container from '../components/ui/Container.astro';
 import { site } from '../config/site';
+import { translate } from '../i18n/translate';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title={`${site.name} — Development`} description="Development placeholder." language="en">
+<BaseLayout
+  title={`${site.name} — ${translate('en', 'development.placeholder')}`}
+  description={translate('en', 'development.notice')}
+  language="en"
+>
   <Container width="narrow" class="foundation-page">
     <Card variant="ivory">
       <h1>{site.name}</h1>
       <DevelopmentNotice language="en" />
+      <DevelopmentLanguageLink />
     </Card>
   </Container>
 </BaseLayout>

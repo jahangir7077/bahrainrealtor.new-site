@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { localeConfig } from '../i18n/config';
 import { directionFor } from '../utils/site';
 import type { Language } from '../types/site';
 
@@ -10,10 +11,12 @@ interface Props {
 }
 
 const { title, description, language } = Astro.props;
+
+const siteLocale = (value: Language) => localeConfig[value].language;
 ---
 
 <!doctype html>
-<html lang={language} dir={directionFor(language)}>
+<html lang={siteLocale(language)} dir={directionFor(language)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

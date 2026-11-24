@@ -1,10 +1,8 @@
-import type { Language, LanguageConfig } from '../types/site';
+import { DEFAULT_LANGUAGE, localeConfig } from '../i18n/config.ts';
 
 export const site = {
   name: 'BahrainRealtor.com',
   productionUrl: 'https://bahrainrealtor.com/',
-  languages: {
-    en: { direction: 'ltr' },
-    ar: { direction: 'rtl' },
-  } satisfies Record<Language, LanguageConfig>,
+  defaultLanguage: DEFAULT_LANGUAGE,
+  languages: localeConfig,
 } as const;

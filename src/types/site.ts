@@ -1,6 +1,1 @@
-export type Language = 'en' | 'ar';
-export type Direction = 'ltr' | 'rtl';
-
-export interface LanguageConfig {
-  direction: Direction;
-}
+export type { Direction, Language, LanguageConfig } from '../i18n/config.ts';
