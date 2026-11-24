@@ -1,7 +1,9 @@
 # BahrainRealtor.com — Astro foundation
 
-Phase 1B.1 is an isolated, non-indexable development foundation, not a
-production-ready website. Phase 1B.2 and later work require separate approval.
+Phase 1B.1 is the completed, isolated non-indexable application foundation.
+Phase 1B.2 is authorized for the design system and visual identity only;
+Phase 1B.3 and later work remain unauthorized. This is not a production-ready
+website.
 The existing live site remains on Netlify until an approved cutover.
 
 ## Local development
@@ -25,12 +27,16 @@ are ignored and `.env.example` contains no secrets.
 ## Structure and limitations
 
 - `src/pages/`: English `/`, Arabic `/ar/`, and a custom 404.
-- `src/layouts/`, `src/components/`, `src/styles/`: shared accessible markup
-  and native CSS.
+- `src/layouts/`, `src/components/`, `src/styles/`: shared accessible markup,
+  reusable UI components and native CSS.
 - `src/config/`, `src/types/`, `src/utils/`: typed language/site configuration.
 - `src/middleware.ts`: no-store and noindex response headers.
 - `tests/`: production server HTTP tests.
+- `/dev/design-system`: local development showcase; production responds 404.
 - `experiments/hostinger-astro-ssr/`: independent Phase 1A experiment.
+
+See [`docs/design-system.md`](docs/design-system.md) for visual tokens,
+typography, component variants, contrast notes and current limitations.
 
 Canonical URLs, hreflang, sitemaps, schema, redirects, property pages,
 Supabase, authentication, dashboard, enquiries and publishing are future

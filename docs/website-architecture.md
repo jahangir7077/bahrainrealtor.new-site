@@ -6,10 +6,12 @@ The project is a rebuild of the existing premium Bahrain real estate website
 on the only approved production domain, `https://bahrainrealtor.com/`, with
 English and Arabic content. `bahrainrealtor.bh` and `bahrainrealtot.com` are
 not production domains.
-The inventory below records the intended structure supplied by the owner. All
-routes are planned, except for the explicitly authorized non-indexable
-Phase 1B.1 development placeholders at `/` and `/ar/`. They do not constitute
-final site design or approve any other route.
+The inventory below records the intended structure supplied by the owner.
+Routes remain planned, except the non-indexable Phase 1B.1 development
+placeholders at `/` and `/ar/`. Phase 1B.2 is authorized for design tokens,
+typography, spacing, responsive layouts, reusable UI components, accessibility,
+RTL compatibility and a development-only showcase; this does not approve any
+new public SEO route or final homepage.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -35,9 +37,9 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Verify staging access restrictions.
 - Validate Supabase integration in a separately approved phase.
 
-Phase 1B.1 is authorized only for the Astro foundation and placeholders.
-Phase 1B.2 and later implementation remain unauthorized. The live Netlify site
-and DNS are unchanged.
+Phase 1B.1 is complete. Phase 1B.2 is authorized only for the design-system
+scope above. Phase 1B.3 and later implementation remain unauthorized. The live
+Netlify site and DNS are unchanged.
 
 ## Planned URL inventory
 

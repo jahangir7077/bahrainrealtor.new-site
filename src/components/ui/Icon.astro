@@ -20,6 +20,7 @@ const { name, label, size = 20 } = Astro.props;
   aria-hidden={label ? undefined : 'true'}
   role={label ? 'img' : undefined}
   aria-label={label}
+  class={name === 'arrow' ? 'icon--directional' : 'icon'}
   focusable="false"
 >
   {name === 'arrow' ? (
@@ -36,7 +37,7 @@ const { name, label, size = 20 } = Astro.props;
     vertical-align: middle;
   }
 
-  :global([dir="rtl"]) svg {
+  :global([dir="rtl"]) .icon--directional {
     transform: scaleX(-1);
   }
 </style>

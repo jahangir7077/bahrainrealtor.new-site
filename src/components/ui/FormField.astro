@@ -13,6 +13,7 @@ interface Props {
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  value?: string;
   options?: Option[];
   rows?: number;
 }
@@ -25,6 +26,7 @@ const {
   required = false,
   disabled = false,
   placeholder,
+  value,
   options = [],
   rows = 4,
 } = Astro.props;
@@ -58,6 +60,7 @@ const describedBy = [helpText && `${id}-help`, error && `${id}-error`].filter(Bo
       name={id}
       rows={rows}
       placeholder={placeholder}
+      value={value}
       required={required}
       disabled={disabled}
       aria-invalid={error ? 'true' : undefined}
@@ -70,6 +73,7 @@ const describedBy = [helpText && `${id}-help`, error && `${id}-error`].filter(Bo
       name={id}
       type={type}
       placeholder={placeholder}
+      value={value}
       required={required}
       disabled={disabled}
       aria-invalid={error ? 'true' : undefined}

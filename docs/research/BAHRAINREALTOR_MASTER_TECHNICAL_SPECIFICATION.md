@@ -1,5 +1,5 @@
 # BahrainRealtor.com — Master Technical Specification
-Version: Planning draft 1.2 | 24 November 2026 | Status: Proposed specification; implementation NOT authorized
+Version: Planning draft 1.3 | 24 November 2026 | Status: Planning baseline; Phase 1B.2 design system explicitly authorized; Phase 1B.3 and later implementation NOT authorized
 
 ## 1. Project identity and non-negotiable boundaries
 - Canonical production domain: https://bahrainrealtor.com/ (NOT .bh or bahrainrealtot.com).
@@ -7,7 +7,7 @@ Version: Planning draft 1.2 | 24 November 2026 | Status: Proposed specification;
 - Repository: https://github.com/jahangir7077/bahrainrealtor.new-site. Existing planning PR/branch: PR #1, `copilot/add-foundational-project-documents` (verify actual state before acting).
 - Source of truth must be reconciled with `.github/copilot-instructions.md`, `docs/website-architecture.md`, `docs/keyword-map.md`, `docs/seo-strategy.md`, `docs/research/MASTER_PROJECT_INSTRUCTIONS_BAHRAINREALTOR_BH.txt`, and `docs/research/Bahrain_Property_Keyword_Master_PSEO.xlsx`. The historical file name containing BH does not change the approved domain. Preserve original research files and provenance; propose any rename rather than silently rewriting originals.
 - The owner selected Hostinger Business Web Hosting for the rebuild. The currently live Netlify website remains in place until an explicitly approved cutover and must not be changed, interrupted, redirected, merged, or redeployed without explicit later approval. No Netlify Agent. Production code deployment is manual and approval-gated.
-- GitHub Copilot should implement in reviewable phases only after separate explicit authorization. This document and first prompt authorize documentation/planning only.
+- GitHub Copilot should implement in reviewable phases only after separate explicit authorization. Phase 0 is complete; Phase 1A basic Hostinger SSR compatibility passed; Phase 1B.1 foundation is complete; Phase 1B.2 design-system work is explicitly authorized; Phase 1B.3 and later phases remain unauthorized.
 
 ## 2. Business, audience and language
 - Personal-brand Bahrain real estate website for Jahangir Realtor Bahrain; buyers, tenants, sellers and investors.
@@ -35,7 +35,10 @@ Version: Planning draft 1.2 | 24 November 2026 | Status: Proposed specification;
   - Verify deployment and rollback procedures.
   - Verify staging access restrictions.
   - Validate Supabase integration in a separately approved phase.
-- Phase 1B is not authorized. All earlier requirements remain in force.
+- Phase 1B.2 is authorized for design tokens, typography, spacing, responsive
+  layouts, basic reusable components, accessibility, RTL, a development-only
+  showcase, tests and documentation. Do not implement Phase 1B.3 or later.
+  All other earlier requirements remain in force.
 
 ### Hostinger compatibility research and validation gate
 - Hostinger documents Node.js applications on Business and Cloud plans and lists Astro among supported frameworks; Astro documents its Node adapter for on-demand rendering. These documents do not prove this account supports the selected Astro SSR configuration end to end. Sources: [Hostinger Node.js deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/), [Hostinger Node.js hosting options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/), and [Astro Node adapter](https://docs.astro.build/en/guides/integrations-guide/node/).
@@ -106,13 +109,16 @@ Publish only real, verified project details; no speculative or empty project det
 - Cutover from the existing Netlify site to Hostinger must have an owner, backup, DNS and hosting configuration plan, smoke tests, monitoring, rollback triggers and explicit written approval.
 
 ## 11. Phased delivery and approval gates
-Phase 0 — Planning-only audit and specification reconciliation (NOW): inspect repository/research files and current architecture; document contradictions, decisions, open questions, proposed technical design, URL inventory approach, acceptance criteria and phased tasks. NO implementation.
-Phase 1 — Foundation: Astro app structure, layouts, bilingual design system, URL/SEO mapping. Requires new authorization.
-Phase 2 — Supabase data, authentication, RLS, migrations, security and backup foundations. Requires review gate.
-Phase 3 — Property CMS, media and SSR listings. Requires review gate.
-Phase 4 — Enquiry workflow and notifications. Requires review gate.
-Phase 5 — Editorial CMS, FAQs and translation-assisted review. Requires review gate.
-Phase 6 — SEO validation, staging tests, migration/redirect checks, rollback and launch readiness. Production launch separately approved.
+Phase 0 — Planning: COMPLETE.
+Phase 1A — Basic Hostinger Astro SSR compatibility: PASSED (owner-reported; see the experiment README).
+Phase 1B.1 — Astro application foundation: COMPLETE and persisted remotely.
+Phase 1B.2 — Design system and visual identity: EXPLICITLY AUTHORIZED for tokens, typography, spacing, responsive layouts, basic reusable components, accessibility, RTL, a development-only showcase, tests and documentation.
+Phase 1B.3 — Further site experience/content work: NOT AUTHORIZED.
+Phase 2 — Supabase data, authentication, RLS, migrations, security and backup foundations: requires separate owner authorization and review gate.
+Phase 3 — Property CMS, media and SSR listings: requires separate owner authorization and review gate.
+Phase 4 — Enquiry workflow and notifications: requires separate owner authorization and review gate.
+Phase 5 — Editorial CMS, FAQs and translation-assisted review: requires separate owner authorization and review gate.
+Phase 6 — SEO validation, staging tests, migration/redirect checks, rollback and launch readiness: requires separate owner authorization. Production launch is separately approved.
 Each phase must have scope, files touched, tests, evidence, risks, costs and explicit go/no-go approval. No automatic phase continuation.
 
 ## 12. Unresolved technical decisions for planning research

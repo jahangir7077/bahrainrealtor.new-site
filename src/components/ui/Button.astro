@@ -22,14 +22,14 @@ const {
 const className = `button button--${variant} button--${size}`;
 ---
 
-{href ? (
+{href && !disabled ? (
   <a
     class={className}
     href={href}
     aria-label={ariaLabel}
-    aria-disabled={disabled ? 'true' : undefined}
-    tabindex={disabled ? -1 : undefined}
   ><slot /></a>
+) : href && disabled ? (
+  <span class={className} aria-disabled="true" aria-label={ariaLabel}><slot /></span>
 ) : (
   <button
     class={className}
@@ -88,6 +88,16 @@ const className = `button button--${variant} button--${size}`;
 
   .button--secondary:hover {
     background: #edf1f5;
+  }
+
+  :global(.surface-dark) .button--secondary {
+    color: var(--color-white);
+    border-color: var(--color-white);
+  }
+
+  :global(.surface-dark) .button--secondary:hover {
+    color: var(--color-navy);
+    background: var(--color-white);
   }
 
   .button--text {

@@ -1,5 +1,5 @@
 ---
-type Level = 2 | 3 | 4 | 5 | 6;
+type Level = 1 | 2 | 3 | 4 | 5 | 6;
 type Alignment = 'start' | 'center';
 interface Props {
   level?: Level;
@@ -8,12 +8,16 @@ interface Props {
   alignment?: Alignment;
 }
 const { level = 2, eyebrow, description, alignment = 'start' } = Astro.props;
-const Heading = `h${level}`;
 ---
 
-<div class:list={['section-heading', `section-heading--${alignment}`}>
+<div class:list={['section-heading', `section-heading--${alignment}`]}>
   {eyebrow && <p class="section-heading__eyebrow">{eyebrow}</p>}
-  <Heading class="section-heading__title"><slot /></Heading>
+  {level === 1 && <h1 class="section-heading__title"><slot /></h1>}
+  {level === 2 && <h2 class="section-heading__title"><slot /></h2>}
+  {level === 3 && <h3 class="section-heading__title"><slot /></h3>}
+  {level === 4 && <h4 class="section-heading__title"><slot /></h4>}
+  {level === 5 && <h5 class="section-heading__title"><slot /></h5>}
+  {level === 6 && <h6 class="section-heading__title"><slot /></h6>}
   {description && <p class="section-heading__description">{description}</p>}
 </div>
 
