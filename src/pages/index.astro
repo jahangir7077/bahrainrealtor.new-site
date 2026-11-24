@@ -1,29 +1,13 @@
 ---
-import DevelopmentNotice from '../components/DevelopmentNotice.astro';
-import DevelopmentLanguageLink from '../components/DevelopmentLanguageLink.astro';
-import Card from '../components/ui/Card.astro';
-import Container from '../components/ui/Container.astro';
-import { site } from '../config/site';
-import { translate } from '../i18n/translate';
+import HomePage from '../components/HomePage.astro';
+import { translate } from '../i18n/translate.ts';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title={`${site.name} — ${translate('en', 'development.placeholder')}`}
-  description={translate('en', 'development.notice')}
+  title={`Bahrain Realtor — ${translate('en', 'development.banner')}`}
+  description={translate('en', 'home.introduction')}
   language="en"
 >
-  <Container width="narrow" class="foundation-page">
-    <Card variant="ivory">
-      <h1>{site.name}</h1>
-      <DevelopmentNotice language="en" />
-      <DevelopmentLanguageLink />
-    </Card>
-  </Container>
+  <HomePage language="en" />
 </BaseLayout>
-
-<style>
-  .foundation-page {
-    padding-block: clamp(var(--space-10), 12vw, var(--space-24));
-  }
-</style>

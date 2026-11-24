@@ -1,0 +1,39 @@
+---
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  title: string;
+  description: string;
+}
+
+const { language, title, description } = Astro.props;
+---
+
+<div class="empty-state" role="status" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <span class="empty-state__mark" aria-hidden="true">—</span>
+  <h3>{title}</h3>
+  <p>{description}</p>
+</div>
+
+<style>
+  .empty-state {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-inline-start: 3px solid var(--color-gold);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .empty-state h3,
+  .empty-state p {
+    margin: 0;
+  }
+
+  .empty-state p {
+    color: var(--color-text-secondary);
+  }
+</style>

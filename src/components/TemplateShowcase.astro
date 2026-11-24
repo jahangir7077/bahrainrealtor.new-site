@@ -1,0 +1,48 @@
+---
+import ArticleTemplate from './templates/ArticleTemplate.astro';
+import ContentLandingTemplate from './templates/ContentLandingTemplate.astro';
+import EditorialArchiveTemplate from './templates/EditorialArchiveTemplate.astro';
+import FaqTemplate from './templates/FaqTemplate.astro';
+import PropertyDetailTemplate from './templates/PropertyDetailTemplate.astro';
+import PropertyListingTemplate from './templates/PropertyListingTemplate.astro';
+import Container from './ui/Container.astro';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+}
+
+const { language } = Astro.props;
+const kinds = ['area', 'propertyType', 'project', 'investment', 'about', 'contact'] as const;
+---
+
+<Container width="wide">
+  <header class="template-showcase__intro">
+    <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+    <h1>{translate(language, 'development.notice')}</h1>
+    <p>{translate(language, 'content.publishedAfterReview')}</p>
+  </header>
+</Container>
+<PropertyListingTemplate language={language} title={translate(language, 'templates.listing')} />
+<PropertyDetailTemplate language={language} />
+{kinds.map((kind) => (
+  <ContentLandingTemplate
+    language={language}
+    kind={kind}
+    title={translate(language, `templates.${kind}`)}
+  />
+))}
+<EditorialArchiveTemplate language={language} articles={[]} />
+<ArticleTemplate language={language} />
+<FaqTemplate language={language} faqs={[]} />
+
+<style>
+  .template-showcase__intro {
+    padding-block: var(--space-10);
+  }
+
+  .template-showcase__intro h1 {
+    font-family: var(--font-display);
+  }
+</style>

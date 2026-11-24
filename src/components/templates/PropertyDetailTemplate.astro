@@ -1,0 +1,172 @@
+---
+import Breadcrumbs from '../Breadcrumbs.astro';
+import EmptyState from '../EmptyState.astro';
+import EnquiryFormPreview from '../EnquiryFormPreview.astro';
+import PropertyStatus from '../PropertyStatus.astro';
+import Container from '../ui/Container.astro';
+import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
+import { getPublicationEligibility } from '../../i18n/publication.ts';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { PropertyRecord } from '../../types/content.ts';
+
+interface Props {
+  language: Language;
+  property?: PropertyRecord;
+}
+
+const { language, property } = Astro.props;
+const content = property?.content[language];
+const publication = property?.publication[language];
+const eligible = Boolean(publication && getPublicationEligibility(publication, language).routeAvailable);
+const price = property?.priceBhd ? formatCurrency(property.priceBhd, language) : null;
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="wide">
+    <Breadcrumbs
+      language={language}
+      items={[
+        { label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' },
+        { label: translate(language, 'vocabulary.property') },
+        ...(content ? [{ label: content.title }] : []),
+      ]}
+    />
+    {property && content && eligible ? (
+      <article class="property-detail">
+        <header class="template-heading">
+          <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+          <h1>{content.title}</h1>
+          <p>{content.areaName}</p>
+          <PropertyStatus language={language} status={property.availability} />
+          {price && <p class="property-detail__price" dir="ltr"><bdi>{price}</bdi></p>}
+        </header>
+        <div class="property-detail__layout">
+          <div>
+            <section aria-labelledby="gallery-heading">
+              <h2 id="gallery-heading">{translate(language, 'templates.gallery')}</h2>
+              <div class="property-gallery">
+                {property.images.map((image) => {
+                  const alt = image.alt[language];
+                  return alt ? (
+                    <img src={image.src} alt={alt} width={image.width} height={image.height} loading="lazy" />
+                  ) : null;
+                })}
+              </div>
+              <div class="gallery-controls">
+                <button type="button" disabled aria-label={translate(language, 'templates.gallery')}>‹</button>
+                <button type="button" disabled aria-label={translate(language, 'templates.gallery')}>›</button>
+              </div>
+            </section>
+            <section aria-labelledby="description-heading">
+              <h2 id="description-heading">{translate(language, 'vocabulary.property')}</h2>
+              <p>{content.description}</p>
+            </section>
+            <section aria-labelledby="features-heading">
+              <h2 id="features-heading">{translate(language, 'templates.detail')}</h2>
+              <dl class="property-facts">
+                <dt>{translate(language, 'vocabulary.bedrooms')}</dt>
+                <dd>{property.bedrooms === undefined ? '—' : <bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi>}</dd>
+                <dt>{translate(language, 'vocabulary.bathrooms')}</dt>
+                <dd>{property.bathrooms === undefined ? '—' : <bdi dir="ltr">{formatPropertyNumber(property.bathrooms, language, 0)}</bdi>}</dd>
+                <dt>{translate(language, 'vocabulary.size')}</dt>
+                <dd>{property.sizeSquareMeters === undefined ? '—' : <><bdi dir="ltr">{formatPropertyNumber(property.sizeSquareMeters, language)}</bdi> m²</>}</dd>
+                <dt>{translate(language, 'vocabulary.property')}</dt>
+                <dd><bdi dir="ltr">{property.immutableReference}</bdi></dd>
+              </dl>
+            </section>
+          </div>
+          <aside><EnquiryFormPreview language={language} /></aside>
+        </div>
+      </article>
+    ) : (
+      <div class="template-empty">
+        <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+        <h1>{translate(language, 'templates.detail')}</h1>
+        <EmptyState language={language} title={translate(language, 'content.listingNotFound')} description={translate(language, 'content.detailsPending')} />
+      </div>
+    )}
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  .template-heading {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    padding-block: var(--space-8);
+  }
+
+  .template-heading h1,
+  .template-heading p {
+    margin: 0;
+  }
+
+  .template-heading h1 {
+    font-family: var(--font-display);
+  }
+
+  .property-detail__price {
+    color: var(--color-navy);
+    font-size: var(--type-h3);
+    font-weight: 700;
+  }
+
+  .property-detail__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(17rem, 0.7fr);
+    gap: var(--space-8);
+  }
+
+  .property-detail section {
+    padding-block: var(--space-6);
+  }
+
+  .property-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  .property-gallery img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .gallery-controls {
+    display: flex;
+    gap: var(--space-2);
+    margin-block-start: var(--space-3);
+  }
+
+  .gallery-controls button {
+    min-width: var(--target-min);
+    min-height: var(--target-min);
+  }
+
+  .property-facts {
+    display: grid;
+    grid-template-columns: minmax(8rem, 0.5fr) 1fr;
+    gap: var(--space-3);
+  }
+
+  .property-facts dt {
+    font-weight: 700;
+  }
+
+  .property-facts dd {
+    margin: 0;
+  }
+
+  @media (max-width: 48rem) {
+    .property-detail__layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+import {
+  detectLanguage,
+  DEVELOPMENT_HOME_EQUIVALENTS,
+  resolveLanguageEquivalent,
+} from '../i18n/routes.ts';
+import { localeConfig } from '../i18n/config.ts';
+import { translate } from '../i18n/translate.ts';
+import type { BilingualRoute } from '../i18n/routes.ts';
+
+interface Props {
+  language: 'en' | 'ar';
+  route?: BilingualRoute;
+}
+
+const { language, route = DEVELOPMENT_HOME_EQUIVALENTS } = Astro.props;
+const target = language === 'en' ? 'ar' : 'en';
+const currentPathLanguage = detectLanguage(Astro.url.pathname);
+const resolution =
+  currentPathLanguage === language
+    ? resolveLanguageEquivalent(
+        Astro.url.pathname,
+        target,
+        route,
+        import.meta.env.DEV ? 'development' : 'production',
+      )
+    : { available: false as const, reason: 'current-route-unknown' as const };
+---
+
+<div class="language-switcher" aria-label={translate(language, 'accessibility.language')}>
+  {resolution.available ? (
+    <a
+      href={resolution.href}
+      lang={localeConfig[target].language}
+      dir={localeConfig[target].direction}
+      hreflang={localeConfig[target].regionalLocale}
+    >{localeConfig[target].nativeLanguageName}</a>
+  ) : (
+    <span aria-disabled="true" title={translate(language, 'translation.unavailable')}>
+      {localeConfig[target].nativeLanguageName}
+      <span class="language-switcher__unavailable" aria-hidden="true"> · {translate(language, 'translation.unavailable')}</span>
+    </span>
+  )}
+</div>
+
+<style>
+  .language-switcher a,
+  .language-switcher span {
+    display: inline-flex;
+    min-height: var(--target-min);
+    align-items: center;
+    gap: var(--space-1);
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-button);
+    font-weight: 700;
+  }
+
+  .language-switcher__unavailable {
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+    font-weight: 400;
+  }
+</style>

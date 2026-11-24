@@ -77,7 +77,7 @@ test('localized metadata separates indexing eligibility from optional canonical 
     alternates: [{ hreflang: 'en-BH', href: 'https://bahrainrealtor.com/' }],
   });
   assert.equal(placeholder?.openGraphLocale, 'en_BH');
-  assert.equal(placeholder?.robots, 'noindex,nofollow');
+  assert.equal(placeholder?.robots, 'noindex, nofollow');
   assert.equal(placeholder?.canonicalUrl, undefined);
   assert.deepEqual(placeholder?.alternates, []);
 
@@ -88,10 +88,17 @@ test('localized metadata separates indexing eligibility from optional canonical 
     pathname: '/ar/example/',
     indexingEligible: true,
     enableCanonical: true,
+    alternates: [
+      { hreflang: 'en-BH', href: 'https://bahrainrealtor.com/example/' },
+      { hreflang: 'ar-BH', href: 'https://evil.example/ar/example/' },
+    ],
   });
   assert.equal(arabic?.openGraphLocale, 'ar_BH');
   assert.equal(arabic?.canonicalUrl, 'https://bahrainrealtor.com/ar/example/');
-  assert.equal(arabic?.robots, 'index,follow');
+  assert.equal(arabic?.robots, 'index, follow');
+  assert.deepEqual(arabic?.alternates, [
+    { hreflang: 'en-BH', href: 'https://bahrainrealtor.com/example/' },
+  ]);
   assert.equal(localizedMetadata({
     title: '   ',
     description: 'Description',

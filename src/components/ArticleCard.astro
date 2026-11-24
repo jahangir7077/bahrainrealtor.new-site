@@ -1,0 +1,55 @@
+---
+import Card from './ui/Card.astro';
+import { getPublicationEligibility } from '../i18n/publication.ts';
+import { formatDate } from '../i18n/formatting.ts';
+import { normalizeInternalPath } from '../i18n/routes.ts';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+import type { ArticleRecord } from '../types/content.ts';
+
+interface Props {
+  article: ArticleRecord;
+  language: Language;
+  href?: string;
+}
+
+const { article, language, href } = Astro.props;
+const content = article.content[language];
+const publication = article.publication[language];
+const eligible = publication && getPublicationEligibility(publication, language).routeAvailable;
+const safeHref = href ? normalizeInternalPath(href) : null;
+const publishedDate = article.publishedAt ? formatDate(article.publishedAt, language) : null;
+---
+
+<Card variant="white" bordered>
+  <article class="article-card" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    {content && eligible ? (
+      <>
+        {publishedDate && <time class="article-card__date" datetime={article.publishedAt}>{publishedDate}</time>}
+        <h3>{safeHref ? <a href={safeHref}>{content.title}</a> : content.title}</h3>
+        <p>{content.summary}</p>
+      </>
+    ) : (
+      <p role="status">{translate(language, 'translation.unavailable')}</p>
+    )}
+  </article>
+</Card>
+
+<style>
+  .article-card h3 {
+    margin-block: 0 var(--space-3);
+    font-family: var(--font-display);
+  }
+
+  .article-card h3 a {
+    color: var(--color-navy);
+  }
+
+  .article-card p {
+    color: var(--color-text-secondary);
+  }
+
+  .article-card__date {
+    font-size: var(--type-small);
+  }
+</style>

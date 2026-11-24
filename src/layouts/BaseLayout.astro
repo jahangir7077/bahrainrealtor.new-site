@@ -1,6 +1,10 @@
 ---
 import '../styles/global.css';
 import { localeConfig } from '../i18n/config';
+import { translate } from '../i18n/translate.ts';
+import SEOHead from '../components/SEOHead.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import { directionFor } from '../utils/site';
 import type { Language } from '../types/site';
 
@@ -8,9 +12,10 @@ interface Props {
   title: string;
   description: string;
   language: Language;
+  showChrome?: boolean;
 }
 
-const { title, description, language } = Astro.props;
+const { title, description, language, showChrome = true } = Astro.props;
 
 const siteLocale = (value: Language) => localeConfig[value].language;
 ---
@@ -20,13 +25,32 @@ const siteLocale = (value: Language) => localeConfig[value].language;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <meta name="robots" content="noindex, nofollow" />
+    <SEOHead title={title} description={description} language={language} pathname={Astro.url.pathname} />
   </head>
   <body>
-    <main>
+    <a class="skip-link" href="#main-content">{translate(language, 'accessibility.skipToContent')}</a>
+    {showChrome && <SiteHeader language={language} />}
+    <main id="main-content">
       <slot />
     </main>
+    {showChrome && <SiteFooter language={language} />}
   </body>
 </html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    z-index: 20;
+    inset-block-start: var(--space-2);
+    inset-inline-start: var(--space-2);
+    transform: translateY(-160%);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+    background: var(--color-navy);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+import TemplateShowcase from '../../../components/TemplateShowcase.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/ui/Container.astro';
+
+const isProduction = import.meta.env.PROD;
+if (isProduction) Astro.response.status = 404;
+---
+
+<BaseLayout title="معاينة القوالب" description="نماذج قوالب محلية للتطوير فقط." language="ar">
+  {isProduction ? (
+    <div lang="ar" dir="rtl"><Container><h1>الصفحة غير موجودة</h1></Container></div>
+  ) : (
+    <TemplateShowcase language="ar" />
+  )}
+</BaseLayout>

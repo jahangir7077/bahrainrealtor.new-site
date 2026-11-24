@@ -16,6 +16,7 @@ if (isProduction) Astro.response.status = 404;
   title={isProduction ? 'Page not found' : 'Design system showcase'}
   description="Local-only design system specimens."
   language="en"
+  showChrome={false}
 >
   {isProduction ? (
     <Container>

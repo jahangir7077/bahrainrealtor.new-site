@@ -1,0 +1,78 @@
+---
+import Breadcrumbs from '../Breadcrumbs.astro';
+import EmptyState from '../EmptyState.astro';
+import PropertyGrid from '../PropertyGrid.astro';
+import Container from '../ui/Container.astro';
+import EnquiryFormPreview from '../EnquiryFormPreview.astro';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { PropertyRecord } from '../../types/content.ts';
+
+type ContentKind = 'area' | 'propertyType' | 'project' | 'investment' | 'about' | 'contact';
+
+interface Props {
+  language: Language;
+  kind: ContentKind;
+  title: string;
+  description?: string;
+  properties?: readonly PropertyRecord[];
+}
+
+const { language, kind, title, description, properties = [] } = Astro.props;
+const listingKinds = kind === 'area' || kind === 'propertyType';
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="wide">
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: title }]} />
+    <header class="content-landing__heading">
+      <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+      <h1>{title}</h1>
+      <p>{description ?? translate(language, 'content.informationPending')}</p>
+    </header>
+    {listingKinds ? (
+      <section aria-labelledby="inventory-title">
+        <h2 id="inventory-title">{translate(language, 'vocabulary.property')}</h2>
+        <PropertyGrid language={language} properties={properties} />
+      </section>
+    ) : kind === 'contact' ? (
+      <EnquiryFormPreview language={language} />
+    ) : (
+      <EmptyState
+        language={language}
+        title={kind === 'project' ? translate(language, 'content.noProjects') : translate(language, 'content.detailsPending')}
+        description={translate(language, 'content.publishedAfterReview')}
+      />
+    )}
+    <section class="content-landing__support">
+      <h2>{translate(language, 'home.faqTitle')}</h2>
+      <p>{translate(language, 'content.noFaqs')}</p>
+    </section>
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  .content-landing__heading {
+    max-width: 54rem;
+    padding-block: var(--space-8);
+  }
+
+  .content-landing__heading h1,
+  .content-landing__heading p {
+    margin-block: 0 var(--space-4);
+  }
+
+  .content-landing__heading h1 {
+    font-family: var(--font-display);
+  }
+
+  .content-landing__support {
+    margin-block-start: var(--space-10);
+    padding-block-start: var(--space-6);
+    border-block-start: 1px solid var(--color-border);
+  }
+</style>

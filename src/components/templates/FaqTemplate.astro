@@ -1,0 +1,40 @@
+---
+import Breadcrumbs from '../Breadcrumbs.astro';
+import FAQAccordion from '../FAQAccordion.astro';
+import Container from '../ui/Container.astro';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { FaqRecord } from '../../types/content.ts';
+
+interface Props {
+  language: Language;
+  faqs: readonly FaqRecord[];
+}
+
+const { language, faqs } = Astro.props;
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="narrow">
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: translate(language, 'home.faqTitle') }]} />
+    <header>
+      <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+      <h1>{translate(language, 'home.faqTitle')}</h1>
+    </header>
+    <FAQAccordion language={language} faqs={faqs} />
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  header {
+    padding-block: var(--space-8);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import Breadcrumbs from '../Breadcrumbs.astro';
+import PropertyGrid from '../PropertyGrid.astro';
+import PropertySearch from '../PropertySearch.astro';
+import Container from '../ui/Container.astro';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { PropertyRecord } from '../../types/content.ts';
+
+interface Props {
+  language: Language;
+  title: string;
+  properties?: readonly PropertyRecord[];
+}
+
+const { language, title, properties = [] } = Astro.props;
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="wide">
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: title }]} />
+    <header class="template-heading">
+      <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+      <h1>{title}</h1>
+      <p>{translate(language, 'content.inventoryPending')}</p>
+    </header>
+    <PropertySearch language={language} />
+    <div class="listing-toolbar" aria-label={translate(language, 'templates.filters')}>
+      <label>
+        {translate(language, 'templates.sort')}
+        <select disabled><option>{translate(language, 'templates.sort')}</option></select>
+      </label>
+      <p aria-live="polite">
+        {properties.length ? translate(language, 'vocabulary.propertyCount', { count: properties.length }) : translate(language, 'content.noProperties')}
+      </p>
+    </div>
+    <PropertyGrid language={language} properties={properties} />
+    <nav class="pagination" aria-label={translate(language, 'templates.pagination')}>
+      <button type="button" disabled>{translate(language, 'templates.pagination')}</button>
+    </nav>
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  .template-heading {
+    padding-block: var(--space-8);
+  }
+
+  .template-heading h1 {
+    font-family: var(--font-display);
+  }
+
+  .listing-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-6);
+  }
+
+  .listing-toolbar p {
+    margin: 0;
+  }
+
+  .listing-toolbar label {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .listing-toolbar select,
+  .pagination button {
+    min-height: var(--target-min);
+    padding-inline: var(--space-3);
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    padding-block-start: var(--space-8);
+  }
+</style>

@@ -23,6 +23,11 @@ main {
   width: 100%;
 }
 
+[dir="rtl"] .eyebrow {
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 p {
   margin-block: 0 var(--space-4);
 }

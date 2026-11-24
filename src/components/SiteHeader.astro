@@ -1,0 +1,274 @@
+---
+import Container from './ui/Container.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+}
+
+const { language } = Astro.props;
+const home = language === 'ar' ? '/ar/' : '/';
+const sectionHref = (id: string) => `${home}#${id}`;
+const navItems = [
+  ['navigation.buyRent', 'property-types'],
+  ['navigation.areas', 'areas'],
+  ['navigation.projects', 'projects'],
+  ['navigation.investment', 'investment'],
+  ['navigation.financing', 'financing'],
+  ['navigation.insights', 'insights'],
+  ['navigation.about', 'about'],
+  ['navigation.contact', 'contact'],
+] as const;
+---
+
+<header class="site-header" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="wide" class="site-header__inner">
+    <a class="brand" href={home} aria-label={`Bahrain Realtor — ${translate(language, 'navigation.home')}`}>
+      <span class="brand__mark" aria-hidden="true">BR</span>
+      <span class="brand__words">
+        <strong>Bahrain Realtor</strong>
+        <span>{translate(language, 'development.banner')}</span>
+      </span>
+    </a>
+
+    <nav class="site-nav site-nav--desktop" aria-label={translate(language, 'accessibility.mainNavigation')}>
+      <ul>
+        {navItems.slice(0, 3).map(([key, id]) => (
+          <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
+        ))}
+        <li class="site-nav__more">
+          <details>
+            <summary>{translate(language, 'navigation.explore')}</summary>
+            <ul>
+              {navItems.slice(3, 7).map(([key, id]) => (
+                <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
+              ))}
+              <li><a href={sectionHref('insights')}>{translate(language, 'navigation.blog')}</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <LanguageSwitcher language={language} />
+      <a class="button button--contact button--small site-header__contact" href={sectionHref('contact')}>
+        {translate(language, 'navigation.contactAdvisor')}
+      </a>
+      <details class="mobile-menu">
+        <summary aria-label={translate(language, 'accessibility.menu')}>
+          <span aria-hidden="true">☰</span>
+          <span class="mobile-menu__label">{translate(language, 'accessibility.openMenu')}</span>
+        </summary>
+        <nav aria-label={translate(language, 'accessibility.mainNavigation')}>
+          <ul>
+            {navItems.map(([key, id]) => (
+              <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
+            ))}
+            <li><a href={sectionHref('insights')}>{translate(language, 'navigation.blog')}</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </Container>
+</header>
+
+<script>
+  document.querySelectorAll<HTMLDetailsElement>('.mobile-menu').forEach((menu) => {
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => { menu.open = false; });
+    });
+  });
+</script>
+
+<style>
+  .site-header {
+    position: relative;
+    z-index: 5;
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .site-header__inner {
+    display: flex;
+    min-height: 5.25rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .brand {
+    display: inline-flex;
+    min-width: max-content;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-navy);
+    text-decoration: none;
+  }
+
+  .brand__mark {
+    display: grid;
+    width: 2.75rem;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid var(--color-gold);
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .brand__words {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .brand__words strong {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+  }
+
+  .brand__words span {
+    color: var(--color-text-secondary);
+    font-size: 0.68rem;
+  }
+
+  .site-nav ul,
+  .mobile-menu ul {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav a,
+  .site-nav summary,
+  .mobile-menu summary {
+    display: inline-flex;
+    min-height: var(--target-min);
+    align-items: center;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .site-nav a:hover,
+  .site-nav summary:hover,
+  .mobile-menu a:hover {
+    color: var(--color-link-hover);
+  }
+
+  .site-nav__more {
+    position: relative;
+  }
+
+  .site-nav__more ul {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-end: 0;
+    display: grid;
+    min-width: 13rem;
+    gap: 0;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .site-nav__more ul a {
+    width: 100%;
+    padding-inline: var(--space-3);
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .site-header__contact {
+    min-width: max-content;
+    font-size: 0.82rem;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  @media (max-width: 70rem) {
+    .site-nav--desktop {
+      display: none;
+    }
+
+    .mobile-menu {
+      position: relative;
+      display: block;
+    }
+
+    .mobile-menu summary {
+      gap: var(--space-2);
+      padding-inline: var(--space-3);
+      border: 1px solid var(--color-border-interactive);
+      border-radius: var(--radius-button);
+      list-style: none;
+    }
+
+    .mobile-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .mobile-menu nav {
+      position: absolute;
+      inset-block-start: calc(100% + var(--space-2));
+      inset-inline-end: 0;
+      width: min(20rem, calc(100vw - 2 * var(--page-gutter)));
+      padding: var(--space-4);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-card);
+    }
+
+    .mobile-menu ul {
+      display: grid;
+      gap: var(--space-1);
+    }
+
+    .mobile-menu a {
+      display: flex;
+      min-height: var(--target-min);
+      align-items: center;
+      color: var(--color-text-primary);
+      text-decoration: none;
+    }
+  }
+
+  @media (max-width: 35rem) {
+    .site-header__inner {
+      min-height: 4.5rem;
+      gap: var(--space-2);
+    }
+
+    .brand__words span,
+    .site-header__contact,
+    .mobile-menu__label {
+      display: none;
+    }
+
+    .brand__words strong {
+      font-size: 0.95rem;
+    }
+
+    .brand__mark {
+      width: 2.35rem;
+    }
+  }
+</style>

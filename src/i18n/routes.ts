@@ -17,8 +17,8 @@ export interface BilingualRoute {
   languages: Partial<Record<Language, LanguageRoute>>;
 }
 
-export const DEVELOPMENT_PLACEHOLDER_EQUIVALENTS: BilingualRoute = {
-  id: 'development-placeholder',
+export const DEVELOPMENT_HOME_EQUIVALENTS: BilingualRoute = {
+  id: 'development-home',
   languages: {
     en: { path: '/', routeExists: true, developmentOnly: true },
     ar: { path: '/ar/', routeExists: true, developmentOnly: true },

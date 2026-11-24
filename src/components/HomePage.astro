@@ -1,0 +1,376 @@
+---
+import AreaCard from './AreaCard.astro';
+import EmptyState from './EmptyState.astro';
+import EnquiryFormPreview from './EnquiryFormPreview.astro';
+import PropertySearch from './PropertySearch.astro';
+import PropertyTypeCard from './PropertyTypeCard.astro';
+import Card from './ui/Card.astro';
+import Container from './ui/Container.astro';
+import SectionHeading from './ui/SectionHeading.astro';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+}
+
+const { language } = Astro.props;
+const categories = ['apartments', 'villas', 'houses', 'land', 'buildings', 'commercial', 'freehold'] as const;
+const areas = ['amwaj', 'tala', 'marassi', 'diyar', 'dilmunia', 'manama'] as const;
+const services = ['sales', 'rentals', 'investment', 'management', 'offPlan', 'secondary'] as const;
+const text = (key: string) => translate(language, key);
+---
+
+<div class="home-page" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <section class="home-hero">
+    <Container width="wide" class="home-hero__inner">
+      <div class="home-hero__copy">
+        <p class="eyebrow">{text('home.eyebrow')}</p>
+        <h1>{text('home.title')}</h1>
+        <p class="home-hero__lead">{text('home.introduction')}</p>
+        <div class="home-hero__actions">
+          <a class="button button--contact button--large" href="#property-types">{text('home.explore')}</a>
+          <a class="button button--secondary button--large" href="#contact">{text('home.contact')}</a>
+        </div>
+      </div>
+      <div class="home-hero__art" aria-hidden="true">
+        <span class="home-hero__disc"></span>
+        <span class="home-hero__line"></span>
+        <span class="home-hero__label">BAHRAIN · REAL ESTATE</span>
+      </div>
+      <PropertySearch language={language} />
+    </Container>
+  </section>
+
+  <section class="section" id="property-types" aria-labelledby={`categories-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.buyRent')} description={text('home.categoriesDescription')}>
+        <span id={`categories-title-${language}`}>{text('home.categoriesTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--categories">
+        {categories.map((category) => (
+          <PropertyTypeCard
+            language={language}
+            title={text(`categories.${category}`)}
+            description={text('content.inventoryPending')}
+          />
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="areas" aria-labelledby={`areas-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.explore')} description={text('home.areasDescription')}>
+        <span id={`areas-title-${language}`}>{text('home.areasTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--areas">
+        {areas.map((area) => (
+          <AreaCard
+            language={language}
+            name={text(`areas.${area}`)}
+            details={text('content.informationPending')}
+          />
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-feature" id="investment" aria-labelledby={`investment-title-${language}`}>
+    <Container width="wide" class="home-feature__inner">
+      <div>
+        <p class="eyebrow">{text('navigation.investment')}</p>
+        <h2 id={`investment-title-${language}`}>{text('home.investmentTitle')}</h2>
+        <p>{text('home.investmentDescription')}</p>
+      </div>
+      <p class="home-feature__note">{text('content.publishedAfterReview')}</p>
+    </Container>
+  </section>
+
+  <section class="section" id="projects" aria-labelledby={`projects-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.projects')} description={text('home.projectsDescription')}>
+        <span id={`projects-title-${language}`}>{text('home.projectsTitle')}</span>
+      </SectionHeading>
+      <EmptyState language={language} title={text('content.noProjects')} description={text('content.detailsPending')} />
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="financing" aria-labelledby={`finance-title-${language}`}>
+    <Container width="wide" class="home-split">
+      <div>
+        <p class="eyebrow">{text('navigation.financing')}</p>
+        <h2 id={`finance-title-${language}`}>{text('home.financeTitle')}</h2>
+        <p>{text('home.financeDescription')}</p>
+      </div>
+      <Card variant="white" bordered>
+        <p class="home-card-note">{text('content.publishedAfterReview')}</p>
+      </Card>
+    </Container>
+  </section>
+
+  <section class="section" id="insights" aria-labelledby={`insights-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.blog')} description={text('home.insightsDescription')}>
+        <span id={`insights-title-${language}`}>{text('home.insightsTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--editorial">
+        <EmptyState language={language} title={text('content.noArticles')} description={text('content.publishedAfterReview')} />
+        <EmptyState language={language} title={text('content.noFaqs')} description={text('content.publishedAfterReview')} />
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="about" aria-labelledby={`about-title-${language}`}>
+    <Container width="wide" class="home-split">
+      <div class="advisor-mark" aria-hidden="true">BR</div>
+      <div>
+        <p class="eyebrow">{text('navigation.about')}</p>
+        <h2 id={`about-title-${language}`}>{text('home.aboutTitle')}</h2>
+        <p class="advisor-name" dir="ltr">Jahangir Realtor Bahrain</p>
+        <p>{text('home.aboutDescription')}</p>
+        <p>{text('content.profilePending')}</p>
+      </div>
+    </Container>
+  </section>
+
+  <section class="section" id="services" aria-labelledby={`services-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.about')} description={text('home.servicesDescription')}>
+        <span id={`services-title-${language}`}>{text('home.servicesTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--categories">
+        {services.map((service) => (
+          <Card variant="white" bordered>
+            <h3>{text(`service.${service}`)}</h3>
+            <p>{text('content.detailsPending')}</p>
+          </Card>
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-feature home-feature--contact" id="contact" aria-labelledby={`contact-title-${language}`}>
+    <Container width="wide" class="contact-grid">
+      <div>
+        <p class="eyebrow">{text('navigation.contact')}</p>
+        <h2 id={`contact-title-${language}`}>{text('home.contactTitle')}</h2>
+        <p>{text('home.contactDescription')}</p>
+        <p>{text('content.contactPending')}</p>
+      </div>
+      <EnquiryFormPreview language={language} />
+    </Container>
+  </section>
+</div>
+
+<style>
+  .home-hero {
+    overflow: hidden;
+    color: var(--color-white);
+    background: var(--color-navy);
+  }
+
+  .home-hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.8fr);
+    align-items: center;
+    gap: clamp(var(--space-6), 7vw, var(--space-16));
+    padding-block: clamp(var(--space-12), 9vw, 8rem) var(--space-10);
+  }
+
+  .home-hero__copy {
+    position: relative;
+    z-index: 1;
+    max-width: 46rem;
+  }
+
+  .eyebrow {
+    margin-block-end: var(--space-4);
+    color: var(--color-gold);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2 {
+    max-width: 18ch;
+    margin-block: 0 var(--space-5);
+    font-family: var(--font-display);
+  }
+
+  h1 {
+    font-size: var(--type-h1);
+    line-height: 1.08;
+  }
+
+  .home-hero__lead {
+    max-width: 54ch;
+    color: #e2e8f0;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    line-height: 1.7;
+  }
+
+  .home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+
+  .home-hero__actions .button--secondary {
+    color: var(--color-white);
+    border-color: var(--color-white);
+  }
+
+  .home-hero__art {
+    position: relative;
+    display: grid;
+    min-height: 18rem;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 24%);
+    border-radius: 50% 50% 0.75rem 0.75rem;
+    background: #193550;
+  }
+
+  .home-hero__disc {
+    width: min(60%, 14rem);
+    aspect-ratio: 1;
+    border: 1px solid rgb(196 163 107 / 72%);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2.5rem rgb(196 163 107 / 8%), 0 0 0 5rem rgb(196 163 107 / 5%);
+  }
+
+  .home-hero__line {
+    position: absolute;
+    width: 140%;
+    height: 1px;
+    transform: rotate(-32deg);
+    background: rgb(255 255 255 / 35%);
+  }
+
+  .home-hero__label {
+    position: absolute;
+    inset-block-end: var(--space-5);
+    inset-inline-start: var(--space-5);
+    color: #e2e8f0;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+
+  .search-panel {
+    grid-column: 1 / -1;
+    margin-block-start: var(--space-2);
+  }
+
+  .home-card-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .home-card-grid--categories {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+
+  .home-card-grid--areas {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .home-card-grid--editorial {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .home-section--soft {
+    background: var(--color-surface-subtle);
+  }
+
+  .home-feature {
+    color: var(--color-white);
+    background: var(--color-navy);
+  }
+
+  .home-feature h2 {
+    color: var(--color-white);
+    font-size: var(--type-h2);
+  }
+
+  .home-feature p {
+    max-width: 58ch;
+    color: #e2e8f0;
+    line-height: 1.7;
+  }
+
+  .home-feature__inner,
+  .home-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(15rem, 0.8fr);
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  .home-feature__note {
+    padding: var(--space-5);
+    border-inline-start: 2px solid var(--color-gold);
+  }
+
+  .home-card-note {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .advisor-mark {
+    display: grid;
+    min-height: 14rem;
+    place-items: center;
+    border: 1px solid var(--color-gold);
+    border-radius: 50%;
+    color: var(--color-navy);
+    background: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 6rem);
+  }
+
+  .advisor-name {
+    font-weight: 700;
+  }
+
+  .home-page h3 {
+    margin-block: 0 var(--space-3);
+  }
+
+  .home-page .card p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(17rem, 1.1fr);
+    align-items: start;
+    gap: var(--space-8);
+  }
+
+  @media (max-width: 52rem) {
+    .home-hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .home-hero__art {
+      min-height: 12rem;
+      border-radius: var(--radius-card);
+    }
+
+    .home-feature__inner,
+    .home-split,
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .advisor-mark {
+      min-height: 10rem;
+      max-width: 16rem;
+    }
+  }
+</style>

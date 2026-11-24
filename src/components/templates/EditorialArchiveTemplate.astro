@@ -1,0 +1,76 @@
+---
+import ArticleCard from '../ArticleCard.astro';
+import Breadcrumbs from '../Breadcrumbs.astro';
+import EmptyState from '../EmptyState.astro';
+import Container from '../ui/Container.astro';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { ArticleRecord } from '../../types/content.ts';
+import { getPublicationEligibility } from '../../i18n/publication.ts';
+
+interface Props {
+  language: Language;
+  articles: readonly ArticleRecord[];
+}
+
+const { language, articles } = Astro.props;
+const visibleArticles = articles.filter((article) => {
+  const publication = article.publication[language];
+  return Boolean(
+    article.content[language] &&
+    publication &&
+    getPublicationEligibility(publication, language).routeAvailable,
+  );
+});
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="wide">
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: translate(language, 'navigation.blog') }]} />
+    <header>
+      <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+      <h1>{translate(language, 'navigation.blog')}</h1>
+    </header>
+    {visibleArticles.length ? (
+      <div class="archive-grid">
+        {visibleArticles.map((article) => <ArticleCard article={article} language={language} />)}
+      </div>
+    ) : (
+      <EmptyState language={language} title={translate(language, 'content.noArticles')} description={translate(language, 'content.publishedAfterReview')} />
+    )}
+    <nav class="pagination" aria-label={translate(language, 'templates.pagination')}>
+      <button type="button" disabled>{translate(language, 'templates.pagination')}</button>
+    </nav>
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  header {
+    padding-block: var(--space-8);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+  }
+
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    padding-block-start: var(--space-8);
+  }
+
+  .pagination button {
+    min-height: var(--target-min);
+    padding-inline: var(--space-4);
+  }
+</style>

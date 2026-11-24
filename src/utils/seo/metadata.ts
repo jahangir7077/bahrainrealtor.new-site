@@ -1,8 +1,9 @@
 import type { Language } from '../../i18n/config.ts';
 import { localeConfig } from '../../i18n/config.ts';
-import { normalizeInternalPath } from '../../i18n/routes.ts';
+import { detectLanguage, normalizeInternalPath } from '../../i18n/routes.ts';
 import type { HreflangLink } from './hreflang.ts';
 import { canonicalUrlFor } from './canonical.ts';
+import { site } from '../../config/site.ts';
 
 export interface LocalizedMetadataInput {
   title: string;
@@ -20,8 +21,29 @@ export interface LocalizedMetadata {
   language: Language;
   openGraphLocale: 'en_BH' | 'ar_BH';
   canonicalUrl?: string;
-  robots: 'index,follow' | 'noindex,nofollow';
+  robots: 'index, follow' | 'noindex, nofollow';
   alternates: readonly HreflangLink[];
+}
+
+function safeAlternates(alternates: readonly HreflangLink[]): HreflangLink[] {
+  const productionOrigin = new URL(site.productionUrl).origin;
+  return alternates.filter((alternate) => {
+    try {
+      const url = new URL(alternate.href);
+      const path = normalizeInternalPath(url.pathname);
+      const language = alternate.hreflang === 'en-BH' || alternate.hreflang === 'x-default'
+        ? 'en'
+        : 'ar';
+      return url.origin === productionOrigin &&
+        url.protocol === 'https:' &&
+        !url.search &&
+        !url.hash &&
+        path === url.pathname &&
+        detectLanguage(path) === language;
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function localizedMetadata(input: LocalizedMetadataInput): LocalizedMetadata | null {
@@ -38,7 +60,7 @@ export function localizedMetadata(input: LocalizedMetadataInput): LocalizedMetad
     language: input.language,
     openGraphLocale: localeConfig[input.language].regionalLocale.replace('-', '_') as 'en_BH' | 'ar_BH',
     ...(canonicalUrl ? { canonicalUrl } : {}),
-    robots: input.indexingEligible ? 'index,follow' : 'noindex,nofollow',
-    alternates: input.indexingEligible ? input.alternates ?? [] : [],
+    robots: input.indexingEligible ? 'index, follow' : 'noindex, nofollow',
+    alternates: input.indexingEligible ? safeAlternates(input.alternates ?? []) : [],
   };
 }

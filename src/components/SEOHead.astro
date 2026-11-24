@@ -1,0 +1,49 @@
+---
+import type { Language } from '../i18n/config.ts';
+import { localizedMetadata } from '../utils/seo/metadata.ts';
+import type { HreflangLink } from '../utils/seo/hreflang.ts';
+
+interface Props {
+  title: string;
+  description: string;
+  language: Language;
+  pathname: string;
+  indexingEligible?: boolean;
+  enableCanonical?: boolean;
+  alternates?: readonly HreflangLink[];
+}
+
+const {
+  title,
+  description,
+  language,
+  pathname,
+  indexingEligible = false,
+  enableCanonical = false,
+  alternates = [],
+} = Astro.props;
+const metadata = localizedMetadata({
+  title,
+  description,
+  language,
+  pathname,
+  indexingEligible,
+  enableCanonical,
+  alternates,
+});
+---
+
+{metadata && (
+  <>
+    <title>{metadata.title}</title>
+    <meta name="description" content={metadata.description} />
+    <meta name="robots" content={metadata.robots} />
+    <meta property="og:title" content={metadata.title} />
+    <meta property="og:description" content={metadata.description} />
+    <meta property="og:locale" content={metadata.openGraphLocale} />
+    {metadata.canonicalUrl && <link rel="canonical" href={metadata.canonicalUrl} />}
+    {metadata.alternates.map((alternate) => (
+      <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+    ))}
+  </>
+)}
