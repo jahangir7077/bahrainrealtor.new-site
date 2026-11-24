@@ -23,6 +23,16 @@ Before designing or implementing the site, read and follow:
 - Production code deployment is manual and approval-gated. Use a separate,
   access-restricted preview environment. Verify how to prevent automatic
   production deployments on Hostinger before any implementation.
+- Phase 1A status: basic Astro SSR compatibility on Hostinger Business Web
+  Hosting is **PASSED** (owner-reported; Astro 7.4.13, `@astrojs/node` 11.1.14,
+  Node 24.x, ZIP upload; see
+  `experiments/hostinger-astro-ssr/README.md`). This is **not** full
+  production readiness. For Hostinger ZIP deploys, explicitly set output
+  directory `dist` and entry file `server/entry.mjs`; auto-detection left the
+  entry file empty and caused HTTP 403. Outstanding gates: same-URL caching,
+  `Cache-Control` for dynamic pages and APIs, resource limits and performance,
+  deployment and rollback, staging access restrictions, and Supabase
+  integration (separately approved phase). Phase 1B is not authorized.
 - A private dashboard for one administrator manages properties, enquiries,
   articles and FAQs. Approved content publishes without a code redeployment.
 - Property listings are managed manually. Stable public property URLs use

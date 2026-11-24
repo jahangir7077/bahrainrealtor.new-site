@@ -40,7 +40,48 @@ Repeat the timestamp request after a short delay. Its `generatedAt` value
 should change; the dynamic page should return HTML containing its route
 parameter and request-time timestamp.
 
-## Hostinger Business deployment configuration to verify
+## Phase 1A result: basic SSR compatibility PASSED (owner-reported)
+
+The owner deployed this experiment by ZIP upload to Hostinger Business Web
+Hosting. This records the owner's report; it is **not** full production
+readiness.
+
+| Item | Verified value |
+| --- | --- |
+| Astro / adapter | 7.4.13 / `@astrojs/node` 11.1.14 |
+| Hostinger Node version | 24.x |
+| Package manager | npm |
+| Root directory | `./` |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Entry file | `server/entry.mjs` |
+| Environment variables | None |
+
+Temporary test website: https://relaxed-lightyellow-gnu-68.hostingersite.com/
+
+Verified: dependency installation, Astro server build, homepage, dynamic SSR
+route `/ssr/hostinger` and `/api/time.json`. Fresh timestamps were confirmed
+using different query parameters: `2026-11-24T16:07:38.545Z` and
+`2026-11-24T16:07:52.463Z`.
+
+**Deployment issue and resolution:** the first deployment returned HTTP 403
+Forbidden. Build logs showed `Entry file: none` although `server/entry.mjs`
+was generated. Dashboard → Redeploy → Settings and redeploy, explicitly
+setting output directory `dist` and entry file `server/entry.mjs`, fixed it.
+Always verify these two fields for ZIP deployments.
+
+**Outstanding validation gates:**
+
+- Investigate same-URL caching: the initial timestamp did not change on refresh, although different query parameters returned fresh values.
+- Verify appropriate `Cache-Control` headers for dynamic property pages and API endpoints.
+- Verify runtime resource limits and performance.
+- Verify deployment and rollback procedures.
+- Verify staging access restrictions.
+- Validate Supabase integration in a separately approved phase.
+
+Phase 1B is not authorized and no application code was changed.
+
+## Hostinger Business deployment configuration (pre-test notes)
 
 Hostinger's support documentation lists Node.js applications on Business and
 Cloud plans and lists Astro among supported frameworks. Astro's Node adapter
@@ -63,7 +104,7 @@ Proposed build and server details, subject to Hostinger dashboard verification:
 | Install | `npm ci` |
 | Build | `npm run build` |
 | Output | `dist/` |
-| Node server entry point | `dist/server/entry.mjs` |
+| Node server entry point | `server/entry.mjs` (relative to output directory `dist`) |
 | Startup command if a command is requested | `node ./dist/server/entry.mjs` |
 | Runtime environment | `HOST` and `PORT` should be provided by the platform; Astro's standalone server reads these values |
 | Application secrets | None required |

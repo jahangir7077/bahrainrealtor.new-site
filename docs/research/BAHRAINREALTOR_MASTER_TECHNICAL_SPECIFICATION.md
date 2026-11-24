@@ -1,5 +1,5 @@
 # BahrainRealtor.com — Master Technical Specification
-Version: Planning draft 1.1 | 23 November 2026 | Status: Proposed specification; implementation NOT authorized
+Version: Planning draft 1.2 | 24 November 2026 | Status: Proposed specification; implementation NOT authorized
 
 ## 1. Project identity and non-negotiable boundaries
 - Canonical production domain: https://bahrainrealtor.com/ (NOT .bh or bahrainrealtot.com).
@@ -23,6 +23,19 @@ Version: Planning draft 1.1 | 23 November 2026 | Status: Proposed specification;
 - Verify the selected Hostinger plan and account's Node.js versions and runtime, Astro adapter and SSR/hybrid compatibility, process lifecycle and resource limits, deployment and rollback controls, caching/invalidation, on-demand rendering, dynamic sitemap generation, preview isolation and costs before implementation. Do not assume static output can update itself or that Hostinger offers Netlify features.
 - Secrets in server environment only; service-role keys never shipped to browser. Use least-privilege RLS, validated public read policies, authenticated write policies, abuse prevention, and secure upload handling.
 - Separate development/staging and production configuration. Use a separate access-restricted preview environment; no indexing of staging, enforced by access controls (robots/noindex alone is insufficient). Verify the available Hostinger isolation and access controls before implementation.
+
+### Phase 1A result: basic SSR compatibility PASSED (owner-reported, 24 November 2026)
+- Isolated test on Hostinger Business Web Hosting: Astro 7.4.13, @astrojs/node 11.1.14, Node 24.x, npm, root `./`, build `npm run build`, output `dist`, entry file `server/entry.mjs`, ZIP upload, no environment variables. Temporary test site: https://relaxed-lightyellow-gnu-68.hostingersite.com/
+- Dependency install, Astro server build, homepage, dynamic SSR route `/ssr/hostinger` and `/api/time.json` succeeded; fresh timestamps confirmed with different query parameters (2026-11-24T16:07:38.545Z and 2026-11-24T16:07:52.463Z).
+- Issue: the first deployment returned HTTP 403 and build logs showed "Entry file: none" although `server/entry.mjs` was generated. Resolved via Dashboard → Redeploy → Settings and redeploy with output directory `dist` and entry file `server/entry.mjs` set explicitly. Do not rely on auto-detection.
+- This is NOT full production readiness. Outstanding validation gates:
+  - Investigate same-URL caching (the initial timestamp did not change on refresh).
+  - Verify appropriate Cache-Control headers for dynamic property pages and API endpoints.
+  - Verify runtime resource limits and performance.
+  - Verify deployment and rollback procedures.
+  - Verify staging access restrictions.
+  - Validate Supabase integration in a separately approved phase.
+- Phase 1B is not authorized. All earlier requirements remain in force.
 
 ### Hostinger compatibility research and validation gate
 - Hostinger documents Node.js applications on Business and Cloud plans and lists Astro among supported frameworks; Astro documents its Node adapter for on-demand rendering. These documents do not prove this account supports the selected Astro SSR configuration end to end. Sources: [Hostinger Node.js deployment](https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/), [Hostinger Node.js hosting options](https://www.hostinger.com/support/node-js-hosting-options-at-hostinger/), and [Astro Node adapter](https://docs.astro.build/en/guides/integrations-guide/node/).

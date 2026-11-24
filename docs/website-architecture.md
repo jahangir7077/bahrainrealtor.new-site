@@ -17,6 +17,26 @@ SSR/hybrid runtime, Node.js and adapter compatibility, deployment controls,
 caching and live-update behavior, preview isolation, vendor capabilities,
 security controls and costs remain subject to validation.
 
+### Phase 1A hosting status
+
+Basic Astro SSR compatibility on Hostinger Business Web Hosting is **PASSED**
+(owner-reported, isolated test in `experiments/hostinger-astro-ssr/`): Astro
+7.4.13, `@astrojs/node` 11.1.14, Node 24.x, npm, ZIP upload, no environment
+variables. The homepage, `/ssr/hostinger` and `/api/time.json` worked and
+fresh server timestamps were confirmed. This is **not** full production
+readiness. Hostinger ZIP deploys require output directory `dist` and entry
+file `server/entry.mjs` to be set explicitly. Outstanding gates:
+
+- Investigate same-URL caching: the initial timestamp did not change on refresh, although different query parameters returned fresh values.
+- Verify appropriate `Cache-Control` headers for dynamic property pages and API endpoints.
+- Verify runtime resource limits and performance.
+- Verify deployment and rollback procedures.
+- Verify staging access restrictions.
+- Validate Supabase integration in a separately approved phase.
+
+Phase 1B and later implementation remain unauthorized; planned routes stay
+planned. The live Netlify site and DNS are unchanged.
+
 ## Planned URL inventory
 
 | Section | URL | Status |
