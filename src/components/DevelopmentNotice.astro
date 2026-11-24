@@ -1,0 +1,9 @@
+---
+import type { Language } from '../types/site';
+interface Props {
+  language: Language;
+}
+const { language } = Astro.props;
+---
+
+<p>{language === 'ar' ? 'صفحة تطويرية مؤقتة.' : 'Development placeholder.'}</p>

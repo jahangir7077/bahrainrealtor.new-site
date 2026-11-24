@@ -7,8 +7,9 @@ on the only approved production domain, `https://bahrainrealtor.com/`, with
 English and Arabic content. `bahrainrealtor.bh` and `bahrainrealtot.com` are
 not production domains.
 The inventory below records the intended structure supplied by the owner. All
-routes are **planned, not implemented**; their inclusion does not authorize
-site design or implementation before the foundation is approved.
+routes are planned, except for the explicitly authorized non-indexable
+Phase 1B.1 development placeholders at `/` and `/ar/`. They do not constitute
+final site design or approve any other route.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -34,14 +35,15 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Verify staging access restrictions.
 - Validate Supabase integration in a separately approved phase.
 
-Phase 1B and later implementation remain unauthorized; planned routes stay
-planned. The live Netlify site and DNS are unchanged.
+Phase 1B.1 is authorized only for the Astro foundation and placeholders.
+Phase 1B.2 and later implementation remain unauthorized. The live Netlify site
+and DNS are unchanged.
 
 ## Planned URL inventory
 
 | Section | URL | Status |
 | --- | --- | --- |
-| Home | `/` | Planned; not implemented |
+| Home | `/` | Development placeholder only; final page planned |
 | Buy property | `/buy-property/` | Planned; not implemented |
 | Buy property | `/buy-property/amwaj-island/` | Planned; not implemented |
 | Buy property | `/buy-property/tala-island/` | Planned; not implemented |

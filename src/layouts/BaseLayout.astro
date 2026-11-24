@@ -1,0 +1,29 @@
+---
+import '../styles/global.css';
+import { directionFor } from '../utils/site';
+import type { Language } from '../types/site';
+
+interface Props {
+  title: string;
+  description: string;
+  language: Language;
+}
+
+const { title, description, language } = Astro.props;
+---
+
+<!doctype html>
+<html lang={language} dir={directionFor(language)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

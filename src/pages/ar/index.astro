@@ -1,0 +1,10 @@
+---
+import DevelopmentNotice from '../../components/DevelopmentNotice.astro';
+import { site } from '../../config/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title={`${site.name} — صفحة تطويرية`} description="صفحة تطويرية مؤقتة." language="ar">
+  <h1 dir="ltr">{site.name}</h1>
+  <DevelopmentNotice language="ar" />
+</BaseLayout>

@@ -32,7 +32,9 @@ Before designing or implementing the site, read and follow:
   entry file empty and caused HTTP 403. Outstanding gates: same-URL caching,
   `Cache-Control` for dynamic pages and APIs, resource limits and performance,
   deployment and rollback, staging access restrictions, and Supabase
-  integration (separately approved phase). Phase 1B is not authorized.
+  integration (separately approved phase). Phase 1B.1 is explicitly authorized
+  for the application foundation and non-indexable placeholders only;
+  Phase 1B.2 and later phases remain unauthorized.
 - A private dashboard for one administrator manages properties, enquiries,
   articles and FAQs. Approved content publishes without a code redeployment.
 - Property listings are managed manually. Stable public property URLs use
@@ -48,8 +50,8 @@ The route inventory reflects the intended structure; its routes are planned,
 not implemented. The keyword map remains provisional until the original keyword
 workbook is available and analyzed. Ask the project owner to approve the
 architecture, keyword ownership, and strategy before starting site design or
-implementation; do not treat planned routes or provisional entries as
-implementation approval.
+implementation beyond Phase 1B.1; do not treat planned routes or provisional
+entries as approval for later implementation.
 
 Create, remove, rename, or redirect pages only when the change is explicitly
 approved and reflected in the architecture and keyword map. Preserve valuable

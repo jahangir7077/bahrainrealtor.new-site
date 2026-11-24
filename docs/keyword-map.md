@@ -9,6 +9,10 @@ infer assignments, search volumes, or rankings from the planned URLs in the
 its English and Arabic terms and search intent, and seek owner approval of the
 resulting map before implementation.
 
+The owner separately authorized non-indexable Phase 1B.1 development
+placeholders at `/` and `/ar/`; this does not approve keyword ownership or
+authorize indexable pages.
+
 ## Ownership rules
 
 - Each approved indexable URL has one primary intent and primary keyword;
