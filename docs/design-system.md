@@ -4,11 +4,12 @@
 
 Phase 1B.2 was authorized for the reusable visual foundation only and is
 implemented, remotely persisted and conditionally accepted with the limitations
-documented below. Phases 1B.3–1B.7 are now explicitly authorized as a combined
-frontend implementation using this design system. The approved public SEO
+documented below. Phases 1B.3–1B.7 are implemented and conditionally accepted;
+Phases 2–5 are authorized as a combined backend implementation using this design
+system. The approved public SEO
 routes, keyword ownership, domain and URL migration requirements remain
-unchanged; no new public landing pages are authorized. Phase 1B.8 and later
-remain unauthorized.
+unchanged; no new SEO landing pages are authorized. Phase 1B.8, Phase 1B.9 and
+Phase 6 remain unauthorized.
 
 ## Visual identity
 

@@ -9,9 +9,10 @@ not production domains.
 The inventory below records the intended structure supplied by the owner.
 Phase 1B.2's design system is implemented, persisted remotely and
 conditionally accepted with its documented limitations. Phases 1B.3–1B.7 are
-explicitly authorized as one combined bilingual frontend implementation. This
-includes the existing root homepage in English and Arabic, but does not approve
-new public SEO routes or landing pages.
+implemented and conditionally accepted. The owner explicitly authorized
+Phases 2–5 for combined backend implementation, including property listings
+using the approved stable property pattern. This does not approve new SEO
+landing pages, changes to keyword ownership or strategic URL mappings.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -35,13 +36,14 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Verify runtime resource limits and performance.
 - Verify deployment and rollback procedures.
 - Verify staging access restrictions.
-- Validate Supabase integration in a separately approved phase.
+- Validate Supabase integration in an isolated development environment.
 
 Phase 0 and Phase 1B.1 are complete; Phase 1B.1 is persisted remotely. Phases
-1B.3–1B.7 are explicitly authorized for the combined frontend scope. Phase
-1B.8 and later implementation remain unauthorized. The application itself has
-not yet been validated on Hostinger. The live Netlify site and DNS are
-unchanged.
+1B.3–1B.7 are implemented and conditionally accepted. Phases 2–5 are
+authorized as one combined backend scope; Phase 1B.8, Phase 1B.9 and Phase 6
+remain unauthorized. Hosted migrations must not be executed yet. The
+application itself has not yet been validated on Hostinger. The live Netlify
+site and DNS are unchanged.
 
 ### Phase 1B.3 bilingual foundation
 

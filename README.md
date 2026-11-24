@@ -4,9 +4,9 @@ Phase 0 is complete. Phase 1A passed basic Hostinger SSR compatibility, but
 full production readiness remains unverified. Phase 1B.1 is complete and
 persisted remotely. Phase 1B.2 is implemented, persisted remotely and
 conditionally accepted with documented limitations. Phases 1B.3–1B.7 are
-explicitly authorized as one combined bilingual frontend implementation;
-Phase 1B.8 and later work remain unauthorized. The website is not production
-ready.
+implemented and conditionally accepted. Phases 2–5 are explicitly authorized
+for combined backend implementation. Phases 1B.8, 1B.9 and 6 remain
+unauthorized. The website is not production ready.
 The existing live site remains on Netlify until an approved cutover.
 
 ## Local development
@@ -43,11 +43,11 @@ typography, component variants, contrast notes and current limitations.
 Playfair Display, Inter and Tajawal font binaries remain unavailable, so
 temporary fallbacks are in use. CodeQL analysis remains incomplete.
 
-Canonical URLs, hreflang, sitemaps, schema, redirects, property pages,
-Supabase, authentication, dashboard, enquiries and publishing are future
-requirements, not implemented. See the architecture, keyword map and SEO
-strategy in `docs/`; placeholders do not approve keyword ownership or final
-content.
+Canonical, hreflang, schema and sitemap eligibility utilities are prepared but
+not activated for production. Redirects, property pages, Supabase,
+authentication, dashboard, enquiries and publishing remain unimplemented.
+See the architecture, keyword map and SEO strategy in `docs/`; placeholders do
+not approve keyword ownership or final content.
 
 ## Hostinger compatibility
 
@@ -61,5 +61,5 @@ the Phase 1A auto-detection left the entry empty and caused HTTP 403.
 Outstanding gates include same-URL caching and `Cache-Control` behavior,
 resource limits and performance, deployment and rollback, staging access
 restrictions, approval-gated production deployment and prevention of automatic
-deployment, and Supabase integration in a separately approved phase.
+deployment, and Supabase integration validation.
 Keyword map validation also remains pending.

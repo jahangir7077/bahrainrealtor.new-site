@@ -42,7 +42,7 @@ handling requires an approved secure endpoint, server-side validation,
 consent and anti-abuse controls before a submission UI can be enabled.
 
 No Supabase project, schema, migration, authentication flow, storage bucket,
-administrator dashboard, publishing workflow, or enquiry transport is
-implemented by this frontend task. Those remain for a separately authorized
-backend phase.
-
+administrator dashboard, publishing workflow, or enquiry transport was
+implemented by the frontend task. The owner has authorized these as part of
+the combined Phases 2–5 backend task. Hosted migrations must not be executed
+yet, including on the identified development project.
