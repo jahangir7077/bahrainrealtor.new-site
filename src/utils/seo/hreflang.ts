@@ -1,5 +1,6 @@
 import type { Language } from '../../i18n/config.ts';
 import { getPublicationEligibility, type PublicationVersion } from '../../i18n/publication.ts';
+import { detectLanguage, normalizeInternalPath } from '../../i18n/routes.ts';
 import { canonicalUrlFor } from './canonical.ts';
 
 export interface HreflangPage {
@@ -25,6 +26,10 @@ export function hreflangForEquivalentPages(pages: readonly HreflangPage[]): Href
     const eligibility = getPublicationEligibility(publication, page.language);
     if (!eligibility.languageEquivalentEligible) continue;
     if (!publication.canonicalPath || publication.canonicalPath !== publication.routePath) continue;
+    if (
+      normalizeInternalPath(publication.canonicalPath) !== publication.canonicalPath ||
+      detectLanguage(publication.canonicalPath) !== page.language
+    ) continue;
     const href = canonicalUrlFor(page.language, publication.canonicalPath);
     if (!href) continue;
     eligible.set(page.language, href);

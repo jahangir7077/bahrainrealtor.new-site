@@ -29,7 +29,7 @@ const price = property?.priceBhd ? formatCurrency(property.priceBhd, language) :
       items={[
         { label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' },
         { label: translate(language, 'vocabulary.property') },
-        ...(content ? [{ label: content.title }] : []),
+        ...(content && eligible ? [{ label: content.title }] : []),
       ]}
     />
     {property && content && eligible ? (

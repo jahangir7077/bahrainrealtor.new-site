@@ -22,7 +22,7 @@ test('canonical URLs use the approved absolute origin and localized self paths',
   assert.equal(canonicalUrlFor('en', '/example/'), 'https://bahrainrealtor.com/example/');
   assert.equal(canonicalUrlFor('ar', '/example/'), 'https://bahrainrealtor.com/ar/example/');
   assert.equal(canonicalUrlFor('ar', '/ar/example/'), 'https://bahrainrealtor.com/ar/example/');
-  for (const path of ['https://evil.example/', '//evil.example/', '/%2e%2e/x/', '/path/?q=1', '/path/#fragment', '/fr/path/']) {
+  for (const path of ['https://evil.example/', '//evil.example/', '/%2e%2e/x/', '/path/?q=1', '/path/#fragment', '/fr/path/', '/ar/example/']) {
     assert.equal(canonicalUrlFor('en', path), null);
   }
 });
@@ -58,6 +58,12 @@ test('hreflang alternates are reciprocal, self-referencing and eligibility-gated
   );
   assert.deepEqual(
     hreflangForEquivalentPages([{ language: 'en', publication: version('en', { indexable: false }) }]),
+    [],
+  );
+  assert.deepEqual(
+    hreflangForEquivalentPages([
+      { language: 'en', publication: version('en', { routePath: '/ar/example/', canonicalPath: '/ar/example/' }) },
+    ]),
     [],
   );
   assert.deepEqual(
@@ -99,6 +105,16 @@ test('localized metadata separates indexing eligibility from optional canonical 
   assert.deepEqual(arabic?.alternates, [
     { hreflang: 'en-BH', href: 'https://bahrainrealtor.com/example/' },
   ]);
+  const mismatchedLanguagePath = localizedMetadata({
+    title: 'Wrong locale path',
+    description: 'Metadata must not index another language route.',
+    language: 'en',
+    pathname: '/ar/example/',
+    indexingEligible: true,
+    enableCanonical: true,
+  });
+  assert.equal(mismatchedLanguagePath?.robots, 'noindex, nofollow');
+  assert.equal(mismatchedLanguagePath?.canonicalUrl, undefined);
   assert.equal(localizedMetadata({
     title: '   ',
     description: 'Description',

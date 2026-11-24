@@ -22,39 +22,39 @@ const price = property.priceBhd ? formatCurrency(property.priceBhd, language) : 
 ---
 
 <Card variant="white" bordered>
-  <article class="property-card" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-    {cover && coverAlt && (
-      <img
-        class="property-card__image"
-        src={cover.src}
-        alt={coverAlt}
-        width={cover.width}
-        height={cover.height}
-        loading="lazy"
-      />
-    )}
-    <div class="property-card__body">
-      <PropertyStatus language={language} status={property.availability} />
-      {content && eligible ? (
+  {content && eligible ? (
+    <article class="property-card" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      {cover && coverAlt && (
+        <img
+          class="property-card__image"
+          src={cover.src}
+          alt={coverAlt}
+          width={cover.width}
+          height={cover.height}
+          loading="lazy"
+        />
+      )}
+      <div class="property-card__body">
+        <PropertyStatus language={language} status={property.availability} />
         <>
           <h3>{content.title}</h3>
           <p>{content.areaName}</p>
         </>
-      ) : (
-        <p role="status">{translate(language, 'translation.unavailable')}</p>
-      )}
-      {price && <p class="property-card__price" dir="ltr"><bdi>{price}</bdi></p>}
-      <div class="property-card__facts">
-        {property.bedrooms !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bedrooms')}</span>}
-        {property.bathrooms !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.bathrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bathrooms')}</span>}
-        {property.sizeSquareMeters !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.sizeSquareMeters, language)}</bdi> m²</span>}
+        {price && <p class="property-card__price" dir="ltr"><bdi>{price}</bdi></p>}
+        <div class="property-card__facts">
+          {property.bedrooms !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bedrooms')}</span>}
+          {property.bathrooms !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.bathrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bathrooms')}</span>}
+          {property.sizeSquareMeters !== undefined && <span><bdi dir="ltr">{formatPropertyNumber(property.sizeSquareMeters, language)}</bdi> m²</span>}
+        </div>
+        <p class="property-card__reference">
+          {translate(language, 'vocabulary.property')}:
+          <bdi dir="ltr">{property.immutableReference}</bdi>
+        </p>
       </div>
-      <p class="property-card__reference">
-        {translate(language, 'vocabulary.property')}:
-        <bdi dir="ltr">{property.immutableReference}</bdi>
-      </p>
-    </div>
-  </article>
+    </article>
+  ) : (
+    <p role="status">{translate(language, 'content.listingNotFound')}</p>
+  )}
 </Card>
 
 <style>

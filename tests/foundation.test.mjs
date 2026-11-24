@@ -70,6 +70,8 @@ for (const [path, status, language, direction] of [
   ['/ar/', 200, 'ar', 'rtl'],
   ['/not-a-route', 404, 'en', 'ltr'],
   ['/dev/design-system', 404, 'en', 'ltr'],
+  ['/dev/templates/', 404, 'en', 'ltr'],
+  ['/ar/dev/templates/', 404, 'ar', 'rtl'],
 ]) {
   test(`${path} serves the expected non-indexable response`, async () => {
     const response = await fetch(`${baseUrl}${path}`);
@@ -79,7 +81,9 @@ for (const [path, status, language, direction] of [
     assert.match(html, /<meta name="robots" content="noindex, nofollow"\s*\/?>/);
     assert.match(response.headers.get('x-robots-tag') ?? '', /noindex/);
     assert.match(response.headers.get('cache-control') ?? '', /no-store/);
-    if (status === 404) assert.match(html, /Page not found/);
+    if (status === 404) {
+      assert.match(html, language === 'ar' ? /الصفحة غير موجودة/ : /Page not found/);
+    }
   });
 }
 
@@ -94,4 +98,18 @@ test('design showcase is available only in development and demonstrates UI speci
   assert.match(html, /Form field states/);
   assert.match(html, /معاينة اللغة العربية/);
   assert.match(html, /not a property listing/i);
+});
+
+test('page-template showcases are available in both languages during development only', async () => {
+  for (const [path, lang, heading] of [
+    ['/dev/templates/', 'en', 'Property listings template'],
+    ['/ar/dev/templates/', 'ar', 'قالب قائمة العقارات'],
+  ]) {
+    const response = await fetch(`${devUrl}${path}`);
+    const html = await response.text();
+    assert.equal(response.status, 200);
+    assert.match(html, new RegExp(`<html\\s+lang="${lang}"`));
+    assert.ok(html.includes(heading));
+    assert.match(html, /No verified|لا تتوفر|غير متاح|Translation unavailable|الترجمة غير متاحة/);
+  }
 });

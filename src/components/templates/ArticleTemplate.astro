@@ -23,7 +23,7 @@ const sections = content?.sections?.filter((section) => /^[A-Za-z0-9_-]+$/.test(
 
 <article class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
   <Container width="narrow">
-    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: content?.title ?? translate(language, 'templates.article') }]} />
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: content && eligible ? content.title : translate(language, 'templates.article') }]} />
     {article && content && eligible ? (
       <>
         <header class="article-heading">

@@ -30,7 +30,7 @@ const publishedDate = article.publishedAt ? formatDate(article.publishedAt, lang
         <p>{content.summary}</p>
       </>
     ) : (
-      <p role="status">{translate(language, 'translation.unavailable')}</p>
+      <p role="status">{content ? translate(language, 'content.noArticles') : translate(language, 'translation.unavailable')}</p>
     )}
   </article>
 </Card>

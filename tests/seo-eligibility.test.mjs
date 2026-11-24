@@ -104,6 +104,17 @@ test('structured-data builders require safe paths and eligible, factual inputs',
     publication: articlePublication,
     language: 'en',
   }), null);
+  assert.equal(articleSchema({
+    title: 'Wrong language route',
+    path: '/ar/insights/example/',
+    authorName: 'Verified author',
+    publishedAt: '2026-01-01',
+    publication: publication('en', {
+      routePath: '/ar/insights/example/',
+      canonicalPath: '/ar/insights/example/',
+    }),
+    language: 'en',
+  }), null);
 
   const propertyPublication = publication('en', {
     routePath: '/properties/sample-home-id/',
@@ -125,5 +136,14 @@ test('structured-data builders require safe paths and eligible, factual inputs',
   assert.equal(propertySchema(property, 'en')?.url, 'https://bahrainrealtor.com/properties/sample-home-id/');
   assert.equal(propertySchema({ ...property, priceBhd: '12.1234' }, 'en'), null);
   assert.equal(propertySchema({ ...property, publication: { en: publication('en', { indexable: false }) } }, 'en'), null);
+  assert.equal(propertySchema({
+    ...property,
+    publication: {
+      en: publication('en', {
+        routePath: '/ar/properties/sample-home-id/',
+        canonicalPath: '/ar/properties/sample-home-id/',
+      }),
+    },
+  }, 'en'), null);
   assert.match(safeJsonLd({ content: '</script><script>alert(1)</script>' }), /\\u003c\/script>/);
 });

@@ -50,9 +50,14 @@ export function localizedMetadata(input: LocalizedMetadataInput): LocalizedMetad
   const pathname = normalizeInternalPath(input.pathname);
   if (!pathname || !input.title.trim() || !input.description.trim()) return null;
   const canonicalUrl =
-    input.enableCanonical && input.indexingEligible
+    input.enableCanonical &&
+    input.indexingEligible &&
+    (detectLanguage(pathname) === input.language || (input.language === 'ar' && detectLanguage(pathname) === 'en'))
       ? canonicalUrlFor(input.language, pathname) ?? undefined
       : undefined;
+  const indexingEligible =
+    input.indexingEligible &&
+    (detectLanguage(pathname) === input.language || (input.language === 'ar' && detectLanguage(pathname) === 'en'));
 
   return {
     title: input.title,
@@ -60,7 +65,7 @@ export function localizedMetadata(input: LocalizedMetadataInput): LocalizedMetad
     language: input.language,
     openGraphLocale: localeConfig[input.language].regionalLocale.replace('-', '_') as 'en_BH' | 'ar_BH',
     ...(canonicalUrl ? { canonicalUrl } : {}),
-    robots: input.indexingEligible ? 'index, follow' : 'noindex, nofollow',
-    alternates: input.indexingEligible ? safeAlternates(input.alternates ?? []) : [],
+    robots: indexingEligible ? 'index, follow' : 'noindex, nofollow',
+    alternates: indexingEligible ? safeAlternates(input.alternates ?? []) : [],
   };
 }

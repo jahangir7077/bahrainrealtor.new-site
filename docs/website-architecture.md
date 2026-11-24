@@ -79,7 +79,7 @@ The approved decisions are:
 
 | Section | URL | Status |
 | --- | --- | --- |
-| Home | `/` | Development placeholder only; final page planned |
+| Home | `/` | Implemented bilingual development preview; no verified listings/contact data; noindex |
 | Buy property | `/buy-property/` | Planned; not implemented |
 | Buy property | `/buy-property/amwaj-island/` | Planned; not implemented |
 | Buy property | `/buy-property/tala-island/` | Planned; not implemented |
@@ -116,6 +116,29 @@ The approved decisions are:
   unique content.
 - Future project detail pages use verified project slugs only. No placeholder
   or speculative project page may be published.
+
+  ### Frontend implementation status
+
+  The English and Arabic homepage routes (`/` and `/ar/`) now share a responsive
+  Astro component system. Reusable property, area, project, editorial, FAQ and
+  content-landing templates are available for later approved route work; they
+  are not themselves additional public routes. Local template demonstrations
+  are available only at `/dev/templates/` and `/ar/dev/templates/` and return
+  HTTP 404 in production builds. The existing `/dev/design-system/` showcase
+  has the same production restriction.
+
+  The frontend currently has no verified property inventory, profile/contact
+  details, authorized photography, published articles or reviewed FAQs. The
+  homepage therefore uses clearly identified pending-information and empty
+  states, and search/enquiry controls do not submit data. Development
+  noindex/no-store protections remain enabled. This work does not provide
+  Supabase integration, production indexing, sitemap publication, redirects,
+  or deployment readiness.
+
+  Typed integration boundaries and the intended publication handoff are
+  documented in [frontend/backend integration](frontend-backend-integration.md).
+  Legacy URL inventory and migration decisions remain pending in the
+  [URL migration map](url-migration-map.md).
 
 ### Content and administration
 

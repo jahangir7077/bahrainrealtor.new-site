@@ -1,6 +1,6 @@
 import type { Language } from '../../i18n/config.ts';
 import { getPublicationEligibility, type PublicationVersion } from '../../i18n/publication.ts';
-import { normalizeInternalPath } from '../../i18n/routes.ts';
+import { detectLanguage, normalizeInternalPath } from '../../i18n/routes.ts';
 import { site } from '../../config/site.ts';
 import type { PropertyRecord } from '../../types/content.ts';
 
@@ -68,7 +68,8 @@ export function articleSchema(input: {
     !Number.isFinite(Date.parse(input.publishedAt)) ||
     !getPublicationEligibility(input.publication, input.language).indexingEligible ||
     input.publication.canonicalPath !== input.path ||
-    input.publication.routePath !== input.path
+    input.publication.routePath !== input.path ||
+    detectLanguage(input.path) !== input.language
   ) {
     return null;
   }
@@ -96,7 +97,8 @@ export function propertySchema(property: PropertyRecord, language: Language) {
     !getPublicationEligibility(publication, language).indexingEligible ||
     !price ||
     !/^\d+(?:\.\d{1,3})?$/.test(price) ||
-    publication.canonicalPath !== publication.routePath
+    publication.canonicalPath !== publication.routePath ||
+    detectLanguage(publication.canonicalPath) !== language
   ) {
     return null;
   }

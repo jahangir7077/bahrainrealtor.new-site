@@ -19,6 +19,15 @@ existing homepage routes only. This authorization does not change keyword
 targeting, URL architecture or production indexability, and does not authorize
 new public SEO landing pages. Phase 1B.8 and later phases remain unauthorized.
 
+The combined Phase 1B.3–1B.7 frontend implementation now includes reusable
+localized metadata, canonical/hreflang, publication eligibility, structured
+data, internal-link validation, and sitemap/robots eligibility utilities.
+They are foundations only: development responses remain noindex, no
+production sitemap or structured data is published, and the production
+indexing switch remains off. The actual existing-site URL inventory and
+approved 301 mappings are recorded as pending in the
+[URL migration map](url-migration-map.md).
+
 ## Search and content
 
 - Create content for the approved audience and intent of each page. Use mapped
@@ -104,6 +113,10 @@ cost.
 4. Test mappings, status codes, redirect chains, canonicals, hreflang,
    internal links and the XML sitemap. Monitor crawl errors, indexing,
    traffic and broken links after launch.
+
+The working inventory template is [URL migration map](url-migration-map.md).
+No source URL, redirect destination or content-retention decision should be
+filled from the planned route inventory alone.
 
 ## Verification and changes
 
