@@ -1,0 +1,46 @@
+---
+type Level = 2 | 3 | 4 | 5 | 6;
+type Alignment = 'start' | 'center';
+interface Props {
+  level?: Level;
+  eyebrow?: string;
+  description?: string;
+  alignment?: Alignment;
+}
+const { level = 2, eyebrow, description, alignment = 'start' } = Astro.props;
+const Heading = `h${level}`;
+---
+
+<div class:list={['section-heading', `section-heading--${alignment}`}>
+  {eyebrow && <p class="section-heading__eyebrow">{eyebrow}</p>}
+  <Heading class="section-heading__title"><slot /></Heading>
+  {description && <p class="section-heading__description">{description}</p>}
+</div>
+
+<style>
+  .section-heading {
+    max-width: var(--content-narrow);
+    margin-block-end: var(--space-8);
+  }
+
+  .section-heading--center {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .section-heading__eyebrow {
+    margin-block-end: var(--space-2);
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+    font-weight: 700;
+  }
+
+  .section-heading__title {
+    margin-block-end: var(--space-3);
+  }
+
+  .section-heading__description {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+</style>

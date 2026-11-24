@@ -1,0 +1,42 @@
+---
+type Name = 'arrow' | 'check';
+interface Props {
+  name: Name;
+  label?: string;
+  size?: number;
+}
+const { name, label, size = 20 } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden={label ? undefined : 'true'}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  focusable="false"
+>
+  {name === 'arrow' ? (
+    <path d="M5 12h14m-6-6 6 6-6 6" />
+  ) : (
+    <path d="m5 12 4 4L19 6" />
+  )}
+</svg>
+
+<style>
+  svg {
+    display: inline-block;
+    flex: 0 0 auto;
+    vertical-align: middle;
+  }
+
+  :global([dir="rtl"]) svg {
+    transform: scaleX(-1);
+  }
+</style>

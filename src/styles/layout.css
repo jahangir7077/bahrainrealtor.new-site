@@ -1,0 +1,40 @@
+.container {
+  width: min(100% - 2 * var(--page-gutter), var(--container-width, var(--content-standard)));
+  margin-inline: auto;
+}
+
+.container--wide {
+  --container-width: var(--content-wide);
+}
+
+.container--narrow {
+  --container-width: var(--content-narrow);
+}
+
+.section {
+  padding-block: clamp(2.5rem, 6vw, 6rem);
+}
+
+.ds-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .ds-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .ds-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 30rem) {
+  :root {
+    --page-gutter: clamp(1.25rem, 4vw, 2rem);
+  }
+}

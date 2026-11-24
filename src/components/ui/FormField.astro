@@ -1,0 +1,143 @@
+---
+type FieldType = 'text' | 'email' | 'tel' | 'search' | 'select' | 'textarea';
+interface Option {
+  value: string;
+  label: string;
+}
+interface Props {
+  id: string;
+  label: string;
+  type?: FieldType;
+  helpText?: string;
+  error?: string;
+  required?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  options?: Option[];
+  rows?: number;
+}
+const {
+  id,
+  label,
+  type = 'text',
+  helpText,
+  error,
+  required = false,
+  disabled = false,
+  placeholder,
+  options = [],
+  rows = 4,
+} = Astro.props;
+const describedBy = [helpText && `${id}-help`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+---
+
+<div class="field">
+  <label class="field__label" for={id}>
+    {label}
+    {required && <span class="field__required" aria-hidden="true"> *</span>}
+    {required && <span class="visually-hidden"> (required)</span>}
+  </label>
+
+  {type === 'select' ? (
+    <select
+      class:list={['field__control', { 'field__control--error': error }]}
+      id={id}
+      name={id}
+      required={required}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={describedBy}
+    >
+      {placeholder && <option value="" selected disabled>{placeholder}</option>}
+      {options.map((option) => <option value={option.value}>{option.label}</option>)}
+    </select>
+  ) : type === 'textarea' ? (
+    <textarea
+      class:list={['field__control', { 'field__control--error': error }]}
+      id={id}
+      name={id}
+      rows={rows}
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={describedBy}
+    ></textarea>
+  ) : (
+    <input
+      class:list={['field__control', { 'field__control--error': error }]}
+      id={id}
+      name={id}
+      type={type}
+      placeholder={placeholder}
+      required={required}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={describedBy}
+    />
+  )}
+
+  {helpText && <p class="field__help" id={`${id}-help`}>{helpText}</p>}
+  {error && <p class="field__error" id={`${id}-error`}>{error}</p>}
+</div>
+
+<style>
+  .field {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .field__label {
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+
+  .field__required {
+    color: var(--color-error-text);
+  }
+
+  .field__control {
+    width: 100%;
+    min-height: var(--target-min);
+    padding: var(--space-3);
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+  }
+
+  textarea.field__control {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  .field__control::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 1;
+  }
+
+  .field__control--error {
+    border: 2px solid var(--color-error-text);
+  }
+
+  .field__control:disabled {
+    color: var(--color-disabled-text);
+    background: var(--color-disabled-surface);
+    cursor: not-allowed;
+  }
+
+  .field__help,
+  .field__error {
+    margin: 0;
+    font-size: var(--type-small);
+  }
+
+  .field__help {
+    color: var(--color-text-secondary);
+  }
+
+  .field__error {
+    color: var(--color-error-text);
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,65 @@
+---
+type Variant = 'neutral' | 'success' | 'warning' | 'error' | 'info' | 'premium';
+interface Props {
+  variant?: Variant;
+}
+const { variant = 'neutral' } = Astro.props;
+---
+
+<span class:list={['badge', `badge--${variant}`]}>
+  <span class="badge__marker" aria-hidden="true"></span>
+  <slot />
+</span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: var(--type-small);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .badge__marker {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .badge--neutral {
+    color: var(--color-text-primary);
+    background: var(--color-disabled-surface);
+  }
+
+  .badge--success {
+    color: var(--color-success-text);
+    background: var(--color-success-surface);
+  }
+
+  .badge--warning {
+    color: var(--color-warning-text);
+    background: var(--color-warning-surface);
+  }
+
+  .badge--error {
+    color: var(--color-error-text);
+    background: var(--color-error-surface);
+  }
+
+  .badge--info {
+    color: var(--color-info-text);
+    background: var(--color-info-surface);
+  }
+
+  .badge--premium {
+    color: var(--color-gold);
+    background: var(--color-navy);
+  }
+</style>
