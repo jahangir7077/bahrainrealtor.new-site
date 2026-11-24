@@ -60,6 +60,8 @@ let providerUrl;
 let factor;
 const userId = '00000000-0000-4000-8000-000000000001';
 const factorId = '00000000-0000-4000-8000-000000000002';
+const enquiryId = '00000000-0000-4000-8000-000000000003';
+let enquiryStatus = 'new';
 const user = () => ({ id: userId, aud: 'authenticated', app_metadata: {}, user_metadata: {}, factors: factor ? [factor] : [] });
 const token = (aal) => [Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url'), Buffer.from(JSON.stringify({
   sub: userId, aal, exp: Math.floor(Date.now() / 1000) + 3600,
@@ -76,6 +78,22 @@ before(async () => {
     if (req.url.startsWith('/auth/v1/token?grant_type=password')) data = session('aal1');
     else if (req.url === '/auth/v1/user') data = user();
     else if (req.url.startsWith('/rest/v1/admin_profiles')) data = { id: userId, authorized: true };
+    else if (req.url.startsWith('/rest/v1/enquiries') && req.method === 'GET') {
+      data = [{
+        id: enquiryId, property_item_id: null, locale: 'en', name: 'Test Enquirer',
+        email: 'person@example.test', telephone: null, message: 'Please contact me.',
+        consent_text: 'Test consent copy.', status: enquiryStatus, created_at: '2026-01-01T00:00:00Z',
+      }];
+    } else if (req.url.startsWith('/rest/v1/enquiry_notifications') && req.method === 'GET') {
+      data = [{
+        enquiry_id: enquiryId, status: 'pending', attempts: 1,
+        last_attempt_at: '2026-01-01T00:01:00Z', next_attempt_at: '2026-01-01T00:02:00Z',
+        delivered_at: null, last_http_status: 503,
+      }];
+    } else if (req.url.startsWith('/rest/v1/enquiries') && req.method === 'PATCH') {
+      enquiryStatus = JSON.parse(body).status;
+      data = [{ id: enquiryId }];
+    }
     else if (req.url === '/auth/v1/factors' && req.method === 'POST') {
       factor = { id: factorId, factor_type: 'totp', status: 'unverified' };
       data = { id: factorId, type: 'totp', totp: { secret: 'TESTSECRET', qr_code: '', uri: '' } };
@@ -140,6 +158,7 @@ test('mocked SSR login, TOTP enrollment and verification enforce session and CSR
   assert.ok(cookies.size);
   const beforeMfa = await request('/admin/');
   assert.equal(beforeMfa.headers.get('location'), '/admin/mfa', `status ${beforeMfa.status}: ${await beforeMfa.text()}`);
+  assert.equal((await request('/admin/enquiries/')).headers.get('location'), '/admin/mfa');
   const enrollment = await request('/admin/mfa', { action: 'enroll' });
   assert.equal(enrollment.status, 200);
   assert.match(await enrollment.text(), /TESTSECRET/);
@@ -147,7 +166,17 @@ test('mocked SSR login, TOTP enrollment and verification enforce session and CSR
   assert.equal(verified.headers.get('location'), '/admin/');
   const dashboard = await request('/admin/');
   assert.equal(dashboard.status, 200);
-  assert.match(await dashboard.text(), /Management tools are not yet available/);
+  assert.match(await dashboard.text(), /Enquiry administration/);
+  const enquiries = await request('/admin/enquiries/');
+  const enquiryHtml = await enquiries.text();
+  assert.equal(enquiries.status, 200);
+  assert.match(enquiryHtml, /Test Enquirer/);
+  assert.match(enquiryHtml, /Please contact me\./);
+  assert.match(enquiryHtml, /Notification delivery/);
+  assert.match(enquiryHtml, /503/);
+  const changedStatus = await request('/admin/enquiries/', { action: 'status', id: enquiryId, status: 'read' });
+  assert.equal(changedStatus.headers.get('location'), '/admin/enquiries/');
+  assert.equal(enquiryStatus, 'read');
   assert.equal((await request('/admin/logout', {}, 'http://evil.test')).status, 403);
   assert.equal((await request('/admin/logout', {})).headers.get('location'), '/admin/login');
   assert.equal((await request('/admin/')).headers.get('location'), '/admin/login');

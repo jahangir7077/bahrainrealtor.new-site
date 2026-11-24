@@ -30,7 +30,7 @@ export function protectedRedirect(response: Response): Response {
   return response;
 }
 
-export async function readForm(request: Request): Promise<URLSearchParams | null> {
+export async function readForm(request: Request, maxBytes = 8192): Promise<URLSearchParams | null> {
   if (!request.body) return null;
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
@@ -40,7 +40,7 @@ export async function readForm(request: Request): Promise<URLSearchParams | null
       const { done, value } = await reader.read();
       if (done) break;
       length += value.length;
-      if (length > 8192) {
+      if (length > maxBytes) {
         await reader.cancel();
         return null;
       }
@@ -61,4 +61,34 @@ export async function readForm(request: Request): Promise<URLSearchParams | null
 export function one(form: URLSearchParams, key: string, maxLength: number): string | null {
   const values = form.getAll(key);
   return values.length === 1 && values[0].length > 0 && values[0].length <= maxLength ? values[0] : null;
+}
+
+const csrfCookie = '__Host-br-csrf';
+
+export function issueCsrfToken(cookies: {
+  set(name: string, value: string, options: Record<string, unknown>): void;
+}): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+  cookies.set(csrfCookie, token, {
+    path: '/',
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: 1800,
+  });
+  return token;
+}
+
+export function validCsrfToken(form: URLSearchParams, cookies: {
+  get(name: string): { value: string } | undefined;
+}): boolean {
+  const submitted = one(form, 'csrf', 64);
+  const cookie = cookies.get(csrfCookie)?.value;
+  if (!submitted || !cookie || !/^[a-f0-9]{64}$/.test(submitted) || !/^[a-f0-9]{64}$/.test(cookie)) return false;
+  let difference = 0;
+  for (let index = 0; index < submitted.length; index += 1) {
+    difference |= submitted.charCodeAt(index) ^ cookie.charCodeAt(index);
+  }
+  return difference === 0;
 }

@@ -22,6 +22,12 @@ const pageUrl = (page: number) => {
   const query = new URLSearchParams();
   if (filters?.transaction) query.set('transaction', filters.transaction);
   if (filters?.bedrooms !== undefined) query.set('bedrooms', String(filters.bedrooms));
+  if (filters?.query) query.set('q', filters.query);
+  if (filters?.location) query.set('location', filters.location);
+  if (filters?.propertyType) query.set('propertyType', filters.propertyType);
+  if (filters?.minimumPrice) query.set('minimumPrice', filters.minimumPrice);
+  if (filters?.maximumPrice) query.set('maximumPrice', filters.maximumPrice);
+  if (filters?.sort && filters.sort !== 'newest') query.set('sort', filters.sort);
   query.set('page', String(page));
   return `${base}?${query}`;
 };
@@ -37,6 +43,9 @@ const pageUrl = (page: number) => {
       ) : (
         <>
           <form method="get" action={base} class="filters">
+            <label>{translate(language, 'search.keyword')}
+              <input name="q" value={filters?.query ?? ''} maxlength="80" />
+            </label>
             <label>{translate(language, 'search.transaction')}
               <select name="transaction">
                 <option value="" selected={!filters?.transaction}>{arabic ? 'الكل' : 'Any'}</option>
@@ -52,12 +61,39 @@ const pageUrl = (page: number) => {
                 ))}
               </select>
             </label>
+            <label>{translate(language, 'search.location')}
+              <input name="location" value={filters?.location ?? ''} maxlength="100" />
+            </label>
+            <label>{translate(language, 'search.propertyType')}
+              <input name="propertyType" value={filters?.propertyType ?? ''} maxlength="100" />
+            </label>
+            <label>{translate(language, 'search.minimumPrice')}
+              <input name="minimumPrice" value={filters?.minimumPrice ?? ''} inputmode="decimal" maxlength="15" />
+            </label>
+            <label>{translate(language, 'search.maximumPrice')}
+              <input name="maximumPrice" value={filters?.maximumPrice ?? ''} inputmode="decimal" maxlength="15" />
+            </label>
+            <label>{translate(language, 'search.sort')}
+              <select name="sort">
+                <option value="newest" selected={filters?.sort === 'newest'}>{translate(language, 'search.newest')}</option>
+                <option value="price_asc" selected={filters?.sort === 'price_asc'}>{translate(language, 'search.lowestPrice')}</option>
+                <option value="price_desc" selected={filters?.sort === 'price_desc'}>{translate(language, 'search.highestPrice')}</option>
+                <option value="bedrooms" selected={filters?.sort === 'bedrooms'}>{translate(language, 'search.mostBedrooms')}</option>
+              </select>
+            </label>
             <button type="submit">{translate(language, 'search.search')}</button>
           </form>
           {properties.length ? (
             <div class="grid">
               {properties.map((property) => (
                 <article class="property">
+                  {property.images[0] && <img
+                    src={`/api/media/${property.images[0].id}`}
+                    alt={property.images[0].altText}
+                    width={property.images[0].width}
+                    height={property.images[0].height}
+                    loading="lazy"
+                  />}
                   <PropertyStatus language={language} status={property.availability} />
                   <h2><a href={propertyPath(property, language)}>{property.title}</a></h2>
                   <p>{property.areaName}</p>
@@ -87,4 +123,5 @@ const pageUrl = (page: number) => {
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-5); }
   .property { border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-5); }
   .property h2 { font-family: var(--font-display); }
+  .property img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-small); }
 </style>

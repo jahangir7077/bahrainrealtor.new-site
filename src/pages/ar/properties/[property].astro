@@ -1,9 +1,10 @@
 ---
 import Detail from '../../../server/properties/Detail.astro';
-import { getProperty, parsePropertyPath, propertyPath } from '../../../server/properties/repository.ts';
+import { getProperty, listRelatedProperties, parsePropertyPath, propertyPath, type PublicProperty } from '../../../server/properties/repository.ts';
 
 const path = parsePropertyPath(Astro.params.property);
 let property: Awaited<ReturnType<typeof getProperty>> = null;
+let related: PublicProperty[] = [];
 let unavailable = false;
 if (!path || ![propertyPath(path, 'ar'), propertyPath(path, 'ar').slice(0, -1)].includes(Astro.url.pathname)) {
   Astro.response.status = 404;
@@ -11,9 +12,10 @@ if (!path || ![propertyPath(path, 'ar'), propertyPath(path, 'ar').slice(0, -1)].
   try {
     property = await getProperty('ar', path);
     if (!property) Astro.response.status = 404;
+    else related = await listRelatedProperties('ar', property);
   } catch { unavailable = true; Astro.response.status = 503; }
 }
 Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
-<Detail language="ar" property={property} unavailable={unavailable} />
+<Detail language="ar" property={property} related={related} unavailable={unavailable} />

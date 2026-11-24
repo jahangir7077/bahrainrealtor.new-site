@@ -1,0 +1,118 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session';
+import { protectedRedirect, protectResponse, readForm, validMutation } from '../../../server/auth/security';
+import {
+  listEnquiries,
+  listEnquiryNotificationStatuses,
+  parseEnquiryStatusUpdate,
+  updateEnquiryStatus,
+} from '../../../server/enquiries/admin';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+let available = false;
+let enquiries: Awaited<ReturnType<typeof listEnquiries>> = [];
+let notifications: Awaited<ReturnType<typeof listEnquiryNotificationStatuses>> = [];
+
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Enquiry administration is unavailable.';
+} else if (Astro.request.method !== 'GET' && Astro.request.method !== 'POST') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else if (Astro.request.method === 'POST' && !validMutation(Astro.request, config.origin)) {
+  Astro.response.status = 403;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    const user = await membership(client);
+    if (!user) {
+      if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/login', 303));
+      Astro.response.status = 403;
+      message = 'Request could not be completed.';
+    } else {
+      const mfa = await mfaState(client);
+      if (!mfa) throw new Error('MFA unavailable');
+      if (!mfa.authorized) {
+        if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+        Astro.response.status = 403;
+        message = 'Request could not be completed.';
+      } else if (Astro.request.method === 'POST') {
+        const form = await readForm(Astro.request);
+        const update = form && parseEnquiryStatusUpdate(form);
+        if (update && await updateEnquiryStatus(client, update)) {
+          return protectedRedirect(Astro.redirect('/admin/enquiries/', 303));
+        }
+        Astro.response.status = 400;
+        message = 'Request could not be completed.';
+      } else {
+        const requested = Astro.url.searchParams.getAll('id');
+        if (requested.length || Astro.url.search !== '') {
+          Astro.response.status = 400;
+          message = 'Invalid enquiry filter.';
+        } else {
+          enquiries = await listEnquiries(client);
+          notifications = await listEnquiryNotificationStatuses(client, enquiries.map((item) => item.id));
+          available = true;
+        }
+      }
+    }
+  } catch {
+    Astro.response.status = Astro.request.method === 'POST' ? 409 : 503;
+    message = Astro.request.method === 'POST'
+      ? 'The status could not be updated. Reload and check the current status.'
+      : 'Enquiry administration is unavailable.';
+  }
+}
+
+const deliveryByEnquiry = new Map(notifications.map((item) => [item.enquiry_id, item]));
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Enquiry administration</title></head>
+<body><main>
+  <h1>Enquiry administration</h1>
+  <p><a href="/admin/">Administration</a></p>
+  {message && <p role="alert">{message}</p>}
+  {available && <>
+    <p>Showing at most the 100 most recent enquiries.</p>
+    {enquiries.length === 0 ? <p>No enquiries have been received.</p> : <ol>
+      {enquiries.map((enquiry) => {
+        const delivery = deliveryByEnquiry.get(enquiry.id);
+        return <li>
+          <h2>{enquiry.name} — {enquiry.status}</h2>
+          <dl>
+            <dt>Received</dt><dd>{enquiry.created_at}</dd>
+            <dt>Language</dt><dd>{enquiry.locale}</dd>
+            <dt>Property ID</dt><dd>{enquiry.property_item_id ?? 'General enquiry'}</dd>
+            <dt>Email</dt><dd>{enquiry.email ?? '—'}</dd>
+            <dt>Telephone</dt><dd>{enquiry.telephone ?? '—'}</dd>
+            <dt>Message</dt><dd style="white-space: pre-wrap">{enquiry.message}</dd>
+            <dt>Consent recorded</dt><dd>{enquiry.consent_text}</dd>
+            <dt>Notification delivery</dt><dd>{delivery?.status ?? 'not queued'}</dd>
+            {delivery && <>
+              <dt>Delivery attempts</dt><dd>{delivery.attempts}</dd>
+              <dt>Last HTTP status</dt><dd>{delivery.last_http_status ?? '—'}</dd>
+              <dt>Last attempt</dt><dd>{delivery.last_attempt_at ?? '—'}</dd>
+              <dt>Next retry</dt><dd>{delivery.next_attempt_at ?? '—'}</dd>
+              <dt>Delivered</dt><dd>{delivery.delivered_at ?? '—'}</dd>
+            </>}
+          </dl>
+          <form method="post">
+            <input type="hidden" name="action" value="status" />
+            <input type="hidden" name="id" value={enquiry.id} />
+            <label>Status
+              <select name="status">
+                <option value="new" selected={enquiry.status === 'new'}>New</option>
+                <option value="read" selected={enquiry.status === 'read'}>Read</option>
+                <option value="closed" selected={enquiry.status === 'closed'}>Closed</option>
+              </select>
+            </label>
+            <button type="submit">Update status</button>
+          </form>
+        </li>;
+      })}
+    </ol>}
+  </>}
+</main></body></html>

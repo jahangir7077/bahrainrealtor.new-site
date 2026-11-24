@@ -1,0 +1,20 @@
+---
+import FaqTemplate from '../../../../components/templates/FaqTemplate.astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { translate } from '../../../../i18n/translate.ts';
+import { listPublishedFaqs } from '../../../../server/editorial/repository.ts';
+
+let faqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
+let unavailable = false;
+try {
+  faqs = await listPublishedFaqs('ar');
+} catch {
+  unavailable = true;
+  Astro.response.status = 503;
+}
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+---
+
+<BaseLayout title={translate('ar', 'home.faqTitle')} description={translate('ar', 'home.faqDescription')} language="ar">
+  <FaqTemplate language="ar" faqs={faqs} preview={false} unavailable={unavailable} />
+</BaseLayout>

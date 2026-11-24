@@ -16,11 +16,18 @@ const row = (overrides = {}) => ({
   published_at: '2026-01-01T00:00:00Z', title: 'Published <home>', body: 'Approved description',
   area_name: 'Reviewed area', property_type: 'Apartment', transaction_type: 'sale',
   availability: 'available', price_bhd: '99999999999.999', bedrooms: 2, bathrooms: 1,
-  size_square_meters: 100.5, location_name: 'Reviewed location', ...overrides,
+  price_bhd_numeric: 99999999999.999, size_square_meters: 100.5,
+  location_name: 'Reviewed location', ...overrides,
 });
 const rows = [
   row(), row({ id: soldId, slug: 'sold-home', availability: 'sold', title: 'Sold property' }),
   row({ id, locale: 'ar', title: 'عقار منشور', body: 'وصف منشور' }),
+  row({
+    id: '55555555-5555-4555-8555-555555555555',
+    revision_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    slug: 'related-sale',
+    title: 'Related sale',
+  }),
   ...Array.from({ length: 21 }, (_, index) => row({
     id: `30000000-0000-4000-8000-${String(index).padStart(12, '0')}`,
     slug: `rent-home-${index}`, transaction_type: 'rent', bedrooms: 3,
@@ -35,6 +42,7 @@ let missingBase;
 let backendError = false;
 let invalidPrice = false;
 let requests = [];
+let mediaRecords = [];
 
 async function unusedPort() {
   const probe = createPortProbe();
@@ -68,11 +76,26 @@ before(async () => {
     requests.push({ path: url.pathname, params: url.searchParams, key: request.headers.apikey });
     response.setHeader('content-type', 'application/json');
     if (backendError) { response.writeHead(500); response.end(JSON.stringify({ message: 'private error' })); return; }
-    let result = rows.filter((item) => {
+    let result = url.pathname.endsWith('/published_content_media')
+      ? mediaRecords.filter((item) => {
+        const locale = url.searchParams.get('locale');
+        const revisionIds = url.searchParams.get('revision_id');
+        return (!locale || locale === `eq.${item.locale}`) &&
+          (!revisionIds || revisionIds.includes(item.revision_id));
+      })
+      : rows.filter((item) => {
       for (const [key, value] of url.searchParams) {
         if (value.startsWith('eq.') && String(item[key]) !== value.slice(3)) return false;
+        if (value.startsWith('neq.') && String(item[key]) === value.slice(4)) return false;
+        if (value.startsWith('not.eq.') && String(item[key]) === value.slice(7)) return false;
         if (value.startsWith('gte.') && !(item[key] >= Number(value.slice(4)))) return false;
+        if (value.startsWith('lte.') && !(item[key] <= Number(value.slice(4)))) return false;
+        if (value.startsWith('ilike.') && !String(item[key]).toLowerCase().includes(value.slice(6).replaceAll('%', '').toLowerCase())) return false;
         if (key === 'availability' && value.startsWith('in.') && !['available', 'reserved'].includes(item.availability)) return false;
+        if (key === 'or' && !value.slice(1, -1).split(',').some((term) => {
+          const match = /^(title|area_name|location_name)\.ilike\.%(.+)%$/.exec(term);
+          return match && String(item[match[1]]).toLowerCase().includes(match[2].toLowerCase());
+        })) return false;
       }
       return true;
     });
@@ -106,6 +129,10 @@ async function read(path, host = base) {
   return { response, html };
 }
 
+function latestPropertyQuery() {
+  return requests.findLast((request) => request.path.endsWith('/published_content'));
+}
+
 test('listing is bounded, filtered, linked, locale-specific and only queries the public view', async () => {
   requests = [];
   const { response, html } = await read('/properties/?transaction=rent&bedrooms=3');
@@ -114,7 +141,7 @@ test('listing is bounded, filtered, linked, locale-specific and only queries the
   assert.doesNotMatch(html, /Rental 20|Sold property|Published &lt;home&gt;/);
   assert.match(html, /page=2/);
   assert.match(html, /\/properties\/rent-home-0-30000000-0000-4000-8000-000000000000\//);
-  const query = requests.at(-1);
+  const query = latestPropertyQuery();
   assert.equal(query.path, '/rest/v1/published_content');
   assert.equal(query.key, 'sb_publishable_test');
   assert.equal(query.params.get('kind'), 'eq.property');
@@ -137,6 +164,8 @@ test('details use exact slug and ID, preserve sold pages and do not fall back ac
   assert.match(en.html, /Approved description/);
   assert.match(en.html, /BHD|BD/);
   assert.match(en.html, /99,999,999,999\.999/);
+  assert.match(en.html, /Related properties/);
+  assert.match(en.html, /Related sale/);
   const sold = await read(`/properties/sold-home-${soldId}/`);
   assert.equal(sold.response.status, 200);
   assert.match(sold.html, /Sold property/);
@@ -151,12 +180,54 @@ test('details use exact slug and ID, preserve sold pages and do not fall back ac
   ]) assert.equal((await read(path)).response.status, 404, path);
 });
 
+test('only localized published gallery images are rendered on listings and details', async () => {
+  mediaRecords = [{
+    id: '44444444-4444-4444-8444-444444444444',
+    revision_id: revision,
+    locale: 'en',
+    alt_text: 'Reviewed exterior',
+    position: 0,
+    is_cover: true,
+    mime_type: 'image/webp',
+    width: 1200,
+    height: 900,
+  }];
+  try {
+    const listing = await read('/properties/');
+    assert.match(listing.html, /src="\/api\/media\/44444444-4444-4444-8444-444444444444"/);
+    assert.match(listing.html, /alt="Reviewed exterior"/);
+    const detail = await read(`/properties/example-home-${id}/`);
+    assert.match(detail.html, /Reviewed exterior/);
+    const arabic = await read(`/ar/properties/example-home-${id}/`);
+    assert.doesNotMatch(arabic.html, /Reviewed exterior/);
+  } finally {
+    mediaRecords = [];
+  }
+});
+
 test('invalid inputs are rejected without backend queries', async () => {
-  for (const query of ['page=0', 'page=51', 'page=1&page=2', 'bedrooms=-1', 'bedrooms=11', 'transaction=sold', 'unknown=x']) {
+  for (const query of [
+    'page=0', 'page=51', 'page=1&page=2', 'bedrooms=-1', 'bedrooms=11',
+    'transaction=sold', 'unknown=x', 'minimumPrice=-1', 'minimumPrice=2&maximumPrice=1',
+    'minimumPrice=1.0001', 'sort=unsupported', 'q=unsafe%2Cfilter',
+  ]) {
     requests = [];
     assert.equal((await read(`/properties/?${query}`)).response.status, 400, query);
     assert.equal(requests.length, 0);
   }
+});
+
+test('listing search applies bounded text and exact decimal price criteria with stable sort', async () => {
+  requests = [];
+  const { response, html } = await read('/properties/?q=Manama&location=Reviewed&propertyType=Apartment&minimumPrice=100.125&maximumPrice=99999999999.999&sort=price_asc');
+  assert.equal(response.status, 200);
+  assert.match(html, /name="q" value="Manama"/);
+  const query = latestPropertyQuery();
+  assert.equal(query.params.get('or'), '(title.ilike.%Manama%,area_name.ilike.%Manama%,location_name.ilike.%Manama%)');
+  assert.equal(query.params.get('location_name'), 'ilike.%Reviewed%');
+  assert.equal(query.params.get('property_type'), 'ilike.%Apartment%');
+  assert.equal(query.params.get('price_bhd_numeric'), 'gte.100.125');
+  assert.equal(query.params.get('order'), 'price_bhd_numeric.asc.nullslast,id.asc');
 });
 
 test('missing configuration and backend failures return 503 rather than empty results or 404', async () => {

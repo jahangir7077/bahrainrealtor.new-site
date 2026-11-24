@@ -1,0 +1,262 @@
+---
+import {
+  createEditorialCategory,
+  createEditorialDraft,
+  editorialPublicationState,
+  getEditorialRevision,
+  isEditorialUuid,
+  listCategories,
+  listEditorialRevisions,
+  parseEditorialCategory,
+  parseEditorialDraft,
+  parseEditorialTransition,
+  reviseEditorialDraft,
+  transitionEditorial,
+} from '../../../server/admin-editorial/workflow.ts';
+import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session.ts';
+import {
+  issueCsrfToken,
+  one,
+  protectedRedirect,
+  protectResponse,
+  readForm,
+  validCsrfToken,
+  validMutation,
+} from '../../../server/auth/security.ts';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+let available = false;
+let csrfToken = '';
+let categories: Awaited<ReturnType<typeof listCategories>> = [];
+let revisions: Awaited<ReturnType<typeof listEditorialRevisions>> = [];
+let detail: Awaited<ReturnType<typeof getEditorialRevision>> = null;
+let state: Awaited<ReturnType<typeof editorialPublicationState>> | null = null;
+
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Editorial administration is unavailable.';
+} else if (Astro.request.method !== 'GET' && Astro.request.method !== 'POST') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else if (Astro.request.method === 'POST' && !validMutation(Astro.request, config.origin)) {
+  Astro.response.status = 403;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    const user = await membership(client);
+    if (!user) {
+      if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/login', 303));
+      Astro.response.status = 403;
+      message = 'Request could not be completed.';
+    } else {
+      const mfa = await mfaState(client);
+      if (!mfa) throw new Error('MFA unavailable');
+      if (!mfa.authorized) {
+        if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+        Astro.response.status = 403;
+        message = 'Request could not be completed.';
+      } else if (Astro.request.method === 'POST') {
+        const form = await readForm(Astro.request, 220000);
+        const action = form && one(form, 'action', 16);
+        let target: string | null = null;
+        let completed = false;
+        if (!form || !validCsrfToken(form, Astro.cookies)) {
+          Astro.response.status = 403;
+          message = 'Request could not be completed.';
+        } else if (action === 'category') {
+          const category = parseEditorialCategory(form);
+          if (category) {
+            await createEditorialCategory(client, category);
+            completed = true;
+          }
+        } else if (action === 'new') {
+          const draft = parseEditorialDraft(form, 'new');
+          if (draft) target = await createEditorialDraft(client, draft);
+        } else if (action === 'draft') {
+          const draft = parseEditorialDraft(form, 'draft');
+          if (draft) target = await reviseEditorialDraft(client, draft);
+        } else if (action === 'approve' || action === 'review' || action === 'publish' || action === 'unpublish') {
+          const input = parseEditorialTransition(form, action);
+          if (input && await transitionEditorial(client, action, input)) target = input.revision;
+        }
+        if (target) return protectedRedirect(Astro.redirect(`/admin/editorial/?revision=${target}`, 303));
+        if (completed) return protectedRedirect(Astro.redirect('/admin/editorial/', 303));
+        if (Astro.response.status !== 403) Astro.response.status = 400;
+        if (!message) message = 'Request could not be completed. Check the submitted fields and current publication state.';
+        csrfToken = issueCsrfToken(Astro.cookies);
+        categories = await listCategories(client);
+        revisions = await listEditorialRevisions(client);
+        available = true;
+      } else {
+        csrfToken = issueCsrfToken(Astro.cookies);
+        const requested = Astro.url.searchParams.getAll('revision');
+        if (requested.length > 1 || (requested.length === 1 && !isEditorialUuid(requested[0]))) {
+          Astro.response.status = 400;
+          message = 'Invalid revision.';
+        } else {
+          categories = await listCategories(client);
+          revisions = await listEditorialRevisions(client);
+          if (requested.length === 1) {
+            detail = await getEditorialRevision(client, requested[0]);
+            if (!detail) {
+              Astro.response.status = 404;
+              message = 'Editorial revision not found.';
+            } else {
+              state = await editorialPublicationState(
+                client,
+                detail.item.id,
+                detail.revision.locale,
+                detail.revision.id,
+              );
+            }
+          }
+          available = true;
+        }
+      }
+    }
+  } catch {
+    Astro.response.status = Astro.request.method === 'POST' ? 409 : 503;
+    message = Astro.request.method === 'POST'
+      ? 'The operation failed or the publication changed. No success was recorded; reload and check the current state.'
+      : 'Editorial administration is unavailable.';
+  }
+}
+const articleCategories = categories.filter((category) => category.kind === 'article');
+const faqCategories = categories.filter((category) => category.kind === 'faq');
+const editCategories = detail ? categories.filter((category) => category.kind === detail!.item.kind) : [];
+---
+
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Editorial administration</title></head>
+<body><main>
+  <h1>Editorial administration</h1>
+  <p><a href="/admin/">Administration</a></p>
+  {message && <p role="alert">{message}</p>}
+  {available && <>
+    <p>Drafts are immutable revisions. English and Arabic approval and publication are independent. Every Arabic publication requires human review of the exact revision.</p>
+
+    <section>
+      <h2>Categories</h2>
+      <ul>{categories.map((category) => <li>{category.kind}: {category.name_en} / {category.name_ar} ({category.slug})</li>)}</ul>
+      <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="category" />
+        <p><label>Content kind <select name="kind" required><option value="article">Article</option><option value="faq">FAQ</option></select></label></p>
+        <p><label>Category slug <input name="slug" maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>English category name <input name="name_en" maxlength="120" required /></label></p>
+        <p><label>Arabic category name <input name="name_ar" maxlength="120" required /></label></p>
+        <button type="submit">Add category</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>Recent article and FAQ revisions</h2>
+      <p>Showing at most the 50 newest editorial revisions.</p>
+      <ul>{revisions.map((revision) => <li>
+        <a href={`/admin/editorial/?revision=${revision.id}`}>{revision.title}</a>
+        ({revision.locale}, {revision.content_items?.[0]?.kind}, {revision.content_items?.[0]?.slug})
+      </li>)}</ul>
+    </section>
+
+    {detail && state && <section>
+      <h2>Private revision preview</h2>
+      <dl>
+        <dt>Content type</dt><dd>{detail.item.kind}</dd>
+        <dt>Content ID</dt><dd>{detail.item.id}</dd><dt>Stable slug</dt><dd>{detail.item.slug}</dd>
+        <dt>Revision ID</dt><dd>{detail.revision.id}</dd><dt>Language</dt><dd>{detail.revision.locale}</dd>
+        <dt>Category</dt><dd>{detail.category.name_en} / {detail.category.name_ar}</dd>
+        <dt>{detail.item.kind === 'faq' ? 'Question' : 'Title'}</dt><dd>{detail.revision.title}</dd>
+        <dt>{detail.item.kind === 'faq' ? 'Answer' : 'Body'}</dt><dd style="white-space: pre-wrap">{detail.revision.body}</dd>
+        {detail.item.kind === 'article' && <>
+          <dt>Summary</dt><dd>{detail.revision.summary}</dd>
+          <dt>Author</dt><dd>{detail.revision.author_name}</dd>
+        </>}
+        <dt>SEO title</dt><dd>{detail.revision.seo_title ?? '—'}</dd>
+        <dt>SEO description</dt><dd>{detail.revision.seo_description ?? '—'}</dd>
+        <dt>Created</dt><dd>{detail.revision.created_at}</dd>
+      </dl>
+      <p>Arabic exact-revision review: {detail.revision.locale === 'ar' ? (state.reviewed ? 'reviewed' : 'not reviewed') : 'not required'}.
+        Approval: {state.approved ? 'approved' : 'not approved'}.
+        Current published revision: {state.current ?? 'none'}.
+      </p>
+
+      {detail.revision.locale === 'ar' && !state.reviewed && <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="review" />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I reviewed this exact Arabic revision, including its complete text and meaning.</label>
+        <button type="submit">Record Arabic human review</button>
+      </form>}
+      {!state.approved && <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="approve" />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I approve this complete editorial revision in its selected language.</label>
+        <button type="submit">Approve this revision</button>
+      </form>}
+      {state.approved && state.current !== detail.revision.id &&
+        (detail.revision.locale !== 'ar' || state.reviewed) && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="publish" />
+          <input type="hidden" name="revision" value={detail.revision.id} />
+          <input type="hidden" name="expected" value={state.current ?? 'none'} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> Publish this approved language revision, replacing the current revision shown above if one exists.</label>
+          <button type="submit">Publish</button>
+        </form>}
+      {state.current && <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="unpublish" />
+        <input type="hidden" name="revision" value={detail.revision.id} /><input type="hidden" name="expected" value={state.current} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> Unpublish the current {detail.revision.locale} publication shown above.</label>
+        <button type="submit">Unpublish this language</button>
+      </form>}
+
+      <h3>Create a new immutable revision</h3>
+      {editCategories.length ? <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="draft" />
+        <input type="hidden" name="revision" value={detail.revision.id} /><input type="hidden" name="kind" value={detail.item.kind} />
+        <p><label>Language <select name="locale"><option value="en" selected={detail.revision.locale === 'en'}>English</option><option value="ar" selected={detail.revision.locale === 'ar'}>Arabic</option></select></label></p>
+        <p><label>Category <select name="category_id" required>{editCategories.map((category) =>
+          <option value={category.id} selected={category.id === detail.metadata.category_id}>{category.name_en} / {category.name_ar}</option>)}</select></label></p>
+        <p><label>{detail.item.kind === 'faq' ? 'Question' : 'Title'} <input name="title" value={detail.revision.title} maxlength="200" required /></label></p>
+        <p><label>{detail.item.kind === 'faq' ? 'Answer' : 'Body'} <textarea name="body" maxlength="20000" required>{detail.revision.body}</textarea></label></p>
+        <p><label>Summary <textarea name="summary" maxlength="1000">{detail.revision.summary ?? ''}</textarea></label></p>
+        <p><label>Author name <input name="author_name" value={detail.revision.author_name ?? ''} maxlength="160" /></label></p>
+        <p><label>SEO title <input name="seo_title" value={detail.revision.seo_title ?? ''} maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500">{detail.revision.seo_description ?? ''}</textarea></label></p>
+        <button type="submit">Save new draft revision</button>
+      </form> : <p role="status">Add a category for this type before creating revisions.</p>}
+    </section>}
+
+    <section>
+      <h2>Create an article</h2>
+      {articleCategories.length ? <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="new" /><input type="hidden" name="kind" value="article" />
+        <p><label>Stable slug <input name="slug" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>Language <select name="locale"><option value="en">English</option><option value="ar">Arabic</option></select></label></p>
+        <p><label>Category <select name="category_id" required>{articleCategories.map((category) => <option value={category.id}>{category.name_en} / {category.name_ar}</option>)}</select></label></p>
+        <p><label>Title <input name="title" maxlength="200" required /></label></p>
+        <p><label>Summary <textarea name="summary" maxlength="1000" required></textarea></label></p>
+        <p><label>Author name <input name="author_name" maxlength="160" required /></label></p>
+        <p><label>Body <textarea name="body" maxlength="20000" required></textarea></label></p>
+        <p><label>SEO title <input name="seo_title" maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500"></textarea></label></p>
+        <button type="submit">Create article draft</button>
+      </form> : <p role="status">Add an article category first.</p>}
+    </section>
+
+    <section>
+      <h2>Create a FAQ</h2>
+      {faqCategories.length ? <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="new" /><input type="hidden" name="kind" value="faq" />
+        <p><label>Stable slug <input name="slug" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>Language <select name="locale"><option value="en">English</option><option value="ar">Arabic</option></select></label></p>
+        <p><label>Category <select name="category_id" required>{faqCategories.map((category) => <option value={category.id}>{category.name_en} / {category.name_ar}</option>)}</select></label></p>
+        <p><label>Question <input name="title" maxlength="200" required /></label></p>
+        <p><label>Answer <textarea name="body" maxlength="20000" required></textarea></label></p>
+        <input type="hidden" name="summary" value="" /><input type="hidden" name="author_name" value="" />
+        <p><label>SEO title <input name="seo_title" maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500"></textarea></label></p>
+        <button type="submit">Create FAQ draft</button>
+      </form> : <p role="status">Add an FAQ category first.</p>}
+    </section>
+  </>}
+</main></body></html>

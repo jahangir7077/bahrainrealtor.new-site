@@ -1,8 +1,7 @@
 import { isLanguage, type Language } from '../../i18n/config.ts';
 
-// These primitives do not enable submission. A future endpoint must fail
-// closed until distributed rate limiting and a private insertion path exist,
-// and must verify property visibility and capture server-owned consent wording.
+// The endpoint must pair these input checks with rate limiting, property
+// visibility verification, private insertion, and server-owned consent text.
 export const MAX_ENQUIRY_BODY_BYTES = 64 * 1024;
 
 const limits = {
@@ -150,7 +149,10 @@ function hasDuplicateTopLevelKeys(json: string): boolean {
  * Read at most MAX_ENQUIRY_BODY_BYTES before JSON parsing. The caller must
  * enforce request timeouts and reject unsupported media types before calling.
  */
-export async function readBoundedEnquiryJson(request: Request): Promise<EnquiryValidationResult> {
+export async function readBoundedEnquiryJson(
+  request: Request,
+  timeoutMs = 10_000,
+): Promise<EnquiryValidationResult> {
   const invalid = { ok: false, reason: 'invalid' } as const;
   const length = request.headers.get('content-length');
   if (length !== null && (!/^\d+$/.test(length) || Number(length) > MAX_ENQUIRY_BODY_BYTES)) return invalid;
@@ -158,9 +160,13 @@ export async function readBoundedEnquiryJson(request: Request): Promise<EnquiryV
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => reject(new Error('Request body timed out')), timeoutMs);
+  });
   try {
     while (true) {
-      const { value, done } = await reader.read();
+      const { value, done } = await Promise.race([reader.read(), timedOut]);
       if (done) break;
       total += value.byteLength;
       if (total > MAX_ENQUIRY_BODY_BYTES) {
@@ -179,8 +185,10 @@ export async function readBoundedEnquiryJson(request: Request): Promise<EnquiryV
     const parsed: unknown = JSON.parse(json);
     return hasDuplicateTopLevelKeys(json) ? invalid : validateEnquiry(parsed);
   } catch {
+    try { await reader.cancel(); } catch { /* The stream may already be closed. */ }
     return invalid;
   } finally {
+    if (timeout) clearTimeout(timeout);
     reader.releaseLock();
   }
 }

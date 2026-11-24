@@ -1,0 +1,20 @@
+---
+import ArticleArchive from '../../../../components/ArticleArchive.astro';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { translate } from '../../../../i18n/translate.ts';
+import { listPublishedArticles } from '../../../../server/editorial/repository.ts';
+
+let articles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
+let unavailable = false;
+try {
+  articles = await listPublishedArticles('ar');
+} catch {
+  unavailable = true;
+  Astro.response.status = 503;
+}
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+---
+
+<BaseLayout title={translate('ar', 'navigation.blog')} description={translate('ar', 'home.insightsDescription')} language="ar">
+  <ArticleArchive language="ar" articles={articles} unavailable={unavailable} />
+</BaseLayout>

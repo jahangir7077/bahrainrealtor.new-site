@@ -40,6 +40,20 @@ export function parseTransition(form: URLSearchParams, action: 'approve' | 'publ
   return { revision, expected: expected === 'none' ? null : expected };
 }
 
+export function parseLifecycleTransition(
+  form: URLSearchParams,
+  action: 'unpublish' | 'archive' | 'unarchive',
+) {
+  const allowed = new Set(['action', 'item', 'revision', 'locale', 'confirm']);
+  if ([...form.keys()].some((key) => !allowed.has(key)) || one(form, 'confirm', 3) !== 'yes') return null;
+  const item = one(form, 'item', 36);
+  const revision = one(form, 'revision', 36);
+  const locale = one(form, 'locale', 2);
+  if (!isUuid(item) || !isUuid(revision) || (action === 'unpublish' && locale !== 'en' && locale !== 'ar') ||
+      (action !== 'unpublish' && form.has('locale'))) return null;
+  return { item, revision, ...(action === 'unpublish' ? { locale } : {}) };
+}
+
 function decimal(form: URLSearchParams, name: string, integerDigits: number, decimals: number, positive = false): string | null | undefined {
   const value = text(form, name, integerDigits + decimals + 1);
   if (value === undefined || value === null) return value;
@@ -81,6 +95,23 @@ export function parseNewDraft(form: URLSearchParams) {
   return { slug, locale, transaction_type, availability, price_bhd, bedrooms, bathrooms, size_square_meters, location_name, title, body, area_name, property_type, seo_title, seo_description };
 }
 
+export function parseFactsDraft(form: URLSearchParams) {
+  const allowed = new Set(['action', 'revision', 'transaction_type', 'availability', 'price_bhd', 'bedrooms', 'bathrooms', 'size_square_meters', 'location_name', 'confirm']);
+  if ([...form.keys()].some((key) => !allowed.has(key)) || one(form, 'confirm', 3) !== 'yes') return null;
+  const revision = one(form, 'revision', 36);
+  const transaction_type = one(form, 'transaction_type', 4);
+  const availability = one(form, 'availability', 11);
+  const price_bhd = decimal(form, 'price_bhd', 11, 3);
+  const bedrooms = count(form, 'bedrooms');
+  const bathrooms = count(form, 'bathrooms');
+  const size_square_meters = decimal(form, 'size_square_meters', 10, 2, true);
+  const location_name = text(form, 'location_name', 200, true);
+  if (!isUuid(revision) || (transaction_type !== 'sale' && transaction_type !== 'rent') ||
+      !['available', 'reserved', 'sold', 'rented', 'unavailable'].includes(availability ?? '') ||
+      [price_bhd, bedrooms, bathrooms, size_square_meters, location_name].some((value) => value === undefined)) return null;
+  return { revision, transaction_type, availability, price_bhd, bedrooms, bathrooms, size_square_meters, location_name };
+}
+
 export async function createNewDraft(client: AuthClient, draft: NonNullable<ReturnType<typeof parseNewDraft>>) {
   const itemId = crypto.randomUUID();
   const versionId = crypto.randomUUID();
@@ -93,6 +124,28 @@ export async function createNewDraft(client: AuthClient, draft: NonNullable<Retu
     p_location_name: draft.location_name, p_title: draft.title, p_body: draft.body,
     p_area_name: draft.area_name, p_property_type: draft.property_type,
     p_seo_title: draft.seo_title, p_seo_description: draft.seo_description,
+  });
+  if (result.error) throw result.error;
+  return revisionId;
+}
+
+export async function createFactsDraft(client: AuthClient, facts: NonNullable<ReturnType<typeof parseFactsDraft>>) {
+  const source = await getPropertyRevision(client, facts.revision);
+  if (!source) return null;
+  const propertyVersionId = crypto.randomUUID();
+  const revisionId = crypto.randomUUID();
+  const result = await client.rpc('create_property_version_draft', {
+    p_item_id: source.item.id,
+    p_source_revision_id: facts.revision,
+    p_property_version_id: propertyVersionId,
+    p_revision_id: revisionId,
+    p_transaction_type: facts.transaction_type,
+    p_availability: facts.availability,
+    p_price_bhd: facts.price_bhd,
+    p_bedrooms: facts.bedrooms,
+    p_bathrooms: facts.bathrooms,
+    p_size_square_meters: facts.size_square_meters,
+    p_location_name: facts.location_name,
   });
   if (result.error) throw result.error;
   return revisionId;
@@ -161,4 +214,24 @@ export async function transition(client: AuthClient, action: 'approve' | 'publis
     : await client.rpc('publish_revision_if_current', { p_revision_id: input.revision, p_expected_revision_id: input.expected });
   if (result.error) throw result.error;
   return true;
+}
+
+export async function transitionLifecycle(
+  client: AuthClient,
+  action: 'unpublish' | 'archive' | 'unarchive',
+  input: NonNullable<ReturnType<typeof parseLifecycleTransition>>,
+) {
+  const revision = await getPropertyRevision(client, input.revision);
+  if (!revision || revision.item.id !== input.item) return false;
+  const result = action === 'unpublish'
+    ? await client.rpc('unpublish_content', { p_item_id: input.item, p_locale: input.locale })
+    : await client.rpc(action === 'archive' ? 'archive_content' : 'unarchive_content', { p_item_id: input.item });
+  if (result.error) throw result.error;
+  return true;
+}
+
+export async function contentArchived(client: AuthClient, itemId: string) {
+  const result = await client.from('content_lifecycle').select('status').eq('item_id', itemId).maybeSingle();
+  if (result.error) throw result.error;
+  return result.data?.status === 'archived';
 }

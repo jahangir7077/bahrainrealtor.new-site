@@ -9,19 +9,23 @@ import type { FaqRecord } from '../../types/content.ts';
 interface Props {
   language: Language;
   faqs: readonly FaqRecord[];
+  preview?: boolean;
+  unavailable?: boolean;
 }
 
-const { language, faqs } = Astro.props;
+const { language, faqs, preview = true, unavailable = false } = Astro.props;
 ---
 
 <section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
   <Container width="narrow">
     <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: translate(language, 'home.faqTitle') }]} />
     <header>
-      <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+      {preview && <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>}
       <h1>{translate(language, 'home.faqTitle')}</h1>
     </header>
-    <FAQAccordion language={language} faqs={faqs} />
+    {unavailable
+      ? <p role="alert">{translate(language, 'content.editorialUnavailable')}</p>
+      : <FAQAccordion language={language} faqs={faqs} />}
   </Container>
 </section>
 

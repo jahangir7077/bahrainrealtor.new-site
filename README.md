@@ -22,12 +22,11 @@ npm run build
 HOST=127.0.0.1 PORT=4321 npm run start
 ```
 
-`npm test` builds the application and tests the standalone production server.
-`npm run preview` is also available for a built application. The existing
-frontend can run without credentials; backend work requires configuration.
-Local `.env` files are ignored and `.env.example` contains placeholders only.
-Do not execute hosted migrations yet, including on the identified development
-project.
+`npm test` runs the existing Node test suite. `npm run preview` is available
+for a built application. Copy `.env.example` to `.env` and add credentials only
+to that ignored local file or a secure environment. Without configuration,
+database-backed routes fail closed. Do not execute hosted migrations yet,
+including on the identified development project.
 
 ## Structure and limitations
 
@@ -47,23 +46,24 @@ Playfair Display, Inter and Tajawal font binaries remain unavailable, so
 temporary fallbacks are in use. CodeQL analysis remains incomplete.
 
 Canonical, hreflang, schema and sitemap eligibility utilities are prepared but
-not activated for production. The backend is incomplete and must not be used
-in production. The current work includes a version-controlled database
-foundation, administrator sign-in and TOTP checks, property drafts and
-locale-specific publishing, and read-only public property routes. Local SQL
-tests use PostgreSQL with stubbed Supabase roles and authentication; property
-HTTP tests use a mock backend. No hosted migrations or real Supabase
-integration tests have been performed.
+not activated for production. The backend implementation includes
+administrator sign-in and TOTP, property revisions and locale-aware publishing,
+private media management, published property search and galleries, enquiry
+intake and lead management, notification retry infrastructure, article/FAQ
+publishing, and private area/project/settings drafts. No hosted migration or
+real Supabase integration has been performed. Local SQL tests use stubbed
+Supabase roles/authentication; HTTP tests use mock backends.
 
-Property editing and unpublishing, validated media uploads, enquiry submission
-and notifications, editorial and FAQ management, website settings, backups
-and recovery are not implemented. Enquiry input validation alone does not
-enable submissions. Concurrent publishing, atomic multi-locale property status
-changes, real TOTP and browser cookie behavior, and secure administrator
-bootstrap and recovery still require verification or implementation.
-Redirects remain unimplemented. See the architecture, keyword map and SEO
-strategy in `docs/`; placeholders do not approve keyword ownership or final
-content.
+The website is not production-ready. Migrations remain unapplied; the email
+provider and worker schedule are unconfigured; image transformation support,
+media backup/recovery, real TOTP/cookie behavior, concurrent hosted publishing,
+admin bootstrap/recovery, privacy/legal requirements and Hostinger runtime and
+deployment controls still need validation. No public project/area/settings
+routes, strategic URL changes, redirects or production indexing are authorized.
+Follow [`docs/frontend-backend-integration.md`](docs/frontend-backend-integration.md)
+for the development setup and migration restrictions. See the architecture,
+keyword map and SEO strategy in `docs/`; provisional keywords do not approve
+new landing pages or final content.
 
 ## Hostinger compatibility
 

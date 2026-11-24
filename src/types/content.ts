@@ -70,6 +70,7 @@ export interface LocalizedArticleContent {
   title: string;
   summary: string;
   body: string;
+  categoryName?: string;
   sections?: readonly {
     id: string;
     heading: string;
@@ -91,6 +92,7 @@ export interface ArticleRecord {
 export interface LocalizedFaqContent {
   question: string;
   answer: string;
+  categoryName?: string;
   humanReviewedRevisionId?: string;
 }
 
