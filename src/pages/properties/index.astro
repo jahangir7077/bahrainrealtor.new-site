@@ -1,0 +1,18 @@
+---
+import Listing from '../../server/properties/Listing.astro';
+import { listProperties, parseFilters } from '../../server/properties/repository.ts';
+
+const filters = parseFilters(Astro.url.searchParams);
+let result = { properties: [], hasNext: false } as Awaited<ReturnType<typeof listProperties>>;
+let error: 'invalid' | 'unavailable' | undefined;
+if (!filters) {
+  error = 'invalid';
+  Astro.response.status = 400;
+} else {
+  try { result = await listProperties('en', filters); }
+  catch { error = 'unavailable'; Astro.response.status = 503; }
+}
+Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+---
+<Listing language="en" filters={filters} {...result} error={error} />

@@ -16,11 +16,12 @@ set search_path = pg_catalog, public
 as $$
   select coalesce(auth.uid() is not null
     and auth.jwt()->>'aal' = 'aal2'
+    and auth.jwt()->'amr' @> '[{"method":"totp"}]'::jsonb
     and exists (select 1 from public.admin_profiles where id = auth.uid() and authorized), false)
 $$;
 revoke all on function private.is_admin() from public, anon, authenticated;
-grant usage on schema private to authenticated;
-grant execute on function private.is_admin() to authenticated;
+grant usage on schema private to anon, authenticated;
+grant execute on function private.is_admin() to anon, authenticated;
 alter table public.admin_profiles enable row level security;
 revoke all on public.admin_profiles from public, anon, authenticated;
 grant select (id, authorized) on public.admin_profiles to authenticated;
@@ -99,13 +100,14 @@ create table public.enquiries (
   property_item_id uuid references public.content_items(id),
   locale text not null check (locale in ('en', 'ar')),
   name text not null check (length(btrim(name)) between 1 and 200),
-  email text not null check (length(btrim(email)) between 3 and 320),
-  telephone text not null check (length(btrim(telephone)) between 1 and 100),
+  email text check (email is null or length(btrim(email)) between 3 and 320),
+  telephone text check (telephone is null or length(btrim(telephone)) between 1 and 100),
   message text not null check (length(btrim(message)) between 1 and 10000),
   consent boolean not null check (consent),
   consent_text text not null check (length(btrim(consent_text)) > 0),
   status text not null default 'new' check (status in ('new', 'read', 'closed')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (email is not null or telephone is not null)
 );
 
 create table private.audit_log (
@@ -131,7 +133,8 @@ begin
   row_data := case when tg_op = 'DELETE' then to_jsonb(old) else to_jsonb(new) end;
   insert into private.audit_log(actor_id, operation, table_name, row_id)
   values (auth.uid(), tg_op, tg_table_schema || '.' || tg_table_name,
-    coalesce(row_data->>'id', row_data->>'revision_id', row_data->>'item_id', row_data->>'user_id'));
+    coalesce(row_data->>'id', row_data->>'revision_id',
+      (row_data->>'item_id') || ':' || (row_data->>'locale'), row_data->>'item_id'));
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end
@@ -216,7 +219,9 @@ alter table public.publications enable row level security;
 alter table public.enquiries enable row level security;
 
 revoke all on public.content_items, public.property_versions, public.content_revisions,
-  public.revision_approvals, public.publications, public.enquiries from public, anon, authenticated;
+  public.revision_approvals, public.publications, public.enquiries from public, anon, authenticated, service_role;
+revoke all on public.admin_profiles from service_role;
+revoke all on private.audit_log from service_role;
 
 grant select, insert on public.content_items, public.property_versions, public.content_revisions to authenticated;
 grant select on public.revision_approvals, public.publications, public.enquiries to authenticated;
@@ -236,7 +241,36 @@ create policy enquiries_admin_status on public.enquiries for update to authentic
   using (private.is_admin()) with check (private.is_admin());
 
 -- A trusted server may insert only after its own validation, consent and abuse controls.
-grant insert on public.enquiries to service_role;
+grant insert (property_item_id, locale, name, email, telephone, message, consent, consent_text)
+  on public.enquiries to service_role;
+
+create function public.create_property_draft(
+  p_item_id uuid, p_property_version_id uuid, p_revision_id uuid,
+  p_slug text, p_locale text, p_transaction_type text, p_availability text,
+  p_price_bhd numeric, p_bedrooms integer, p_bathrooms integer, p_size_square_meters numeric,
+  p_location_name text, p_title text, p_body text, p_area_name text, p_property_type text,
+  p_seo_title text, p_seo_description text
+) returns void language plpgsql security invoker
+set search_path = pg_catalog, public, private
+as $$
+begin
+  if not private.is_admin() then raise exception 'Not authorized' using errcode = '42501'; end if;
+  if p_item_id is null or p_property_version_id is null or p_revision_id is null then
+    raise exception 'All identifiers are required';
+  end if;
+  insert into public.content_items(id, kind, slug) values (p_item_id, 'property', p_slug);
+  insert into public.property_versions(id, item_id, transaction_type, availability, price_bhd,
+    bedrooms, bathrooms, size_square_meters, location_name)
+  values (p_property_version_id, p_item_id, p_transaction_type, p_availability, p_price_bhd,
+    p_bedrooms, p_bathrooms, p_size_square_meters, p_location_name);
+  insert into public.content_revisions(id, item_id, locale, property_version_id, title, body,
+    area_name, property_type, seo_title, seo_description, created_by)
+  values (p_revision_id, p_item_id, p_locale, p_property_version_id, p_title, p_body,
+    p_area_name, p_property_type, p_seo_title, p_seo_description, auth.uid());
+end
+$$;
+revoke all on function public.create_property_draft(uuid, uuid, uuid, text, text, text, text, numeric, integer, integer, numeric, text, text, text, text, text, text, text) from public, anon, authenticated;
+grant execute on function public.create_property_draft(uuid, uuid, uuid, text, text, text, text, numeric, integer, integer, numeric, text, text, text, text, text, text, text) to authenticated;
 
 create function public.approve_revision(p_revision_id uuid)
 returns void language plpgsql security definer
@@ -250,18 +284,48 @@ begin
 end
 $$;
 
-create function public.publish_revision(p_revision_id uuid)
+create function public.publish_revision_if_current(p_revision_id uuid, p_expected_revision_id uuid)
 returns void language plpgsql security definer
 set search_path = pg_catalog, public, private
 as $$
+declare
+  target_item uuid;
+  target_locale text;
+  target_kind text;
+  target_property_version uuid;
 begin
   if not private.is_admin() then raise exception 'Not authorized' using errcode = '42501'; end if;
-  insert into public.publications(item_id, locale, revision_id, published_by)
-  select item_id, locale, revision_id, auth.uid()
-  from public.revision_approvals where revision_id = p_revision_id
-  on conflict (item_id, locale) do update
-    set revision_id = excluded.revision_id, published_by = excluded.published_by, published_at = now();
-  if not found then raise exception 'Approved revision not found'; end if;
+  select a.item_id, a.locale, i.kind, r.property_version_id
+    into target_item, target_locale, target_kind, target_property_version
+  from public.revision_approvals a
+  join public.content_revisions r on r.id = a.revision_id
+  join public.content_items i on i.id = a.item_id
+  where a.revision_id = p_revision_id;
+  if not found then raise exception 'Approval missing or publication changed'; end if;
+
+  -- Serialize all publication changes for an item before comparing locales.
+  perform 1 from public.content_items where id = target_item for update;
+  if target_kind = 'property' and exists (
+    select 1 from public.publications p
+    join public.content_revisions r on r.id = p.revision_id
+    where p.item_id = target_item and p.locale <> target_locale
+      and r.property_version_id is distinct from target_property_version
+  ) then
+    raise exception 'Other published locale uses different property facts';
+  end if;
+  if p_expected_revision_id is null then
+    insert into public.publications(item_id, locale, revision_id, published_by)
+    select item_id, locale, revision_id, auth.uid()
+    from public.revision_approvals where revision_id = p_revision_id
+    on conflict (item_id, locale) do nothing;
+  else
+    update public.publications p
+    set revision_id = a.revision_id, published_by = auth.uid(), published_at = now()
+    from public.revision_approvals a
+    where a.revision_id = p_revision_id and p.item_id = a.item_id
+      and p.locale = a.locale and p.revision_id = p_expected_revision_id;
+  end if;
+  if not found then raise exception 'Approval missing or publication changed'; end if;
 end
 $$;
 
@@ -271,12 +335,13 @@ set search_path = pg_catalog, public, private
 as $$
 begin
   if not private.is_admin() then raise exception 'Not authorized' using errcode = '42501'; end if;
+  perform 1 from public.content_items where id = p_item_id for update;
   delete from public.publications where item_id = p_item_id and locale = p_locale;
 end
 $$;
-revoke all on function public.approve_revision(uuid), public.publish_revision(uuid),
+revoke all on function public.approve_revision(uuid), public.publish_revision_if_current(uuid, uuid),
   public.unpublish_content(uuid, text) from public, anon, authenticated;
-grant execute on function public.approve_revision(uuid), public.publish_revision(uuid),
+grant execute on function public.approve_revision(uuid), public.publish_revision_if_current(uuid, uuid),
   public.unpublish_content(uuid, text) to authenticated;
 
 -- Owner-executed view intentionally bypasses underlying RLS, but only joins approved
@@ -285,7 +350,7 @@ create view public.published_content with (security_barrier = true) as
 select i.id, i.kind, i.slug, r.locale, r.id as revision_id, p.published_at,
   r.title, r.body, r.summary, r.area_name, r.property_type, r.author_name,
   r.seo_title, r.seo_description,
-  v.transaction_type, v.availability, v.price_bhd, v.bedrooms, v.bathrooms,
+  v.transaction_type, v.availability, v.price_bhd::text as price_bhd, v.bedrooms, v.bathrooms,
   v.size_square_meters, v.location_name
 from public.publications p
 join public.content_revisions r on (r.id, r.item_id, r.locale) = (p.revision_id, p.item_id, p.locale)
@@ -298,10 +363,16 @@ grant select on public.published_content to anon, authenticated;
 insert into storage.buckets (id, name, public) values ('private-media', 'private-media', false);
 create policy private_media_admin_select on storage.objects for select to authenticated
   using (bucket_id = 'private-media' and private.is_admin());
-create policy private_media_admin_insert on storage.objects for insert to authenticated
-  with check (bucket_id = 'private-media' and private.is_admin());
-create policy private_media_admin_update on storage.objects for update to authenticated
-  using (bucket_id = 'private-media' and private.is_admin())
-  with check (bucket_id = 'private-media' and private.is_admin());
 create policy private_media_admin_delete on storage.objects for delete to authenticated
   using (bucket_id = 'private-media' and private.is_admin());
+-- Restrictive policies also constrain any pre-existing permissive storage policies.
+create policy private_media_restrict_select on storage.objects as restrictive for select to public
+  using (bucket_id <> 'private-media' or private.is_admin());
+create policy private_media_anonymous_denied on storage.objects as restrictive for select to anon
+  using (bucket_id <> 'private-media');
+create policy private_media_restrict_insert on storage.objects as restrictive for insert to public
+  with check (bucket_id <> 'private-media');
+create policy private_media_restrict_update on storage.objects as restrictive for update to public
+  using (bucket_id <> 'private-media') with check (bucket_id <> 'private-media');
+create policy private_media_restrict_delete on storage.objects as restrictive for delete to public
+  using (bucket_id <> 'private-media' or private.is_admin());

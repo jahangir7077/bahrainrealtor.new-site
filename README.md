@@ -23,13 +23,16 @@ HOST=127.0.0.1 PORT=4321 npm run start
 ```
 
 `npm test` builds the application and tests the standalone production server.
-`npm run preview` is also available for a built application. No environment
-variables or credentials are required by the foundation; local `.env` files
-are ignored and `.env.example` contains no secrets.
+`npm run preview` is also available for a built application. The existing
+frontend can run without credentials; backend work requires configuration.
+Local `.env` files are ignored and `.env.example` contains placeholders only.
+Do not execute hosted migrations yet, including on the identified development
+project.
 
 ## Structure and limitations
 
-- `src/pages/`: English `/`, Arabic `/ar/`, and a custom 404.
+- `src/pages/`: bilingual frontend, published property routes and administrator
+  authentication and property draft interfaces.
 - `src/layouts/`, `src/components/`, `src/styles/`: shared accessible markup,
   reusable UI components and native CSS.
 - `src/config/`, `src/types/`, `src/utils/`: typed language/site configuration.
@@ -44,10 +47,23 @@ Playfair Display, Inter and Tajawal font binaries remain unavailable, so
 temporary fallbacks are in use. CodeQL analysis remains incomplete.
 
 Canonical, hreflang, schema and sitemap eligibility utilities are prepared but
-not activated for production. Redirects, property pages, Supabase,
-authentication, dashboard, enquiries and publishing remain unimplemented.
-See the architecture, keyword map and SEO strategy in `docs/`; placeholders do
-not approve keyword ownership or final content.
+not activated for production. The backend is incomplete and must not be used
+in production. The current work includes a version-controlled database
+foundation, administrator sign-in and TOTP checks, property drafts and
+locale-specific publishing, and read-only public property routes. Local SQL
+tests use PostgreSQL with stubbed Supabase roles and authentication; property
+HTTP tests use a mock backend. No hosted migrations or real Supabase
+integration tests have been performed.
+
+Property editing and unpublishing, validated media uploads, enquiry submission
+and notifications, editorial and FAQ management, website settings, backups
+and recovery are not implemented. Enquiry input validation alone does not
+enable submissions. Concurrent publishing, atomic multi-locale property status
+changes, real TOTP and browser cookie behavior, and secure administrator
+bootstrap and recovery still require verification or implementation.
+Redirects remain unimplemented. See the architecture, keyword map and SEO
+strategy in `docs/`; placeholders do not approve keyword ownership or final
+content.
 
 ## Hostinger compatibility
 
@@ -63,3 +79,10 @@ resource limits and performance, deployment and rollback, staging access
 restrictions, approval-gated production deployment and prevention of automatic
 deployment, and Supabase integration validation.
 Keyword map validation also remains pending.
+
+Hostinger documents an `is_enabled` setting for
+[Git auto-deployment](https://docs.hostinger.com/api-reference/endpoints/hosting/git/update-git-auto-deployment-settings);
+its documented default is enabled. No Hostinger account setting has been
+inspected or changed here. Before any separately approved production deployment,
+verify that auto-deployment is disabled for the actual site and confirm the
+manual deployment and rollback procedure.

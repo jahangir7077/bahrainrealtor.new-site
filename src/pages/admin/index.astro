@@ -1,0 +1,28 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../server/auth/session';
+import { protectedRedirect, protectResponse } from '../../server/auth/security';
+
+protectResponse(Astro.response);
+const config = settings();
+let available = false;
+if (!config) {
+  Astro.response.status = 503;
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    if (!await membership(client)) return protectedRedirect(Astro.redirect('/admin/login', 303));
+    const state = await mfaState(client);
+    if (!state) throw new Error('MFA unavailable');
+    if (!state.authorized) return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+    available = true;
+  } catch {
+    Astro.response.status = 503;
+  }
+}
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Administration</title></head>
+<body><main>
+  <h1>Administration</h1>
+  {available ? <><p>Signed in. Management tools are not yet available.</p><form method="post" action="/admin/logout"><button type="submit">Sign out</button></form></> : <p>Administration is unavailable.</p>}
+</main></body></html>

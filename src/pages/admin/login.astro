@@ -1,0 +1,47 @@
+---
+import { createAuthClient, membership, settings } from '../../server/auth/session';
+import { one, protectedRedirect, protectResponse, readForm, validMutation } from '../../server/auth/security';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Administration is unavailable.';
+} else if (Astro.request.method === 'POST') {
+  if (!validMutation(Astro.request, config.origin)) {
+    Astro.response.status = 403;
+    message = 'Request could not be completed.';
+  } else {
+    const form = await readForm(Astro.request);
+    const email = form && one(form, 'email', 320);
+    const password = form && one(form, 'password', 1024);
+    try {
+      if (email && password) {
+        const client = createAuthClient(Astro.request, Astro.cookies, config);
+        const result = await client.auth.signInWithPassword({ email, password });
+        if (!result.error && await membership(client)) return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+        if (!result.error) await client.auth.signOut({ scope: 'local' });
+      }
+    } catch {
+      // Avoid exposing provider or configuration errors.
+    }
+    Astro.response.status = 401;
+    message = 'Sign-in could not be completed.';
+  }
+} else if (Astro.request.method !== 'GET') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+}
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Administrator sign in</title></head>
+<body><main>
+  <h1>Administrator sign in</h1>
+  {message && <p role="alert">{message}</p>}
+  {config && <form method="post">
+    <p><label>Email <input name="email" type="email" autocomplete="username" required maxlength="320" /></label></p>
+    <p><label>Password <input name="password" type="password" autocomplete="current-password" required maxlength="1024" /></label></p>
+    <button type="submit">Sign in</button>
+  </form>}
+</main></body></html>

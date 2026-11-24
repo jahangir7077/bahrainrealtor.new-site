@@ -1,19 +1,26 @@
 import { createServerClient } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
-import { configuredOrigin } from './security';
+import { configuredOrigin } from './security.ts';
 
-export function settings() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
-  const origin = configuredOrigin(process.env.ADMIN_ORIGIN, import.meta.env.DEV);
+declare const process: { env: Record<string, string | undefined> };
+
+export function resolveSettings(env: Record<string, string | undefined>, allowLocalHttp: boolean) {
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_PUBLISHABLE_KEY;
+  const origin = configuredOrigin(env.APP_ORIGIN, allowLocalHttp);
   if (!url || !key || !origin) return null;
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) return null;
+    const localHttp = allowLocalHttp && parsed.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+    if ((parsed.protocol !== 'https:' && !localHttp) || parsed.username || parsed.password || parsed.search || parsed.hash) return null;
     return { url, key, origin };
   } catch {
     return null;
   }
+}
+
+export function settings() {
+  return resolveSettings(process.env, import.meta.env.DEV);
 }
 
 export function createAuthClient(request: Request, cookies: AstroCookies, config: NonNullable<ReturnType<typeof settings>>) {

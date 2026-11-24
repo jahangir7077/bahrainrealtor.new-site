@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PropertyStatus from '../../components/PropertyStatus.astro';
+import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { PublicProperty } from './repository.ts';
+
+interface Props {
+  language: Language;
+  property: PublicProperty | null;
+  unavailable: boolean;
+}
+const { language, property, unavailable } = Astro.props;
+const arabic = language === 'ar';
+const title = property?.title ?? (unavailable
+  ? (arabic ? 'العقار غير متاح حالياً' : 'Property temporarily unavailable')
+  : translate(language, 'notFound.title'));
+---
+<BaseLayout title={title} description={title} language={language}>
+  <Container width="wide">
+    <section class="detail">
+      {property ? (
+        <article>
+          <Breadcrumbs language={language} items={[
+            { label: translate(language, 'navigation.home'), href: arabic ? '/ar/' : '/' },
+            { label: arabic ? 'العقارات' : 'Properties', href: arabic ? '/ar/properties/' : '/properties/' },
+            { label: property.title },
+          ]} />
+          <h1>{property.title}</h1>
+          <PropertyStatus language={language} status={property.availability} />
+          <p>{property.areaName}</p>
+          {property.priceBhd !== undefined && <p><bdi dir="ltr">{formatCurrency(property.priceBhd, language)}</bdi></p>}
+          <p class="description">{property.body}</p>
+          <dl>
+            <dt>{translate(language, 'search.propertyType')}</dt><dd>{property.propertyType}</dd>
+            <dt>{translate(language, 'search.location')}</dt><dd>{property.locationName}</dd>
+            {property.bedrooms !== undefined && <><dt>{translate(language, 'vocabulary.bedrooms')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi></dd></>}
+            {property.bathrooms !== undefined && <><dt>{translate(language, 'vocabulary.bathrooms')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.bathrooms, language, 0)}</bdi></dd></>}
+            {property.sizeSquareMeters !== undefined && <><dt>{translate(language, 'vocabulary.size')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.sizeSquareMeters, language)}</bdi> m²</dd></>}
+          </dl>
+        </article>
+      ) : (
+        <><h1>{title}</h1><p>{unavailable
+          ? (arabic ? 'يرجى المحاولة لاحقاً.' : 'Please try again later.')
+          : translate(language, 'notFound.description')}</p></>
+      )}
+    </section>
+  </Container>
+</BaseLayout>
+<style>
+  .detail { padding-block: var(--space-10) var(--space-20); }
+  h1 { font-family: var(--font-display); }
+  .description { white-space: pre-wrap; }
+  dl { display: grid; grid-template-columns: minmax(8rem, 0.3fr) 1fr; gap: var(--space-3); }
+  dt { font-weight: 700; }
+  dd { margin: 0; }
+</style>
