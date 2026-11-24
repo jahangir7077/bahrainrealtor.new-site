@@ -15,15 +15,19 @@ Before designing or implementing the site, read and follow:
 - Phase 0 — planning: complete.
 - Phase 1A — basic Hostinger SSR compatibility: passed (owner-reported).
 - Phase 1B.1 — Astro application foundation: complete and persisted remotely.
-- Phase 1B.2 — design system and visual identity: explicitly authorized for
-  tokens, typography, spacing, responsive layouts, basic reusable UI,
-  accessibility, RTL, a development-only showcase, tests and documentation.
-- Phase 1B.3 and later phases: not authorized.
+- Phase 1B.2 — design system and visual identity: implemented, persisted
+  remotely and conditionally accepted with its documented limitations.
+- Phase 1B.3 — bilingual architecture and localization foundation: explicitly
+  authorized by the owner for the scope in
+  [website architecture](../docs/website-architecture.md).
+- Phase 1B.4 and later phases: not authorized.
 
-Phase 1B.2 does not authorize final homepage, navigation, search, property
+Phase 1B.3 does not authorize final homepage, navigation, search, property
 listings, keyword targeting, SEO route changes, Supabase, administration,
-enquiries, publishing or deployment. Reconcile authorization statements when
-the owner explicitly approves a new phase; never bypass platform permissions.
+enquiries, publishing, new public landing pages or deployment. This
+reconciliation task is documentation-only; wait for the separate Phase 1B.3
+implementation prompt. Reconcile authorization statements when the owner
+explicitly approves a new phase; never bypass platform permissions.
 
 - Production domain: `https://bahrainrealtor.com/`; this is a rebuild of the
   existing website on the same domain. Do not use `bahrainrealtor.bh` or
@@ -47,9 +51,8 @@ the owner explicitly approves a new phase; never bypass platform permissions.
   entry file empty and caused HTTP 403. Outstanding gates: same-URL caching,
   `Cache-Control` for dynamic pages and APIs, resource limits and performance,
   deployment and rollback, staging access restrictions, and Supabase
-  integration (separately approved phase). Phase 1B.1 is complete. Phase 1B.2
-  is explicitly authorized for the design system and visual identity only;
-  Phase 1B.3 and later phases remain unauthorized.
+  integration (separately approved phase). The application foundation itself
+  has not been validated on Hostinger.
 - A private dashboard for one administrator manages properties, enquiries,
   articles and FAQs. Approved content publishes without a code redeployment.
 - Property listings are managed manually. Stable public property URLs use
@@ -66,7 +69,7 @@ not implemented. The keyword map remains provisional until the original keyword
 workbook is available and analyzed. Ask the project owner to approve the
 architecture, keyword ownership, and strategy before work outside the
 explicitly authorized phase; do not treat planned routes or provisional
-entries as approval for later implementation. Phase 1B.2 does not authorize
+entries as approval for later implementation. Phase 1B.3 does not authorize
 new SEO pages, keyword targeting, a final homepage, or later-phase features.
 
 Create, remove, rename, or redirect pages only when the change is explicitly

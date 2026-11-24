@@ -1,9 +1,14 @@
 # BahrainRealtor.com — Astro foundation
 
 Phase 1B.1 is the completed, isolated non-indexable application foundation.
-Phase 1B.2 is authorized for the design system and visual identity only;
-Phase 1B.3 and later work remain unauthorized. This is not a production-ready
-website.
+Phase 0 is complete, and Phase 1A passed basic Hostinger SSR compatibility.
+Phase 1B.1 is persisted remotely; Phase 1B.2 is implemented, persisted remotely
+and conditionally accepted with its documented limitations. Phase 1B.3,
+bilingual architecture and localization foundation, is explicitly authorized
+for the scope in [website architecture](docs/website-architecture.md);
+Phase 1B.4 and later work remain unauthorized. This authorization reconciliation
+is documentation-only; implementation awaits a separate prompt. This is not
+a production-ready website.
 The existing live site remains on Netlify until an approved cutover.
 
 ## Local development
@@ -37,6 +42,8 @@ are ignored and `.env.example` contains no secrets.
 
 See [`docs/design-system.md`](docs/design-system.md) for visual tokens,
 typography, component variants, contrast notes and current limitations.
+Playfair Display, Inter and Tajawal font binaries remain unavailable, so
+temporary fallbacks are in use. CodeQL analysis remains incomplete.
 
 Canonical URLs, hreflang, sitemaps, schema, redirects, property pages,
 Supabase, authentication, dashboard, enquiries and publishing are future
@@ -57,3 +64,4 @@ Outstanding gates include same-URL caching and `Cache-Control` behavior,
 resource limits and performance, deployment and rollback, staging access
 restrictions, approval-gated production deployment and prevention of automatic
 deployment, and Supabase integration in a separately approved phase.
+Keyword map validation also remains pending.

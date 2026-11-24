@@ -12,10 +12,12 @@ Node.js compatibility, deployment controls, vendor capabilities, security,
 privacy requirements and costs remain subject to validation. The
 [architecture](website-architecture.md) records intended
 routes, while the [keyword map](keyword-map.md) remains provisional until the
-original workbook is approved for final ownership. Phase 1B.2 is authorized
-for visual design-system work only. This authorization does not change keyword
-targeting, URL architecture, indexability, or authorize new public pages. Phase
-1B.3 and later phases remain unauthorized.
+original workbook is approved for final ownership. Phase 1B.2 is implemented,
+remotely persisted and conditionally accepted. Phase 1B.3 is explicitly
+authorized for the bilingual foundation described in the architecture; this
+documentation reconciliation does not implement it. Its authorization does
+not change keyword targeting, URL architecture or indexability, or authorize
+new public landing pages. Phase 1B.4 and later phases remain unauthorized.
 
 ## Search and content
 

@@ -2,11 +2,16 @@
 
 ## Status and scope
 
-Phase 1B.2 is authorized for the reusable visual foundation only. It is not a
-final homepage or production design. No property listings, SEO landing pages,
-navigation, localization workflow, integrations, or later-phase features are
-included. The public SEO routes, keyword ownership, domain, and URL migration
-requirements remain unchanged.
+Phase 1B.2 was authorized for the reusable visual foundation only and is
+implemented, remotely persisted and conditionally accepted with the limitations
+documented below. It is not a final homepage or production design. No property
+listings, SEO landing pages, navigation, localization workflow, integrations,
+or later-phase features are included in Phase 1B.2. Phase 1B.3 is explicitly
+authorized for the bilingual foundation described in
+[website architecture](website-architecture.md), but awaits a separate
+implementation prompt. Phase 1B.4 and later remain unauthorized. The public SEO
+routes, keyword ownership, domain, and URL migration requirements remain
+unchanged.
 
 ## Visual identity
 

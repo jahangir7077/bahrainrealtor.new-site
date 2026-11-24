@@ -8,10 +8,10 @@ English and Arabic content. `bahrainrealtor.bh` and `bahrainrealtot.com` are
 not production domains.
 The inventory below records the intended structure supplied by the owner.
 Routes remain planned, except the non-indexable Phase 1B.1 development
-placeholders at `/` and `/ar/`. Phase 1B.2 is authorized for design tokens,
-typography, spacing, responsive layouts, reusable UI components, accessibility,
-RTL compatibility and a development-only showcase; this does not approve any
-new public SEO route or final homepage.
+placeholders at `/` and `/ar/`. Phase 1B.2's design system is implemented,
+persisted remotely and conditionally accepted with its documented limitations.
+Phase 1B.3 is explicitly authorized for the bilingual foundation below; this
+does not approve any new public landing page, SEO route or final homepage.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -37,9 +37,39 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Verify staging access restrictions.
 - Validate Supabase integration in a separately approved phase.
 
-Phase 1B.1 is complete. Phase 1B.2 is authorized only for the design-system
-scope above. Phase 1B.3 and later implementation remain unauthorized. The live
-Netlify site and DNS are unchanged.
+Phase 0 and Phase 1B.1 are complete; Phase 1B.1 is persisted remotely. The
+application itself has not yet been validated on Hostinger. Phase 1B.4 and
+later implementation remain unauthorized. The live Netlify site and DNS are
+unchanged.
+
+### Phase 1B.3 bilingual foundation
+
+The owner explicitly authorized bilingual architecture and localization
+foundation work. This authorization reconciliation is documentation-only;
+implementation awaits a separate prompt. The subsequent task may cover
+centralized locale configuration, type-safe interface dictionaries,
+locale-aware routing and language-equivalent resolution, language switching,
+localized metadata, canonical and hreflang utilities, publication eligibility
+rules, currency/number/date/plural formatting, localized HTTP 404 presentation,
+RTL/LTR compatibility, automated tests and bilingual architecture
+documentation. Preserve the approved Phase 1B.2 design system and existing
+foundation protections. No additional public landing pages are authorized.
+
+The approved decisions are:
+
+- The production domain is `https://bahrainrealtor.com/`; English is the
+  default, with root English routes and Arabic routes under `/ar/` using
+  matching English slugs. Existing route approval rules still apply.
+- English uses `en-BH` and LTR; Arabic uses `ar-BH` and RTL, with Western
+  numerals for Arabic property numerals. Use BHD, the `Asia/Bahrain` time
+  zone and the Gregorian calendar.
+- Select language by URL without automatic language redirects or a need for
+  language preference cookies or tracking.
+- Indicate unavailable translations; do not silently fall back to English
+  content. AI-assisted translations require human review, and English and
+  Arabic publication approvals are independent.
+- Use reciprocal hreflang only for eligible published equivalents and
+  independent localized canonical URLs.
 
 ## Planned URL inventory
 
