@@ -52,6 +52,8 @@ The current migrations are ordered:
 3. `supabase/migrations/20261124000300_media.sql`
 4. `supabase/migrations/20261124000400_editorial.sql`
 5. `supabase/migrations/20261124000500_property_search_archive.sql`
+6. `supabase/migrations/20261125000100_secure_media_delivery.sql`
+7. `supabase/migrations/20261125000200_site_content_publication.sql`
 
 They provide administrator membership/MFA policies, immutable content
 revisions and per-locale publication, enquiry and notification queues,
@@ -81,12 +83,21 @@ and image delivery still require validation on Hostinger.
 
 The private `/admin/` dashboard links property, media, editorial, site-content
 and enquiry management. Mutations check admin membership and MFA; public and
-administrative responses are no-store/noindex. Area, project and site-setting
-records are private drafts; no unapproved public route or setting feed is
-created. Enquiries use server-owned bilingual consent, atomic rate limiting,
-spam checks, a private database outbox and a separately scheduled notification
-worker. The email delivery provider and worker schedule still require owner
-configuration and privacy/legal review.
+administrative responses are no-store/noindex. The site-content workflow
+assigns records only to an exact allowlist: mapped buy-property targets and
+approved buy, rent, project and residency routes. Area/project/landing content
+is served only from the filtered `published_site_content` view after
+locale-specific approval and compare-and-swap publication; Arabic additionally
+requires exact-revision human review. Published pages receive CMS metadata,
+WebPage/BreadcrumbList schema, contextual links, eligible reciprocal
+hreflang, and sitemap entries. Missing or unpublished content does not create
+a public route. Website settings remain private. The new site-content
+migration is pending review/application to an authorized development database;
+it has not been run against any hosted database. Enquiries use server-owned
+bilingual consent, atomic rate limiting, spam checks, a private database
+outbox and a separately scheduled notification worker. The email delivery
+provider and worker schedule still require owner configuration and privacy/legal
+review.
 
 ## Beginner-friendly development setup
 
@@ -127,11 +138,13 @@ configuration and privacy/legal review.
    URL is HTTPS, and that `APP_ORIGIN` is exactly the local browser origin.
    Do not print or share key values. Local `.env` is ignored; never commit it.
 
-4. The owner reports the five existing migrations were applied to the
-   development project. The additional media-privacy migration is
-   `20261125000100_secure_media_delivery.sql`; review and apply it only to that
-   project after explicit authorization. Do not rerun the original migrations,
-   target production, or create another project.
+4. The owner reports the five original migrations were applied to the
+   development project. The forward media-privacy and site-content
+   publication migrations are
+   `20261125000100_secure_media_delivery.sql` and
+   `20261125000200_site_content_publication.sql`; review and apply them only
+   to that project after explicit migration authorization. Do not rerun the
+   original migrations, target production, or create another project.
 
 5. After an authorized migration, configure server-only secrets through the
    local `.env` or the approved environment's secret manager, never in the
@@ -220,10 +233,15 @@ migrations in order to a disposable local Supabase-compatible database.
 
 ## Private areas, projects, and website settings
 
-`/admin/site-content/` manages area, project, and website-setting records
-through localized immutable revisions. Records can be archived and restored;
-the record, revision, and audit history are retained. The database tables are
-admin-only and have no public read view or publication function. This work
-does not add area/project pages, change route mappings, or make settings
-publicly consumable. These records remain private drafts pending separate
-authorization of any public route or publication integration.
+`/admin/site-content/` manages area, project, landing-page and website-setting
+records through localized immutable revisions. The forward
+`20261125000200_site_content_publication.sql` migration allowlists exact routes,
+adds approval, Arabic exact-revision review, locale-specific
+compare-and-swap publishing/unpublishing, and exposes only eligible published
+records through a public view. A catch-all SSR route serves only allowlisted
+paths with published content; it does not invent pages for arbitrary URLs.
+Published pages supply localized SEO metadata, WebPage/BreadcrumbList schema,
+internal links, eligible hreflang, and gated sitemap entries. The feature
+requires this migration before it can read or publish site content; do not run
+it on a hosted database without authorization. Settings remain private, and
+no content is pre-published or assumed verified.

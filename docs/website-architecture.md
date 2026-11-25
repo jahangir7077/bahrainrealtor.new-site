@@ -91,27 +91,36 @@ The approved decisions are:
 | Section | URL | Status |
 | --- | --- | --- |
 | Home | `/` | Implemented bilingual development preview; no verified listings/contact data; noindex |
-| Buy property | `/buy-property/` | Planned; not implemented |
-| Buy property | `/buy-property/amwaj-island/` | Planned; not implemented |
-| Buy property | `/buy-property/tala-island/` | Planned; not implemented |
-| Buy property | `/buy-property/marassi-al-bahrain/` | Planned; not implemented |
-| Buy property | `/buy-property/diyar-al-muharraq/` | Planned; not implemented |
-| Buy property | `/buy-property/dilmunia-island/` | Planned; not implemented |
-| Buy property | `/buy-property/manama-capital/` | Planned; not implemented |
-| Rent property | `/rent-property/` | Planned; not implemented |
-| Rent property | `/rent-property/amwaj-island/` | Planned; not implemented |
-| Rent property | `/rent-property/tala-island/` | Planned; not implemented |
-| Rent property | `/rent-property/marassi-al-bahrain/` | Planned; not implemented |
-| Rent property | `/rent-property/diyar-al-muharraq/` | Planned; not implemented |
-| Rent property | `/rent-property/dilmunia-island/` | Planned; not implemented |
-| Rent property | `/rent-property/manama-capital/` | Planned; not implemented |
-| Projects | `/projects/` | Planned; not implemented |
+| Buy property | `/buy-property/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/amwaj-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/tala-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/marassi-al-bahrain/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/diyar-al-muharraq/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/dilmunia-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Buy property | `/buy-property/manama-capital/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/amwaj-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/tala-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/marassi-al-bahrain/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/diyar-al-muharraq/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/dilmunia-island/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Rent property | `/rent-property/manama-capital/` | CMS route implemented; unpublished until reviewed unique content is ready |
+| Projects | `/projects/` | CMS route implemented; unpublished until reviewed unique content is ready |
 | Blog | `/blog/` | Implemented bilingual CMS-backed hub; noindex by default |
 | Blog | `/blog/articles/` | Implemented CMS-backed archive; noindex by default |
 | Blog | `/blog/faqs/` | Implemented CMS-backed archive; noindex by default |
-| Bahrain residency | `/bahrain-residency/` | Planned; not implemented |
-| Bahrain residency | `/bahrain-residency/golden-visa-bahrain/` | Planned; not implemented |
-| Bahrain residency | `/bahrain-residency/self-sponsorship-visa/` | Planned; not implemented |
+| Bahrain residency | `/bahrain-residency/` | CMS route implemented; unpublished pending verified, reviewed content |
+| Bahrain residency | `/bahrain-residency/golden-visa-bahrain/` | CMS route implemented; unpublished pending legal/content verification |
+| Bahrain residency | `/bahrain-residency/self-sponsorship-visa/` | CMS route implemented; unpublished pending legal/content verification |
+
+The immutable site-content route catalog also contains all 58 mapped
+`/buy-property/` targets in `keyword-map.md`. Those mapped area/intent pages use
+the same localized CMS publication workflow; they are not public until a
+specific approved route has independently approved English content and, for
+Arabic, an exact-revision human review. Routes without published content return
+not found. The forward migration
+`supabase/migrations/20261125000200_site_content_publication.sql` defines the
+allowlist and publication view; it has not been run against a hosted database.
 
 ### Additional approved route patterns
 
@@ -138,15 +147,19 @@ The approved decisions are:
   HTTP 404 in production builds. The existing `/dev/design-system/` showcase
   has the same production restriction.
 
-  Public property and editorial routes now read from their published Supabase
-  views. The CMS-backed blog hub, article/FAQ archives, and bilingual
-  `/guides/{slug}/` details use locale-specific publication eligibility;
-  property and editorial pages include applicable metadata and structured
-  data. Dynamic sitemap and robots endpoints are implemented, but indexing is
-  disabled by default and production deployment, verified inventory,
-  profile/contact details, authorized photography, redirect mapping, and
-  Hostinger readiness remain incomplete. The homepage retains pending-
-  information and empty states where verified business content is absent.
+  Public property and editorial routes read from their published Supabase
+  views. The CMS-backed blog hub, article/FAQ archives, bilingual
+  `/guides/{slug}/` details, and allowlisted area/project/landing routes use
+  locale-specific publication eligibility. Published site-content pages
+  provide CMS metadata, WebPage and BreadcrumbList schema, localized
+  equivalents when both languages are eligible, and links to related published
+  pages. Dynamic sitemap entries use only published routes; indexing remains
+  disabled by default. The site-content migration is forward-only and must be
+  reviewed before authorized application to the development database. Verified
+  content, inventory, profile/contact details, authorized photography,
+  redirect mapping, production deployment, and Hostinger readiness remain
+  incomplete. The homepage retains pending-information and empty states where
+  verified business content is absent.
 
   Typed integration boundaries and the intended publication handoff are
   documented in [frontend/backend integration](frontend-backend-integration.md).

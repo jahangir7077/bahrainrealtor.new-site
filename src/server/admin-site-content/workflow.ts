@@ -1,6 +1,6 @@
 import type { AuthClient } from '../auth/session.ts';
 import { one } from '../auth/security.ts';
-import { isSiteContentRoute, siteContentRouteKind, SITE_CONTENT_ROUTES } from '../site-content/routes.ts';
+import { siteContentRouteKind, SITE_CONTENT_ROUTES } from '../site-content/routes.ts';
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

@@ -119,7 +119,7 @@ const links = related.filter((item) => item.routePath !== content?.routePath &&
           <h2>{arabic ? 'صفحات ذات صلة' : 'Related pages'}</h2>
           <ul>{links.map((item) => <li><a href={`${arabic ? '/ar' : ''}${item.routePath}`}>{item.title}</a></li>)}</ul>
         </nav>}
-      </> : <h1>{arabic ? 'الصفحة غير متاحة' : 'Page unavailable'}</h1>}
+      </> : <h1>{arabic ? 'الصفحة غير موجودة' : 'Page not found'}</h1>}
     </Container>
   </article>
 </BaseLayout>
