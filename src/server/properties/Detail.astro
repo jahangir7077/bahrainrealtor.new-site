@@ -7,6 +7,7 @@ import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
 import { translate } from '../../i18n/translate.ts';
 import type { Language } from '../../i18n/config.ts';
 import { propertyPath, type PublicProperty } from './repository.ts';
+import { contentMetadata } from '../../utils/seo/content-metadata.ts';
 
 interface Props {
   language: Language;
@@ -19,8 +20,16 @@ const arabic = language === 'ar';
 const title = property?.title ?? (unavailable
   ? (arabic ? 'العقار غير متاح حالياً' : 'Property temporarily unavailable')
   : translate(language, 'notFound.title'));
+const metadata = property
+  ? contentMetadata({
+      title: property.title,
+      description: property.summary ?? property.body,
+      seoTitle: property.seoTitle,
+      seoDescription: property.seoDescription,
+    })
+  : { title, description: title };
 ---
-<BaseLayout title={title} description={title} language={language}>
+<BaseLayout title={metadata.title} description={metadata.description} language={language}>
   <Container width="wide">
     <section class="detail">
       {property ? (

@@ -14,6 +14,7 @@ const revision = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const row = (overrides = {}) => ({
   id, kind: 'property', slug: 'example-home', locale: 'en', revision_id: revision,
   published_at: '2026-01-01T00:00:00Z', title: 'Published <home>', body: 'Approved description',
+  summary: null, seo_title: 'Reviewed listing SEO title', seo_description: 'Reviewed listing search description.',
   area_name: 'Reviewed area', property_type: 'Apartment', transaction_type: 'sale',
   availability: 'available', price_bhd: '99999999999.999', bedrooms: 2, bathrooms: 1,
   price_bhd_numeric: 99999999999.999, size_square_meters: 100.5,
@@ -160,6 +161,8 @@ test('listing is bounded, filtered, linked, locale-specific and only queries the
 test('details use exact slug and ID, preserve sold pages and do not fall back across locales', async () => {
   const en = await read(`/properties/example-home-${id}/`);
   assert.equal(en.response.status, 200);
+  assert.match(en.html, /<title>Reviewed listing SEO title<\/title>/);
+  assert.match(en.html, /<meta name="description" content="Reviewed listing search description\."\/?>/);
   assert.match(en.html, /Published &lt;home&gt;/);
   assert.match(en.html, /Approved description/);
   assert.match(en.html, /BHD|BD/);

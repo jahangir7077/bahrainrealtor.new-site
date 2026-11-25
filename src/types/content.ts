@@ -70,6 +70,8 @@ export interface LocalizedArticleContent {
   title: string;
   summary: string;
   body: string;
+  seoTitle?: string;
+  seoDescription?: string;
   categoryName?: string;
   sections?: readonly {
     id: string;

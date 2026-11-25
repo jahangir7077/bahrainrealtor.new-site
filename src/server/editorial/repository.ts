@@ -87,6 +87,12 @@ export async function listPublishedArticles(language: Language): Promise<readonl
           title: row.title as string,
           summary: row.summary as string,
           body: row.body as string,
+          ...(typeof row.seo_title === 'string' && row.seo_title.trim()
+            ? { seoTitle: row.seo_title }
+            : {}),
+          ...(typeof row.seo_description === 'string' && row.seo_description.trim()
+            ? { seoDescription: row.seo_description }
+            : {}),
           categoryName: row.category_name as string,
           ...(language === 'ar' ? { humanReviewedRevisionId: row.revision_id as string } : {}),
         },

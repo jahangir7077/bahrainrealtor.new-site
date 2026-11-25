@@ -8,7 +8,7 @@ const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 const idPattern = new RegExp(`^${UUID}$`);
 const pathPattern = new RegExp(`^([a-z0-9]+(?:-[a-z0-9]+)*)-(${UUID})$`);
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const columns = 'id,kind,slug,locale,revision_id,published_at,title,body,area_name,property_type,transaction_type,availability,price_bhd,price_bhd_numeric,bedrooms,bathrooms,size_square_meters,location_name';
+const columns = 'id,kind,slug,locale,revision_id,published_at,title,body,summary,seo_title,seo_description,area_name,property_type,transaction_type,availability,price_bhd,price_bhd_numeric,bedrooms,bathrooms,size_square_meters,location_name';
 export const PAGE_SIZE = 20;
 export const MAX_PAGE = 50;
 
@@ -17,6 +17,9 @@ export interface PublicProperty {
   slug: string;
   title: string;
   body: string;
+  summary?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   areaName: string;
   propertyType: string;
   transaction: PropertyTransaction;
@@ -123,10 +126,12 @@ function client() {
   });
 }
 
-function propertyFromRow(row: Record<string, unknown>, language: Language): PublicProperty {
+export function propertyFromRow(row: Record<string, unknown>, language: Language): PublicProperty {
   const text = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0;
   const number = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0;
   const optionalNumber = (value: unknown) => value === null || number(value);
+  const optionalText = (value: unknown, maximum: number) =>
+    value === null || (typeof value === 'string' && value.length <= maximum);
   const validPrice = row.price_bhd === null ||
     (typeof row.price_bhd === 'string' && /^(?:0|[1-9]\d{0,10})(?:\.\d{1,3})?$/.test(row.price_bhd));
   if (row.kind !== 'property' || row.locale !== language || !text(row.id) || !idPattern.test(row.id) ||
@@ -135,6 +140,8 @@ function propertyFromRow(row: Record<string, unknown>, language: Language): Publ
       Number.isNaN(Date.parse(row.published_at)) ||
       !text(row.title) || !text(row.body) || !text(row.area_name) || !text(row.property_type) ||
       !text(row.location_name) || !['sale', 'rent'].includes(String(row.transaction_type)) ||
+      !optionalText(row.summary, 500) || !optionalText(row.seo_title, 200) ||
+      !optionalText(row.seo_description, 500) ||
       !['available', 'reserved', 'sold', 'rented', 'unavailable'].includes(String(row.availability)) ||
       !validPrice || !optionalNumber(row.bedrooms) || !optionalNumber(row.bathrooms) ||
       !optionalNumber(row.size_square_meters) ||
@@ -147,6 +154,11 @@ function propertyFromRow(row: Record<string, unknown>, language: Language): Publ
     slug: row.slug as string,
     title: row.title as string,
     body: row.body as string,
+    ...(typeof row.summary === 'string' && row.summary.trim() ? { summary: row.summary } : {}),
+    ...(typeof row.seo_title === 'string' && row.seo_title.trim() ? { seoTitle: row.seo_title } : {}),
+    ...(typeof row.seo_description === 'string' && row.seo_description.trim()
+      ? { seoDescription: row.seo_description }
+      : {}),
     areaName: row.area_name as string,
     propertyType: row.property_type as string,
     transaction: row.transaction_type as PropertyTransaction,
