@@ -39,11 +39,15 @@ file `server/entry.mjs` to be set explicitly. Outstanding gates:
 - Validate Supabase integration in an isolated development environment.
 
 Phase 0 and Phase 1B.1 are complete; Phase 1B.1 is persisted remotely. Phases
-1B.3–1B.7 are implemented and conditionally accepted. Phases 2–5 are
-authorized as one combined backend scope; Phase 1B.8, Phase 1B.9 and Phase 6
-remain unauthorized. Hosted migrations must not be executed yet. The
-application itself has not yet been validated on Hostinger. The live Netlify
-site and DNS are unchanged.
+1B.3–1B.7 are implemented and conditionally accepted. Phases 2–5 were
+authorized as one combined backend scope. The owner authorization dated
+2026-11-25 additionally authorizes the previously gated public website,
+keyword/URL mapping, SEO, analytics readiness, performance, accessibility and
+security development. It does not authorize production deployment, DNS
+changes, production indexing activation, hosted migration execution, external
+account changes or publishing unverified content. The application itself has
+not yet been validated on Hostinger. The live Netlify site and DNS are
+unchanged.
 
 ### Phase 1B.3 bilingual foundation
 
@@ -57,9 +61,12 @@ RTL/LTR compatibility, automated tests and bilingual architecture
 documentation. The combined scope also authorizes the global navigation and
 footer, the English and Arabic homepage at `/` and `/ar/`, development-only
 template demonstrations, reusable backend-ready page templates and technical
-SEO utilities. Preserve the approved Phase 1B.2 design system and existing
-noindex and no-store protections. No additional public landing pages are
-authorized.
+SEO utilities. The owner authorization dated 2026-11-25 now also authorizes
+keyword-led public route development in the mapping recorded by
+[keyword-map.md](keyword-map.md). Preserve the approved Phase 1B.2 design
+system, editorial eligibility, privacy boundaries, and noindex default.
+Mapped landing routes must not enter the sitemap or become indexable until
+verified inventory and unique, human-approved content are present.
 
 The approved decisions are:
 
@@ -176,10 +183,14 @@ the remainder only after research and content/cannibalization review.
 3. Analyze the original keyword workbook and record approved keyword ownership
    in [keyword-map.md](keyword-map.md); review
    [seo-strategy.md](seo-strategy.md) alongside it.
-4. Obtain explicit owner approval for the foundation and for subsequent changes
-   to architecture and keyword ownership before creating, removing, renaming,
-   or redirecting pages.
+4. The owner explicitly authorized development-finalization of the workbook
+   keyword mapping, target URLs, route templates, topic clusters and technical
+   SEO on 2026-11-25. This supersedes the earlier development approval gate for
+   those activities only; production indexing, redirects based on live-site
+   audit, deployment, DNS, hosted migrations and external account changes
+   remain gated.
 
 If requirements are unclear or a requested page is absent from the approved
-inventory, ask the owner rather than inventing a route or changing the
-strategy. Keyword ownership remains provisional in `keyword-map.md`.
+inventory, use the authorized workbook mapping; do not invent facts, inventory,
+legal claims or keyword metrics. Keyword ownership is mapped in
+`keyword-map.md`; implementation and publication status remain explicit.

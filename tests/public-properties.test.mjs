@@ -182,6 +182,12 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.ok(xml.includes(`https://bahrainrealtor.com/properties/sold-home-${soldId}/`));
   const robotsOn = await (await fetch(`${indexingBase}/robots.txt`)).text();
   assert.match(robotsOn, /Sitemap: https:\/\/bahrainrealtor\.com\/sitemap\.xml/);
+  const property = await fetch(`${indexingBase}/properties/example-home-${id}/`);
+  assert.equal(property.status, 200);
+  const propertyHtml = await property.text();
+  assert.match(propertyHtml, /<meta name="robots" content="index, follow"/);
+  assert.match(propertyHtml, /<link rel="canonical" href="https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
+  assert.doesNotMatch(property.headers.get('x-robots-tag') ?? '', /noindex/);
 });
 
 test('details use exact slug and ID, preserve sold pages and do not fall back across locales', async () => {

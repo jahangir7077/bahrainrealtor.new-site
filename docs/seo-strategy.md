@@ -11,14 +11,12 @@ until an approved cutover. Supabase suitability, Astro/Hostinger runtime and
 Node.js compatibility, deployment controls, vendor capabilities, security,
 privacy requirements and costs remain subject to validation. The
 [architecture](website-architecture.md) records intended
-routes, while the [keyword map](keyword-map.md) remains provisional until the
-original workbook is approved for final ownership. Phase 1B.2 is implemented,
-remotely persisted and conditionally accepted. Phases 1B.3–1B.7 are
-implemented and conditionally accepted. Phases 2–5 are authorized for combined
-backend implementation, including property listings using the approved stable
-property pattern. This does not change keyword targeting, strategic URL
-architecture or production indexability, and does not authorize new SEO
-landing pages. Phase 1B.8, Phase 1B.9 and Phase 6 remain unauthorized.
+routes, and the [keyword map](keyword-map.md) records ownership and URL
+assignments from the existing workbook. Owner authorization on 2026-11-25
+extends development scope to mapped pages, templates, technical SEO, tracking
+readiness, competitor benchmarking and performance work. It does not permit
+production deployment, DNS or external account changes, production indexing,
+unapproved hosted migrations, or publishing unverified claims/content.
 
 The combined Phase 1B.3–1B.7 frontend implementation now includes reusable
 localized metadata, canonical/hreflang, publication eligibility, structured
@@ -39,6 +37,18 @@ approved 301 mappings are recorded as pending in the
   availability, contact information and business credentials; never fabricate.
 - Retain the ten planned article topics, prioritizing the first three and
   publishing the remainder only after research and cannibalization review.
+- Treat on-page, technical, content, local, semantic/entity, off-page and
+  topical-authority work as one launch requirement. Improve crawlability,
+  internal links, local business consistency and conversion paths together;
+  never use paid/fake reviews, spam links, unverified credentials or invented
+  experience.
+- Use direct answers beneath descriptive headings where the question and
+  verified content support it. AEO/GEO readiness depends on clear, accurate,
+  accessible content and factual structured data—not keyword manipulation.
+- Benchmark competitors only from cited, reproducible observations. Record
+  useful gaps in performance, accessibility, mobile property presentation,
+  navigation and enquiry completion; do not infer competitor weaknesses from
+  keyword-export presence alone.
 
 ## English and Arabic
 
@@ -125,6 +135,6 @@ Before launch, check representative pages for metadata, canonical URLs,
 indexability, structured data, mobile usability, accessibility, performance,
 both languages, sitemap entries and redirects. Record actual measurements.
 Privacy/legal requirements, retention periods, monitoring ownership and
-provider costs must be validated before implementation. Obtain owner approval
-before changing this strategy, and update the architecture and keyword map
-when affected.
+provider costs must be validated before implementation. Keep the strategy,
+architecture and keyword map consistent when implementing the authorized
+scope; the production and content safeguards above remain in force.

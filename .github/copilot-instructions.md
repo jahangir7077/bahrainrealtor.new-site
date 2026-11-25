@@ -21,13 +21,19 @@ Before designing or implementing the site, read and follow:
   conditionally accepted with its documented limitations.
 - Phases 2–5 — database, authentication, property CMS, enquiries and
   editorial CMS: explicitly authorized as one combined backend implementation.
-- Phase 1B.8, Phase 1B.9 and Phase 6: not authorized.
+- Owner authorization dated 2026-11-25 explicitly extends development scope to
+  finalize the workbook-based keyword/URL map and implement approved public
+  routes, templates, technical SEO, analytics readiness, performance,
+  accessibility and security work. This authorization does not permit
+  production deployment, DNS changes, production indexing activation, hosted
+  migrations, external account changes, paid services or publishing unverified
+  content.
 
-This authorization does not permit changes to approved keyword targeting or
-strategic URL architecture, production indexing, redirects, deployment, or
-Phase 1B.8, 1B.9 or 6 work. Hosted migrations must not be executed yet, even
-against the identified development project. Keep demonstrations non-indexable
-and unavailable in production where required. Never bypass platform permissions.
+All approved development decisions remain subject to the existing keyword
+evidence, privacy, editorial and production safeguards. Keep indexing disabled
+by default and demonstrations non-indexable and unavailable in production
+where required. Prepare forward migrations only; do not execute hosted
+migrations. Never bypass platform permissions.
 
 - Production domain: `https://bahrainrealtor.com/`; this is a rebuild of the
   existing website on the same domain. Do not use `bahrainrealtor.bh` or
@@ -64,11 +70,11 @@ and unavailable in production where required. Never bypass platform permissions.
   enquiries, backups, image backups and revision history according to the
   approved architecture, subject to validation.
 
-The route inventory reflects the intended structure; most routes are planned,
-not implemented. The keyword map remains provisional pending review and owner
-approval. Do not treat planned routes or provisional entries as approval for
-new SEO landing pages or changes to keyword targeting. Implement the authorized
-backend and property routes without changing strategic URL mappings.
+The route inventory and keyword map reflect the owner-authorized development
+scope; route implementation status must remain explicit. Use the existing
+research workbook as evidence, and do not invent search metrics or property
+facts. Do not expose new routes in the sitemap or enable indexing until
+publication, unique-content, inventory and production gates are satisfied.
 
 Create, remove, rename, or redirect pages only when the change is explicitly
 approved and reflected in the architecture and keyword map. Preserve valuable
@@ -80,7 +86,8 @@ privacy/legal requirements and final URL mappings as pending validation unless
 documented as approved. When requirements or approvals are missing, ask the
 owner instead of making strategic decisions.
 
-For any requested change that affects these documents, obtain owner approval
-and keep all three consistent. Implement only the approved scope, preserve
-existing behavior where applicable, and verify relevant SEO and technical
-requirements before considering the work complete.
+For changes affecting these documents, keep architecture, keyword ownership
+and SEO requirements consistent. The 2026-11-25 owner authorization covers
+development changes within scope, but not production activation or external
+account operations. Preserve existing behavior where applicable and verify
+relevant SEO and technical requirements before considering work complete.
