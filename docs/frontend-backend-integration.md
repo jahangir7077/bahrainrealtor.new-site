@@ -207,12 +207,14 @@ locale. Publishing Arabic requires human review of the exact revision being
 published. Publication uses compare-and-swap semantics, and unpublishing is
 locale-specific and compare-and-swap guarded.
 
-Public content is read only from the published editorial view. The approved
-archive interfaces are `/blog/articles/`, `/blog/faqs/` and their `/ar/`
-equivalents. Content is rendered only in its published language, with no
-cross-language fallback. No individual article URL is introduced here, and
-these interfaces remain non-indexable until the separate production SEO and
-route approvals are complete. Focused database assertions are in
+Public content is read only from the published editorial view. The bilingual
+`/blog/` hub and `/blog/articles/`, `/blog/faqs/` archives are CMS-backed;
+published articles also render at `/guides/{slug}/` and `/ar/guides/{slug}/`.
+Content is rendered only in its published language, with no cross-language
+fallback. Article details include CMS metadata and Article/Breadcrumb schema;
+FAQ archives include schema for visible published answers. Public editorial
+routes remain noindex unless indexing is explicitly enabled and eligible
+content exists. Focused database assertions are in
 `supabase/tests/editorial-security.sql`; run them only after applying the
 migrations in order to a disposable local Supabase-compatible database.
 

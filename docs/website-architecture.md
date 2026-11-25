@@ -11,8 +11,10 @@ Phase 1B.2's design system is implemented, persisted remotely and
 conditionally accepted with its documented limitations. Phases 1B.3–1B.7 are
 implemented and conditionally accepted. The owner explicitly authorized
 Phases 2–5 for combined backend implementation, including property listings
-using the approved stable property pattern. This does not approve new SEO
-landing pages, changes to keyword ownership or strategic URL mappings.
+using the approved stable property pattern. The 2026-11-25 authorization also
+covers completion of the workbook-based keyword map, mapped public routes and
+SEO implementation; publication, indexing and production safeguards remain
+in force.
 
 The rebuild is planned for Astro with Supabase-backed content on Hostinger
 Business Web Hosting. The existing live site remains on Netlify until an
@@ -104,9 +106,9 @@ The approved decisions are:
 | Rent property | `/rent-property/dilmunia-island/` | Planned; not implemented |
 | Rent property | `/rent-property/manama-capital/` | Planned; not implemented |
 | Projects | `/projects/` | Planned; not implemented |
-| Blog | `/blog/` | Planned; not implemented |
-| Blog | `/blog/articles/` | Planned; not implemented |
-| Blog | `/blog/faqs/` | Planned; not implemented |
+| Blog | `/blog/` | Implemented bilingual CMS-backed hub; noindex by default |
+| Blog | `/blog/articles/` | Implemented CMS-backed archive; noindex by default |
+| Blog | `/blog/faqs/` | Implemented CMS-backed archive; noindex by default |
 | Bahrain residency | `/bahrain-residency/` | Planned; not implemented |
 | Bahrain residency | `/bahrain-residency/golden-visa-bahrain/` | Planned; not implemented |
 | Bahrain residency | `/bahrain-residency/self-sponsorship-visa/` | Planned; not implemented |
@@ -136,13 +138,15 @@ The approved decisions are:
   HTTP 404 in production builds. The existing `/dev/design-system/` showcase
   has the same production restriction.
 
-  The frontend currently has no verified property inventory, profile/contact
-  details, authorized photography, published articles or reviewed FAQs. The
-  homepage therefore uses clearly identified pending-information and empty
-  states, and search/enquiry controls do not submit data. Development
-  noindex/no-store protections remain enabled. This work does not provide
-  Supabase integration, production indexing, sitemap publication, redirects,
-  or deployment readiness.
+  Public property and editorial routes now read from their published Supabase
+  views. The CMS-backed blog hub, article/FAQ archives, and bilingual
+  `/guides/{slug}/` details use locale-specific publication eligibility;
+  property and editorial pages include applicable metadata and structured
+  data. Dynamic sitemap and robots endpoints are implemented, but indexing is
+  disabled by default and production deployment, verified inventory,
+  profile/contact details, authorized photography, redirect mapping, and
+  Hostinger readiness remain incomplete. The homepage retains pending-
+  information and empty states where verified business content is absent.
 
   Typed integration boundaries and the intended publication handoff are
   documented in [frontend/backend integration](frontend-backend-integration.md).

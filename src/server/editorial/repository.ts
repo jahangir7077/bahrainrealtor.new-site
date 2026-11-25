@@ -117,17 +117,47 @@ export async function getPublishedArticle(language: Language, slug: string): Pro
   return articleRecord(validate(data, 'article', language), language, true);
 }
 
-export async function listPublishedArticlePaths(): Promise<{ path: string; lastModified: string }[]> {
+export async function listPublishedEditorialPaths(): Promise<{ path: string; lastModified: string }[]> {
   const paths: { path: string; lastModified: string }[] = [];
   for (const language of ['en', 'ar'] as const) {
     const articles = await listPublishedArticles(language);
-    if (articles.length === 100) throw new Error('Published article sitemap exceeds configured capacity');
-    for (const article of articles) {
-      if (!article.publishedAt || !Number.isFinite(Date.parse(article.publishedAt))) {
-        throw new Error('Invalid published article date');
-      }
+    const faqs = await listPublishedFaqs(language);
+    if (articles.length === 100 || faqs.length === 100) {
+      throw new Error('Published editorial sitemap exceeds configured capacity');
+    }
+    const articleDates = articles.map((article) => article.publishedAt).filter(
+      (date): date is string => Boolean(date && Number.isFinite(Date.parse(date))),
+    );
+    const faqDates = faqs.map((faq) => faq.publishedAt).filter(
+      (date): date is string => Boolean(date && Number.isFinite(Date.parse(date))),
+    );
+    if (articleDates.length !== articles.length || faqDates.length !== faqs.length) {
+      throw new Error('Invalid published editorial date');
+    }
+    const latestDate = [...articleDates, ...faqDates].reduce<string | undefined>(
+      (latest, date) => !latest || Date.parse(date) > Date.parse(latest) ? date : latest,
+      undefined,
+    );
+    const prefix = language === 'ar' ? '/ar' : '';
+    if (articles.length) {
       paths.push({
-        path: `${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`,
+        path: `${prefix}/blog/articles/`,
+        lastModified: articleDates.reduce((latest, date) =>
+          Date.parse(date) > Date.parse(latest) ? date : latest),
+      });
+    }
+    if (faqs.length) {
+      paths.push({
+        path: `${prefix}/blog/faqs/`,
+        lastModified: faqDates.reduce((latest, date) =>
+          Date.parse(date) > Date.parse(latest) ? date : latest),
+      });
+    }
+    if (latestDate) paths.push({ path: `${prefix}/blog/`, lastModified: latestDate });
+    for (const article of articles) {
+      if (!article.publishedAt) throw new Error('Invalid published article date');
+      paths.push({
+        path: `${prefix}/guides/${article.slug}/`,
         lastModified: article.publishedAt,
       });
     }
@@ -154,23 +184,4 @@ export async function listPublishedFaqs(language: Language): Promise<readonly Fa
       publication: { [language]: publication(row, language) },
     };
   });
-}
-
-export async function listPublishedFaqArchivePaths(): Promise<{ path: string; lastModified: string }[]> {
-  const paths: { path: string; lastModified: string }[] = [];
-  for (const language of ['en', 'ar'] as const) {
-    const faqs = await listPublishedFaqs(language);
-    if (faqs.length === 100) throw new Error('Published FAQ sitemap exceeds configured capacity');
-    const dates = faqs.map((faq) => faq.publishedAt).filter(
-      (date): date is string => Boolean(date && Number.isFinite(Date.parse(date))),
-    );
-    if (faqs.length && dates.length !== faqs.length) throw new Error('Invalid published FAQ date');
-    if (dates.length) {
-      paths.push({
-        path: `${language === 'ar' ? '/ar' : ''}/blog/faqs/`,
-        lastModified: dates.sort((a, b) => Date.parse(b) - Date.parse(a))[0],
-      });
-    }
-  }
-  return paths;
 }

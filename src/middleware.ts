@@ -15,7 +15,7 @@ export const onRequest = defineMiddleware(async (_context, next) => {
   const approvedEditorialArchive =
     process.env.SEO_INDEXING_ENABLED === 'true' &&
     response.status === 200 &&
-    /^\/(?:ar\/)?blog\/(?:articles|faqs)\/$/i.test(pathname);
+    /^\/(?:ar\/)?blog\/(?:articles|faqs)?\/$/i.test(pathname);
   if (!seoEndpoint) response.headers.set('Cache-Control', 'no-store, max-age=0');
   if (approvedPropertyPage || approvedGuidePage || approvedEditorialArchive) {
     response.headers.delete('X-Robots-Tag');

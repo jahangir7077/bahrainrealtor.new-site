@@ -1,5 +1,5 @@
 import { listPublishedPropertyPaths } from '../server/properties/repository.ts';
-import { listPublishedArticlePaths, listPublishedFaqArchivePaths } from '../server/editorial/repository.ts';
+import { listPublishedEditorialPaths } from '../server/editorial/repository.ts';
 import { sitemapXml } from '../utils/seo/sitemap.ts';
 
 export const prerender = false;
@@ -10,8 +10,7 @@ export async function GET() {
     const paths = enabled
       ? [
           ...await listPublishedPropertyPaths(),
-          ...await listPublishedArticlePaths(),
-          ...await listPublishedFaqArchivePaths(),
+          ...await listPublishedEditorialPaths(),
         ]
       : [];
     return new Response(sitemapXml(paths), {

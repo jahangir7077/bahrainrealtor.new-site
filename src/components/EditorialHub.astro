@@ -1,0 +1,40 @@
+---
+import Container from './ui/Container.astro';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  articleCount: number;
+  faqCount: number;
+}
+
+const { language, articleCount, faqCount } = Astro.props;
+const arabic = language === 'ar';
+const prefix = arabic ? '/ar' : '';
+---
+
+<Container width="narrow">
+  <section class="hub">
+    <h1>{arabic ? 'المدونة' : 'Blog'}</h1>
+    <nav aria-label={arabic ? 'المحتوى التحريري' : 'Editorial content'}>
+      <ul>
+        <li>
+          <a href={`${prefix}/blog/articles/`}>{arabic ? 'المقالات' : 'Articles'}</a>
+          <span>{articleCount}</span>
+        </li>
+        <li>
+          <a href={`${prefix}/blog/faqs/`}>{arabic ? 'الأسئلة الشائعة' : 'Frequently asked questions'}</a>
+          <span>{faqCount}</span>
+        </li>
+      </ul>
+    </nav>
+  </section>
+</Container>
+
+<style>
+  .hub { padding-block: var(--space-10) var(--space-20); }
+  .hub h1 { font-family: var(--font-display); }
+  .hub ul { display: grid; gap: var(--space-4); padding: 0; list-style: none; }
+  .hub li { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+  .hub a { color: var(--color-text); font-weight: 600; }
+</style>

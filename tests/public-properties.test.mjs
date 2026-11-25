@@ -215,6 +215,10 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.ok(xml.includes(`https://bahrainrealtor.com/ar/properties/example-home-${id}/`));
   assert.ok(xml.includes(`https://bahrainrealtor.com/properties/sold-home-${soldId}/`));
   assert.ok(xml.includes('https://bahrainrealtor.com/guides/amwaj-property-investment-guide/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/blog/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/ar/blog/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/blog/articles/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/ar/blog/articles/'));
   assert.ok(xml.includes('https://bahrainrealtor.com/blog/faqs/'));
   assert.ok(xml.includes('https://bahrainrealtor.com/ar/blog/faqs/'));
   assert.ok(xml.includes('<lastmod>2026-11-25T10:00:00.000Z</lastmod>'));
@@ -226,6 +230,23 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.match(propertyHtml, /<meta name="robots" content="index, follow"/);
   assert.match(propertyHtml, /<link rel="canonical" href="https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.doesNotMatch(property.headers.get('x-robots-tag') ?? '', /noindex/);
+});
+
+test('bilingual blog hubs link only to published CMS archives and remain noindex by default', async () => {
+  const english = await read('/blog/');
+  assert.equal(english.response.status, 200);
+  assert.match(english.html, /<h1[^>]*>Blog<\/h1>/);
+  assert.match(english.html, /href="\/blog\/articles\/"/);
+  assert.match(english.html, /href="\/blog\/faqs\/"/);
+  assert.match(english.html, /noindex, nofollow/);
+  const arabic = await read('/ar/blog/');
+  assert.equal(arabic.response.status, 200);
+  assert.match(arabic.html, /<h1[^>]*>المدونة<\/h1>/);
+  assert.match(arabic.html, /href="\/ar\/blog\/articles\/"/);
+  assert.match(arabic.html, /href="\/ar\/blog\/faqs\/"/);
+  const enabled = await fetch(`${indexingBase}/blog/`);
+  assert.equal(enabled.status, 200);
+  assert.match(await enabled.text(), /name="robots" content="index, follow"/);
 });
 
 test('bilingual guide routes use published CMS content, metadata, schema, and safe index gates', async () => {

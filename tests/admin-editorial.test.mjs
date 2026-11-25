@@ -127,7 +127,8 @@ test('CSRF token is random, cookie-bound and requires a single exact form value'
   const token = issueCsrfToken(cookies);
   assert.match(token, /^[a-f0-9]{64}$/);
   assert.equal(validCsrfToken(form({ csrf: token }), cookies), true);
-  assert.equal(validCsrfToken(form({ csrf: `${token.slice(0, -1)}0` }), cookies), false);
+  const differentToken = `${token.slice(0, -1)}${token.endsWith('0') ? '1' : '0'}`;
+  assert.equal(validCsrfToken(form({ csrf: differentToken }), cookies), false);
   const duplicate = form({ csrf: token });
   duplicate.append('csrf', token);
   assert.equal(validCsrfToken(duplicate, cookies), false);
