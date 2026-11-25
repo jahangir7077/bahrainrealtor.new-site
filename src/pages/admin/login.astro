@@ -39,6 +39,7 @@ if (!config) {
 <body><main>
   <h1>Administrator sign in</h1>
   {message && <p role="alert">{message}</p>}
+  {!config && import.meta.env.DEV && <p>Check SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY and APP_ORIGIN in the server environment, then restart the development server. APP_ORIGIN must match the browser address exactly.</p>}
   {config && <form method="post">
     <p><label>Email <input name="email" type="email" autocomplete="username" required maxlength="320" /></label></p>
     <p><label>Password <input name="password" type="password" autocomplete="current-password" required maxlength="1024" /></label></p>

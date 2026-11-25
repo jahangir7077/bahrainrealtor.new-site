@@ -42,7 +42,12 @@ before(async () => {
   baseUrl = `http://127.0.0.1:${port}`;
   server = spawn(process.execPath, ['dist/server/entry.mjs'], {
     cwd: root,
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port) },
+    env: {
+      ...process.env, HOST: '127.0.0.1', PORT: String(port),
+      SUPABASE_URL: 'https://example.supabase.co',
+      SUPABASE_PUBLISHABLE_KEY: 'mock-publishable-key',
+      APP_ORIGIN: 'https://admin.example',
+    },
     stdio: 'ignore',
   });
   await waitForServer(server, baseUrl, 'Production server');
@@ -86,6 +91,14 @@ for (const [path, status, language, direction] of [
     }
   });
 }
+
+test('production server reads configuration at runtime', async () => {
+  const response = await fetch(`${baseUrl}/admin/login`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Administrator sign in/);
+  assert.doesNotMatch(html, /mock-publishable-key/);
+});
 
 test('design showcase is available only in development and demonstrates UI specimens', async () => {
   const response = await fetch(`${devUrl}/dev/design-system`);

@@ -4,8 +4,9 @@
 
 The application is Astro SSR with typed content contracts in
 `src/types/content.ts`. Backend foundations are implemented, but this is not
-production-ready. The migrations are version-controlled and **have not been
-executed against any hosted Supabase project**. Do not send credentials in
+production-ready. The owner reports that all five migrations were executed and
+the administrator authorized in the development project; this session has not
+independently verified those operations. Do not send credentials in
 conversation messages.
 
 The existing production site remains on Netlify. No deployment, DNS change,
@@ -55,7 +56,9 @@ The current migrations are ordered:
 They provide administrator membership/MFA policies, immutable content
 revisions and per-locale publication, enquiry and notification queues,
 private media metadata and storage policies, editorial/site-content records,
-property search and archive safeguards. No hosted migration has been run.
+property search and archive safeguards. Hosted execution is owner-reported,
+not independently verified here. Do not run further hosted migrations without
+separate approval.
 Local SQL tests use stubbed Supabase roles and authentication unless a real
 local Supabase stack is explicitly stated; they are not hosted-integration
 tests.
@@ -65,7 +68,11 @@ search and filters, exact decimal price sorting, pagination and related
 properties. Public images are served via short-lived transformed signed URLs
 for media attached to an exact published locale revision. Transform delivery
 depends on the project's Supabase Image Transformations support; it fails
-closed if unavailable. Originals remain in private storage.
+closed if unavailable. Supabase documents image resizing as a
+[Pro-plan-and-above feature](https://supabase.com/docs/guides/storage/serving/image-transformations).
+Consequently public transformed images cannot be assumed to work on the Free
+plan; a secure, tested alternative or a paid plan is needed. Originals remain
+in private storage.
 
 The private `/admin/` dashboard links property, media, editorial, site-content
 and enquiry management. Mutations check admin membership and MFA; public and
@@ -105,15 +112,19 @@ configuration and privacy/legal review.
    npm run dev
    ```
 
-   Open `http://127.0.0.1:4321`. Without a valid project URL and publishable
-   key, database-backed routes intentionally fail closed. Local `.env` is
-   ignored; never commit it.
+   Open `http://127.0.0.1:4321/admin/login`. The dev server loads the project
+   root `.env` into its server process at startup; already-set process
+   variables take precedence. Restart the server after changing `.env` or
+   process variables. Use the same host and port in the browser and
+   `APP_ORIGIN`, and ensure the URL has no path or trailing extra characters.
+   If login still returns 503, check that all three settings are present in
+   the environment of the process actually running Astro, that the Supabase
+   URL is HTTPS, and that `APP_ORIGIN` is exactly the local browser origin.
+   Do not print or share key values. Local `.env` is ignored; never commit it.
 
-4. **Do not run `supabase link`, `supabase db push`, or otherwise execute a
-   hosted migration yet.** The owner must first authorize hosted development
-   migration execution. When explicitly authorized, use the existing project
-   reference above, review every migration in order, and follow the approved
-   migration process. Do not create a replacement project or target production.
+4. The owner reports the five existing migrations were applied to the
+   development project. Do not run additional hosted migrations or target
+   production without separate approval. Do not create another project.
 
 5. After an authorized migration, configure server-only secrets through the
    local `.env` or the approved environment's secret manager, never in the
@@ -125,13 +136,11 @@ configuration and privacy/legal review.
    endpoint must be fixed HTTPS and must not contain credentials or a query.
    Do not send any secret through chat.
 
-6. Create the one authorized administrator in Supabase Auth. After migrations
-   are explicitly authorized and applied, have the owner grant that user
-   membership by inserting their Auth user UUID into
-   `public.admin_profiles` with `authorized = true` using a restricted
-   administrative session. Sign in at `/admin/login`, enroll and verify TOTP
-   at `/admin/mfa`, and validate the session before using admin functions.
-   Restrict Auth redirect URLs to the actual local or approved preview origin.
+6. The owner reports that the administrator was created and authorized.
+   Sign in at `/admin/login`, enroll and verify TOTP at `/admin/mfa`, and
+   validate the session before using admin functions. Restrict Auth redirect
+   URLs to the actual local or approved preview origin. These actual Supabase
+   Auth and MFA flows still require independent integration verification.
 
 7. Configure a scheduled caller for
    `POST /api/internal/enquiry-notifications` using the worker bearer token
@@ -156,6 +165,22 @@ retention, encrypted backups and restore, privacy/legal requirements,
 Hostinger resource limits/caching, deployment/rollback, preview access
 restrictions, and manual production deployment controls. Production indexing,
 redirects, strategic URL changes, deployment and cutover remain unauthorized.
+
+## Hostinger staging preparation
+
+Only after separate staging authorization, use a separate access-restricted
+Hostinger site and the development Supabase project, never the existing live
+site or production data. Verify that Hostinger's access restriction protects
+every route and that production auto-deployment is disabled before uploading
+anything. Set Node 24, `npm run build`, output `dist`, and entry
+`server/entry.mjs`; supply the server variables via Hostinger's protected
+runtime environment, not browser-exposed variables or build-time injection.
+Use the exact HTTPS staging origin for `APP_ORIGIN`. Verify HTTPS cookies,
+MFA, publication, storage, no-store/noindex headers, and restricted access
+before accepting the preview. Keep the prior staging artifact and configuration
+securely for rollback, and verify an account-specific manual restore procedure
+before deployment. Hostinger's actual controls, process restart, caching and
+rollback remain unverified; do not assume noindex alone protects a preview.
 
 ## Editorial CMS integration
 

@@ -25,8 +25,9 @@ HOST=127.0.0.1 PORT=4321 npm run start
 `npm test` runs the existing Node test suite. `npm run preview` is available
 for a built application. Copy `.env.example` to `.env` and add credentials only
 to that ignored local file or a secure environment. Without configuration,
-database-backed routes fail closed. Do not execute hosted migrations yet,
-including on the identified development project.
+database-backed routes fail closed. The owner reports that the five migrations
+were applied to the development project; this has not been independently
+verified here. Do not execute additional hosted migrations without approval.
 
 ## Structure and limitations
 
@@ -50,12 +51,12 @@ not activated for production. The backend implementation includes
 administrator sign-in and TOTP, property revisions and locale-aware publishing,
 private media management, published property search and galleries, enquiry
 intake and lead management, notification retry infrastructure, article/FAQ
-publishing, and private area/project/settings drafts. No hosted migration or
-real Supabase integration has been performed. Local SQL tests use stubbed
-Supabase roles/authentication; HTTP tests use mock backends.
+publishing, and private area/project/settings drafts. The reported hosted
+migration and admin setup have not been independently verified. Local SQL
+tests use stubbed Supabase roles/authentication; HTTP tests use mock backends.
 
-The website is not production-ready. Migrations remain unapplied; the email
-provider and worker schedule are unconfigured; image transformation support,
+The website is not production-ready. The email provider and worker schedule
+are unconfigured; image transformation support,
 media backup/recovery, real TOTP/cookie behavior, concurrent hosted publishing,
 admin bootstrap/recovery, privacy/legal requirements and Hostinger runtime and
 deployment controls still need validation. No public project/area/settings
