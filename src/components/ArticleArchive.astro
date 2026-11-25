@@ -39,7 +39,7 @@ const visibleArticles = articles.filter((article) => {
           return (
             <article class="article-entry">
               <p class="article-entry__category">{content.categoryName}</p>
-              <h2>{content.title}</h2>
+              <h2><a href={`${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`}>{content.title}</a></h2>
               <p class="article-entry__summary">{content.summary}</p>
               <div class="article-entry__meta">
                 <span>{translate(language, 'templates.author')}: <bdi>{article.authorName}</bdi></span>

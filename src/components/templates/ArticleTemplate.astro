@@ -10,9 +10,10 @@ import type { ArticleRecord } from '../../types/content.ts';
 interface Props {
   language: Language;
   article?: ArticleRecord;
+  preview?: boolean;
 }
 
-const { language, article } = Astro.props;
+const { language, article, preview = true } = Astro.props;
 const content = article?.content[language];
 const publication = article?.publication[language];
 const eligible = Boolean(publication && getPublicationEligibility(publication, language).routeAvailable);
@@ -27,7 +28,7 @@ const sections = content?.sections?.filter((section) => /^[A-Za-z0-9_-]+$/.test(
     {article && content && eligible ? (
       <>
         <header class="article-heading">
-          <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>
+          {preview && <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>}
           <h1>{content.title}</h1>
           <p>{content.summary}</p>
           <div class="article-meta">

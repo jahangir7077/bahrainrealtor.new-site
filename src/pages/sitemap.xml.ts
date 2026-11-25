@@ -1,4 +1,5 @@
 import { listPublishedPropertyPaths } from '../server/properties/repository.ts';
+import { listPublishedArticlePaths, listPublishedFaqArchivePaths } from '../server/editorial/repository.ts';
 import { sitemapXml } from '../utils/seo/sitemap.ts';
 
 export const prerender = false;
@@ -6,7 +7,13 @@ export const prerender = false;
 export async function GET() {
   const enabled = process.env.SEO_INDEXING_ENABLED === 'true';
   try {
-    const paths = enabled ? await listPublishedPropertyPaths() : [];
+    const paths = enabled
+      ? [
+          ...await listPublishedPropertyPaths(),
+          ...await listPublishedArticlePaths(),
+          ...await listPublishedFaqArchivePaths(),
+        ]
+      : [];
     return new Response(sitemapXml(paths), {
       headers: {
         'Content-Type': 'application/xml; charset=utf-8',

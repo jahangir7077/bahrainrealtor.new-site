@@ -166,7 +166,13 @@ test('editorial route checks origin, CSRF, administrator membership and AAL2 on 
     const source = await readFile(new URL(publicRoute, import.meta.url), 'utf8');
     assert.match(source, /listPublished(?:Articles|Faqs)/);
     assert.match(source, /Astro\.response\.status = 503/);
-    assert.doesNotMatch(source, /indexingEligible|indexable=\{true\}/);
+    assert.match(source, /SEO_INDEXING_ENABLED === 'true'/);
+    if (publicRoute.includes('/articles/')) {
+      assert.match(source, /getPublicationEligibility\(publication, '(?:en|ar)'\)\.routeAvailable/);
+    } else {
+      assert.match(source, /faqs\.length > 0/);
+    }
+    assert.doesNotMatch(source, /indexingEligible=\{true\}|enableCanonical=\{true\}/);
   }
 });
 

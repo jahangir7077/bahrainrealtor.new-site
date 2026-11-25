@@ -13,8 +13,17 @@ try {
   Astro.response.status = 503;
 }
 Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+const indexable = process.env.SEO_INDEXING_ENABLED === 'true' && faqs.length > 0;
+if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 
-<BaseLayout title={translate('en', 'home.faqTitle')} description={translate('en', 'home.faqDescription')} language="en">
+<BaseLayout
+  title={translate('en', 'home.faqTitle')}
+  description={translate('en', 'home.faqDescription')}
+  language="en"
+  indexingEligible={indexable}
+  enableCanonical={indexable}
+  showOpenGraph
+>
   <FaqTemplate language="en" faqs={faqs} preview={false} unavailable={unavailable} />
 </BaseLayout>

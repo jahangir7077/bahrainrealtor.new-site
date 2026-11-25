@@ -35,6 +35,40 @@ const rows = [
     title: `Rental ${index}`,
   })),
 ];
+const editorialRows = [
+  ...['en', 'ar'].map((locale) => ({
+    id: locale === 'en' ? '66666666-6666-4666-8666-666666666666' : '77777777-7777-4777-8777-777777777777',
+    kind: 'article',
+    slug: 'amwaj-property-investment-guide',
+    locale,
+    revision_id: locale === 'en' ? '88888888-8888-4888-8888-888888888888' : '99999999-9999-4999-8999-999999999999',
+    published_at: '2026-11-25T10:00:00Z',
+    title: locale === 'en' ? 'Amwaj property investment guide' : 'دليل الاستثمار العقاري في أمواج',
+    body: locale === 'en' ? 'Verified guide body.' : 'محتوى الدليل المعتمد.',
+    summary: locale === 'en' ? 'A reviewed summary.' : 'ملخص تمت مراجعته.',
+    author_name: 'Editorial team',
+    seo_title: locale === 'en' ? 'Investing in Amwaj property' : 'الاستثمار في عقارات أمواج',
+    seo_description: locale === 'en' ? 'Reviewed Amwaj investment information.' : 'معلومات مراجعة عن الاستثمار في أمواج.',
+    category_slug: 'investment',
+    category_name: locale === 'en' ? 'Investment' : 'الاستثمار',
+  })),
+  ...['en', 'ar'].map((locale) => ({
+    id: locale === 'en' ? 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' : 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    kind: 'faq',
+    slug: 'buying-property',
+    locale,
+    revision_id: locale === 'en' ? 'cccccccc-cccc-4ccc-8ccc-cccccccccccc' : 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    published_at: '2026-11-24T10:00:00Z',
+    title: locale === 'en' ? 'How do I buy property?' : 'كيف أشتري عقاراً؟',
+    body: locale === 'en' ? 'Review the verified buying process.' : 'راجع عملية الشراء المعتمدة.',
+    summary: null,
+    author_name: null,
+    seo_title: null,
+    seo_description: null,
+    category_slug: 'buying',
+    category_name: locale === 'en' ? 'Buying' : 'الشراء',
+  })),
+];
 let backend;
 let configured;
 let indexingEnabled;
@@ -86,7 +120,7 @@ before(async () => {
         return (!locale || locale === `eq.${item.locale}`) &&
           (!revisionIds || revisionIds.includes(item.revision_id));
       })
-      : rows.filter((item) => {
+      : (url.pathname.endsWith('/published_editorial') ? editorialRows : rows).filter((item) => {
       for (const [key, value] of url.searchParams) {
         if (value.startsWith('eq.') && String(item[key]) !== value.slice(3)) return false;
         if (value.startsWith('neq.') && String(item[key]) === value.slice(4)) return false;
@@ -180,6 +214,10 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.ok(xml.includes(`https://bahrainrealtor.com/properties/example-home-${id}/`));
   assert.ok(xml.includes(`https://bahrainrealtor.com/ar/properties/example-home-${id}/`));
   assert.ok(xml.includes(`https://bahrainrealtor.com/properties/sold-home-${soldId}/`));
+  assert.ok(xml.includes('https://bahrainrealtor.com/guides/amwaj-property-investment-guide/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/blog/faqs/'));
+  assert.ok(xml.includes('https://bahrainrealtor.com/ar/blog/faqs/'));
+  assert.ok(xml.includes('<lastmod>2026-11-25T10:00:00.000Z</lastmod>'));
   const robotsOn = await (await fetch(`${indexingBase}/robots.txt`)).text();
   assert.match(robotsOn, /Sitemap: https:\/\/bahrainrealtor\.com\/sitemap\.xml/);
   const property = await fetch(`${indexingBase}/properties/example-home-${id}/`);
@@ -188,6 +226,41 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.match(propertyHtml, /<meta name="robots" content="index, follow"/);
   assert.match(propertyHtml, /<link rel="canonical" href="https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.doesNotMatch(property.headers.get('x-robots-tag') ?? '', /noindex/);
+});
+
+test('bilingual guide routes use published CMS content, metadata, schema, and safe index gates', async () => {
+  const path = '/guides/amwaj-property-investment-guide/';
+  const draftSafe = await read(path);
+  assert.equal(draftSafe.response.status, 200);
+  assert.match(draftSafe.html, /<meta name="robots" content="noindex, nofollow"/);
+  assert.match(draftSafe.html, /A reviewed summary/);
+  assert.doesNotMatch(draftSafe.html, /Development template preview/);
+  const enabled = await fetch(`${indexingBase}${path}`);
+  assert.equal(enabled.status, 200);
+  const html = await enabled.text();
+  assert.match(html, /<title>Investing in Amwaj property<\/title>/);
+  assert.match(html, /<meta name="robots" content="index, follow"/);
+  assert.match(html, /"@type":"Article"/);
+  assert.match(html, /"@type":"BreadcrumbList"/);
+  assert.match(html, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/guides\/amwaj-property-investment-guide\/"/);
+  const arabic = await fetch(`${indexingBase}/ar${path}`);
+  assert.equal(arabic.status, 200);
+  assert.match(await arabic.text(), /الاستثمار في عقارات أمواج/);
+  for (const host of [base, indexingBase]) {
+    assert.equal((await fetch(`${host}/guides/unpublished-guide/`)).status, 404);
+  }
+});
+
+test('FAQ archives emit visible-content schema and auto-enter the sitemap only with content', async () => {
+  const normal = await read('/blog/faqs/');
+  assert.match(normal.html, /"@type":"FAQPage"/);
+  assert.match(normal.html, /"name":"How do I buy property\?"/);
+  assert.match(normal.html, /name="robots" content="noindex, nofollow"/);
+  const enabled = await fetch(`${indexingBase}/blog/faqs/`);
+  assert.equal(enabled.status, 200);
+  const html = await enabled.text();
+  assert.match(html, /name="robots" content="index, follow"/);
+  assert.match(html, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/blog\/faqs\/"/);
 });
 
 test('details use exact slug and ID, preserve sold pages and do not fall back across locales', async () => {

@@ -1,0 +1,18 @@
+---
+import ArticleDetail from '../../../server/editorial/ArticleDetail.astro';
+import { getPublishedArticle } from '../../../server/editorial/repository.ts';
+
+const slug = Astro.params.slug ?? '';
+let article = null;
+try {
+  article = await getPublishedArticle('ar', slug);
+} catch {
+  Astro.response.status = 503;
+}
+if (!article && Astro.response.status !== 503) Astro.response.status = 404;
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+if (!article || process.env.SEO_INDEXING_ENABLED !== 'true') {
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
+---
+<ArticleDetail language="ar" article={article} />

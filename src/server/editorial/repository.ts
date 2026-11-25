@@ -57,8 +57,10 @@ function validate(row: Record<string, unknown>, kind: 'article' | 'faq', languag
   return row;
 }
 
-function publication(row: Record<string, unknown>, language: Language) {
-  const routePath = `${language === 'ar' ? '/ar' : ''}/blog/${row.kind === 'article' ? 'articles' : 'faqs'}/`;
+function publication(row: Record<string, unknown>, language: Language, detail = false) {
+  const routePath = detail
+    ? `${language === 'ar' ? '/ar' : ''}/guides/${row.slug}/`
+    : `${language === 'ar' ? '/ar' : ''}/blog/${row.kind === 'article' ? 'articles' : 'faqs'}/`;
   return {
     status: 'published' as const,
     revisionId: row.revision_id as string,
@@ -66,9 +68,35 @@ function publication(row: Record<string, unknown>, language: Language) {
     publishedRevisionId: row.revision_id as string,
     ...(language === 'ar' ? { humanReviewedRevisionId: row.revision_id as string } : {}),
     routePath,
+    canonicalPath: routePath,
     routeExists: true,
-    indexable: false,
+    indexable: detail && process.env.SEO_INDEXING_ENABLED === 'true',
     redirected: false,
+  };
+}
+
+function articleRecord(row: Record<string, unknown>, language: Language, detail = false): ArticleRecord {
+  return {
+    id: row.id as string,
+    slug: row.slug as string,
+    authorName: row.author_name as string,
+    publishedAt: row.published_at as string,
+    content: {
+      [language]: {
+        title: row.title as string,
+        summary: row.summary as string,
+        body: row.body as string,
+        ...(typeof row.seo_title === 'string' && row.seo_title.trim()
+          ? { seoTitle: row.seo_title }
+          : {}),
+        ...(typeof row.seo_description === 'string' && row.seo_description.trim()
+          ? { seoDescription: row.seo_description }
+          : {}),
+        categoryName: row.category_name as string,
+        ...(language === 'ar' ? { humanReviewedRevisionId: row.revision_id as string } : {}),
+      },
+    },
+    publication: { [language]: publication(row, language, detail) },
   };
 }
 
@@ -77,29 +105,34 @@ export async function listPublishedArticles(language: Language): Promise<readonl
   if (error || !Array.isArray(data)) throw new Error('Public editorial content unavailable');
   return data.map((untrusted) => {
     const row = validate(untrusted, 'article', language);
-    return {
-      id: row.id as string,
-      slug: row.slug as string,
-      authorName: row.author_name as string,
-      publishedAt: row.published_at as string,
-      content: {
-        [language]: {
-          title: row.title as string,
-          summary: row.summary as string,
-          body: row.body as string,
-          ...(typeof row.seo_title === 'string' && row.seo_title.trim()
-            ? { seoTitle: row.seo_title }
-            : {}),
-          ...(typeof row.seo_description === 'string' && row.seo_description.trim()
-            ? { seoDescription: row.seo_description }
-            : {}),
-          categoryName: row.category_name as string,
-          ...(language === 'ar' ? { humanReviewedRevisionId: row.revision_id as string } : {}),
-        },
-      },
-      publication: { [language]: publication(row, language) },
-    };
+    return articleRecord(row, language);
   });
+}
+
+export async function getPublishedArticle(language: Language, slug: string): Promise<ArticleRecord | null> {
+  if (!slugPattern.test(slug) || slug.length > 160) return null;
+  const { data, error } = await rowsFor(language, 'article').eq('slug', slug).maybeSingle();
+  if (error) throw new Error('Public editorial content unavailable');
+  if (!data) return null;
+  return articleRecord(validate(data, 'article', language), language, true);
+}
+
+export async function listPublishedArticlePaths(): Promise<{ path: string; lastModified: string }[]> {
+  const paths: { path: string; lastModified: string }[] = [];
+  for (const language of ['en', 'ar'] as const) {
+    const articles = await listPublishedArticles(language);
+    if (articles.length === 100) throw new Error('Published article sitemap exceeds configured capacity');
+    for (const article of articles) {
+      if (!article.publishedAt || !Number.isFinite(Date.parse(article.publishedAt))) {
+        throw new Error('Invalid published article date');
+      }
+      paths.push({
+        path: `${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`,
+        lastModified: article.publishedAt,
+      });
+    }
+  }
+  return paths;
 }
 
 export async function listPublishedFaqs(language: Language): Promise<readonly FaqRecord[]> {
@@ -109,6 +142,7 @@ export async function listPublishedFaqs(language: Language): Promise<readonly Fa
     const row = validate(untrusted, 'faq', language);
     return {
       id: row.id as string,
+      publishedAt: row.published_at as string,
       content: {
         [language]: {
           question: row.title as string,
@@ -120,4 +154,23 @@ export async function listPublishedFaqs(language: Language): Promise<readonly Fa
       publication: { [language]: publication(row, language) },
     };
   });
+}
+
+export async function listPublishedFaqArchivePaths(): Promise<{ path: string; lastModified: string }[]> {
+  const paths: { path: string; lastModified: string }[] = [];
+  for (const language of ['en', 'ar'] as const) {
+    const faqs = await listPublishedFaqs(language);
+    if (faqs.length === 100) throw new Error('Published FAQ sitemap exceeds configured capacity');
+    const dates = faqs.map((faq) => faq.publishedAt).filter(
+      (date): date is string => Boolean(date && Number.isFinite(Date.parse(date))),
+    );
+    if (faqs.length && dates.length !== faqs.length) throw new Error('Invalid published FAQ date');
+    if (dates.length) {
+      paths.push({
+        path: `${language === 'ar' ? '/ar' : ''}/blog/faqs/`,
+        lastModified: dates.sort((a, b) => Date.parse(b) - Date.parse(a))[0],
+      });
+    }
+  }
+  return paths;
 }

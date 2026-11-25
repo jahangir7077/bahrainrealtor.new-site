@@ -8,8 +8,16 @@ export const onRequest = defineMiddleware(async (_context, next) => {
     process.env.SEO_INDEXING_ENABLED === 'true' &&
     response.status === 200 &&
     /^\/(?:ar\/)?properties\/[a-z0-9]+(?:-[a-z0-9]+)*-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/$/i.test(pathname);
+  const approvedGuidePage =
+    process.env.SEO_INDEXING_ENABLED === 'true' &&
+    response.status === 200 &&
+    /^\/(?:ar\/)?guides\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/i.test(pathname);
+  const approvedEditorialArchive =
+    process.env.SEO_INDEXING_ENABLED === 'true' &&
+    response.status === 200 &&
+    /^\/(?:ar\/)?blog\/(?:articles|faqs)\/$/i.test(pathname);
   if (!seoEndpoint) response.headers.set('Cache-Control', 'no-store, max-age=0');
-  if (approvedPropertyPage) {
+  if (approvedPropertyPage || approvedGuidePage || approvedEditorialArchive) {
     response.headers.delete('X-Robots-Tag');
   } else if (!seoEndpoint && !response.headers.has('X-Robots-Tag')) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');

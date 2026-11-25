@@ -100,6 +100,7 @@ export interface LocalizedFaqContent {
 
 export interface FaqRecord {
   id: string;
+  publishedAt?: string;
   content: Partial<Record<Language, LocalizedFaqContent>>;
   publication: Partial<Record<Language, PublicationVersion>>;
 }
