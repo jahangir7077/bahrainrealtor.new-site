@@ -13,9 +13,20 @@ interface Props {
   description: string;
   language: Language;
   showChrome?: boolean;
+  indexingEligible?: boolean;
+  enableCanonical?: boolean;
+  showOpenGraph?: boolean;
 }
 
-const { title, description, language, showChrome = true } = Astro.props;
+const {
+  title,
+  description,
+  language,
+  showChrome = true,
+  indexingEligible = false,
+  enableCanonical = false,
+  showOpenGraph = false,
+} = Astro.props;
 
 const siteLocale = (value: Language) => localeConfig[value].language;
 ---
@@ -25,7 +36,15 @@ const siteLocale = (value: Language) => localeConfig[value].language;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <SEOHead title={title} description={description} language={language} pathname={Astro.url.pathname} />
+    <SEOHead
+      title={title}
+      description={description}
+      language={language}
+      pathname={Astro.url.pathname}
+      indexingEligible={indexingEligible}
+      enableCanonical={enableCanonical}
+      showOpenGraph={showOpenGraph}
+    />
   </head>
   <body>
     <a class="skip-link" href="#main-content">{translate(language, 'accessibility.skipToContent')}</a>

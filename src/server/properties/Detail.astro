@@ -8,6 +8,7 @@ import { translate } from '../../i18n/translate.ts';
 import type { Language } from '../../i18n/config.ts';
 import { propertyPath, type PublicProperty } from './repository.ts';
 import { contentMetadata } from '../../utils/seo/content-metadata.ts';
+import { breadcrumbSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
 
 interface Props {
   language: Language;
@@ -28,8 +29,22 @@ const metadata = property
       seoDescription: property.seoDescription,
     })
   : { title, description: title };
+const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true' && Boolean(property);
+const breadcrumbs = property ? breadcrumbSchema([
+  { name: translate(language, 'navigation.home'), path: language === 'ar' ? '/ar/' : '/' },
+  { name: arabic ? 'العقارات' : 'Properties', path: arabic ? '/ar/properties/' : '/properties/' },
+  { name: property.title, path: propertyPath(property, language) },
+]) : null;
 ---
-<BaseLayout title={metadata.title} description={metadata.description} language={language}>
+<BaseLayout
+  title={metadata.title}
+  description={metadata.description}
+  language={language}
+  indexingEligible={indexingEnabled}
+  enableCanonical={indexingEnabled}
+  showOpenGraph
+>
+  {breadcrumbs && <script type="application/ld+json" set:html={safeJsonLd(breadcrumbs)} />}
   <Container width="wide">
     <section class="detail">
       {property ? (

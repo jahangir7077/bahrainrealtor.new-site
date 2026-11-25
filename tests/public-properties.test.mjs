@@ -37,6 +37,8 @@ const rows = [
 ];
 let backend;
 let configured;
+let indexingEnabled;
+let indexingBase;
 let unconfigured;
 let base;
 let missingBase;
@@ -112,10 +114,15 @@ before(async () => {
     SUPABASE_URL: `http://127.0.0.1:${backend.address().port}`,
     SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
   });
+  [indexingEnabled, indexingBase] = await start({
+    SUPABASE_URL: `http://127.0.0.1:${backend.address().port}`,
+    SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
+    SEO_INDEXING_ENABLED: 'true',
+  });
 });
 
 after(async () => {
-  for (const child of [configured, unconfigured]) {
+  for (const child of [configured, indexingEnabled, unconfigured]) {
     if (child && child.exitCode === null) { child.kill(); await once(child, 'exit'); }
   }
   if (backend) await new Promise((resolve) => backend.close(resolve));
@@ -158,9 +165,30 @@ test('listing is bounded, filtered, linked, locale-specific and only queries the
   assert.doesNotMatch(ar.html, /Rental 0|Published &lt;home&gt;/);
 });
 
+test('sitemap and robots endpoints are served and indexing stays explicitly gated', async () => {
+  const disabled = await fetch(`${base}/sitemap.xml`);
+  assert.equal(disabled.status, 200);
+  assert.match(disabled.headers.get('content-type'), /application\/xml/);
+  assert.match(await disabled.text(), /<urlset/);
+  assert.doesNotMatch(await (await fetch(`${base}/sitemap.xml`)).text(), /<url>/);
+  const robotsOff = await (await fetch(`${base}/robots.txt`)).text();
+  assert.match(robotsOff, /Disallow: \/admin\//);
+  assert.doesNotMatch(robotsOff, /Sitemap:/);
+  const enabled = await fetch(`${indexingBase}/sitemap.xml`);
+  assert.equal(enabled.status, 200);
+  const xml = await enabled.text();
+  assert.ok(xml.includes(`https://bahrainrealtor.com/properties/example-home-${id}/`));
+  assert.ok(xml.includes(`https://bahrainrealtor.com/ar/properties/example-home-${id}/`));
+  assert.ok(xml.includes(`https://bahrainrealtor.com/properties/sold-home-${soldId}/`));
+  const robotsOn = await (await fetch(`${indexingBase}/robots.txt`)).text();
+  assert.match(robotsOn, /Sitemap: https:\/\/bahrainrealtor\.com\/sitemap\.xml/);
+});
+
 test('details use exact slug and ID, preserve sold pages and do not fall back across locales', async () => {
   const en = await read(`/properties/example-home-${id}/`);
   assert.equal(en.response.status, 200);
+  assert.match(en.html, /"@type":"BreadcrumbList"/);
+  assert.match(en.html, /"item":"https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.match(en.html, /<title>Reviewed listing SEO title<\/title>/);
   assert.match(en.html, /<meta name="description" content="Reviewed listing search description\."\/?>/);
   assert.match(en.html, /Published &lt;home&gt;/);

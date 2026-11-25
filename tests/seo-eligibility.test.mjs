@@ -5,12 +5,14 @@ import { eligibleSitemapRoutes, robotsIndexingDirective } from '../src/utils/seo
 import {
   articleSchema,
   breadcrumbSchema,
+  faqPageSchema,
   organizationSchema,
   personSchema,
   propertySchema,
   realEstateAgentSchema,
   safeJsonLd,
 } from '../src/utils/seo/structured-data.ts';
+import { robotsTxt, sitemapXml } from '../src/utils/seo/sitemap.ts';
 
 const publication = (language = 'en', overrides = {}) => ({
   status: 'published',
@@ -56,12 +58,52 @@ test('sitemap and robots eligibility stay disabled by default and exclude unrevi
   assert.equal(robotsIndexingDirective(unreviewedArabic, 'ar', true), 'noindex, nofollow');
 });
 
+test('sitemap and robots responses use safe stable paths and preserve public media crawling', () => {
+  const xml = sitemapXml([
+    '/properties/home-11111111-1111-4111-8111-111111111111/',
+    '/ar/properties/home-11111111-1111-4111-8111-111111111111/',
+    '/properties/home-11111111-1111-4111-8111-111111111111/',
+    '//outside.example/path',
+    '/private/?token=secret',
+  ]);
+  assert.equal((xml.match(/<url>/g) ?? []).length, 2);
+  assert.match(xml, /https:\/\/bahrainrealtor\.com\/properties\/home-11111111-1111-4111-8111-111111111111\//);
+  assert.match(xml, /https:\/\/bahrainrealtor\.com\/ar\/properties\//);
+  assert.doesNotMatch(xml, /outside\.example|token=secret/);
+  const robots = robotsTxt(false);
+  assert.match(robots, /Disallow: \/admin\//);
+  assert.match(robots, /Disallow: \/api\/admin\//);
+  assert.doesNotMatch(robots, /Disallow: \/api\/$/);
+  assert.doesNotMatch(robots, /Sitemap:/);
+  assert.match(robotsTxt(true), /Sitemap: https:\/\/bahrainrealtor\.com\/sitemap\.xml/);
+});
+
 test('structured-data builders require safe paths and eligible, factual inputs', () => {
   assert.deepEqual(organizationSchema('Bahrain Realtor', '/'), {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Bahrain Realtor',
     url: 'https://bahrainrealtor.com/',
+  });
+
+  test('FAQ structured data includes only visible published questions with safely encoded answers', () => {
+    const faqs = [
+      {
+        content: { en: { question: 'What is available?', answer: '</script><b>Verified answer</b>' } },
+        publication: { en: publication() },
+      },
+      {
+        content: { en: { question: 'Private draft?', answer: 'Not visible' } },
+        publication: { en: publication('en', { status: 'draft' }) },
+      },
+    ];
+    assert.deepEqual(faqPageSchema(faqs, 'en')?.mainEntity, [{
+      '@type': 'Question',
+      name: 'What is available?',
+      acceptedAnswer: { '@type': 'Answer', text: '</script><b>Verified answer</b>' },
+    }]);
+    assert.equal(faqPageSchema(faqs, 'ar'), null);
+    assert.match(safeJsonLd(faqPageSchema(faqs, 'en')), /\\u003c\/script>/);
   });
   assert.equal(organizationSchema('Bahrain Realtor', '//outside.example/'), null);
   assert.equal(personSchema('Advisor', '/', 'https://outside.example/image.jpg'), null);

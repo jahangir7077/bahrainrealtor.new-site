@@ -5,6 +5,7 @@ import Container from '../ui/Container.astro';
 import { translate } from '../../i18n/translate.ts';
 import type { Language } from '../../i18n/config.ts';
 import type { FaqRecord } from '../../types/content.ts';
+import { faqPageSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
 
 interface Props {
   language: Language;
@@ -14,9 +15,11 @@ interface Props {
 }
 
 const { language, faqs, preview = true, unavailable = false } = Astro.props;
+const schema = !unavailable ? faqPageSchema(faqs, language) : null;
 ---
 
 <section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  {schema && <script type="application/ld+json" set:html={safeJsonLd(schema)} />}
   <Container width="narrow">
     <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: translate(language, 'home.faqTitle') }]} />
     <header>

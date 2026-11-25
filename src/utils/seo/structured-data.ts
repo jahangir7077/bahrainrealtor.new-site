@@ -3,6 +3,7 @@ import { getPublicationEligibility, type PublicationVersion } from '../../i18n/p
 import { detectLanguage, normalizeInternalPath } from '../../i18n/routes.ts';
 import { site } from '../../config/site.ts';
 import type { PropertyRecord } from '../../types/content.ts';
+import type { FaqRecord } from '../../types/content.ts';
 
 export interface BreadcrumbData {
   name: string;
@@ -83,6 +84,23 @@ export function articleSchema(input: {
     ...(modified ? { dateModified: modified } : {}),
     mainEntityOfPage: url,
   };
+}
+
+export function faqPageSchema(faqs: readonly FaqRecord[], language: Language) {
+  const mainEntity = faqs.flatMap((faq) => {
+    const publication = faq.publication[language];
+    const content = faq.content[language];
+    if (!publication || !content ||
+        !getPublicationEligibility(publication, language).routeAvailable ||
+        !content.question.trim() || !content.answer.trim()) return [];
+    return [{
+      '@type': 'Question',
+      name: content.question.trim(),
+      acceptedAnswer: { '@type': 'Answer', text: content.answer.trim() },
+    }];
+  });
+  if (!mainEntity.length) return null;
+  return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity };
 }
 
 export function propertySchema(property: PropertyRecord, language: Language) {

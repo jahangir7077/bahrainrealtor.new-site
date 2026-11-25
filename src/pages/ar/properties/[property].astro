@@ -16,6 +16,8 @@ if (!path || ![propertyPath(path, 'ar'), propertyPath(path, 'ar').slice(0, -1)].
   } catch { unavailable = true; Astro.response.status = 503; }
 }
 Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+if (process.env.SEO_INDEXING_ENABLED !== 'true' || !property) {
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
 ---
 <Detail language="ar" property={property} related={related} unavailable={unavailable} />

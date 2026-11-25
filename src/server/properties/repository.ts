@@ -272,6 +272,32 @@ export async function getProperty(language: Language, path: { id: string; slug: 
   return property;
 }
 
+export async function listPublishedPropertyPaths(): Promise<string[]> {
+  const paths: string[] = [];
+  const pageSize = 1000;
+  for (let page = 0; page < 50; page += 1) {
+    const start = page * pageSize;
+    const { data, error } = await client().from('published_content')
+      .select('id,slug,locale,kind')
+      .eq('kind', 'property')
+      .order('id', { ascending: true })
+      .range(start, start + pageSize - 1);
+    if (error || !Array.isArray(data) || data.length > pageSize) {
+      throw new Error('Public sitemap content unavailable');
+    }
+    for (const row of data) {
+      if (row.kind !== 'property' || typeof row.id !== 'string' || !idPattern.test(row.id) ||
+          typeof row.slug !== 'string' || !slugPattern.test(row.slug) ||
+          (row.locale !== 'en' && row.locale !== 'ar')) {
+        throw new Error('Invalid public sitemap content');
+      }
+      paths.push(propertyPath({ id: row.id, slug: row.slug }, row.locale));
+    }
+    if (data.length < pageSize) return paths;
+  }
+  throw new Error('Public sitemap content exceeds configured capacity');
+}
+
 export async function listRelatedProperties(language: Language, property: PublicProperty): Promise<PublicProperty[]> {
   const { data, error } = await client().from('published_content').select(columns)
     .eq('kind', 'property').eq('locale', language).eq('availability', 'available')
