@@ -59,6 +59,30 @@ select public.create_site_content_draft(
   '50000000-0000-0000-0000-000000000014',
   'setting', 'site-title', 'en', 'Site title', 'Private site title', null, null, null
 );
+select public.create_routed_site_content_draft(
+  '40000000-0000-0000-0000-000000000014',
+  '50000000-0000-0000-0000-000000000015',
+  'area', 'buy-property-amwaj-island', '/buy-property/amwaj-island/',
+  'en', 'Amwaj property', 'Verified English area content', 'Reviewed summary', 'SEO title', 'SEO description'
+);
+select public.revise_site_content_draft(
+  '50000000-0000-0000-0000-000000000015',
+  '50000000-0000-0000-0000-000000000016',
+  'area', 'ar', 'عقارات أمواج', 'محتوى عربي تمت مراجعته', 'ملخص تمت مراجعته', 'عنوان SEO', 'وصف SEO'
+);
+select public.approve_site_content_revision('50000000-0000-0000-0000-000000000015');
+select public.publish_site_content_revision('50000000-0000-0000-0000-000000000015', null);
+select public.approve_site_content_revision('50000000-0000-0000-0000-000000000016');
+do $$ begin
+  begin
+    perform public.publish_site_content_revision('50000000-0000-0000-0000-000000000016', null);
+    raise exception 'Unreviewed Arabic site content unexpectedly published';
+  exception when raise_exception then
+    if sqlerrm = 'Unreviewed Arabic site content unexpectedly published' then raise; end if;
+  end;
+end $$;
+select public.review_site_content_revision('50000000-0000-0000-0000-000000000016');
+select public.publish_site_content_revision('50000000-0000-0000-0000-000000000016', null);
 select public.set_site_content_archived('40000000-0000-0000-0000-000000000011', false, true);
 do $$ begin
   begin
@@ -137,9 +161,20 @@ select pg_temp.assert_true(
   'Arabic article and FAQ content appear only after exact-revision review'
 );
 select pg_temp.assert_true(
+  (select count(*) = 2 from public.published_site_content
+    where route_path = '/buy-property/amwaj-island/'),
+  'only independently approved English and human-reviewed Arabic site content is public'
+);
+select pg_temp.assert_true(
   not has_table_privilege('anon', 'public.content_revisions', 'select') and
   not has_table_privilege('anon', 'public.editorial_revision_metadata', 'select'),
   'anonymous readers cannot inspect revisions or editorial metadata tables'
+);
+select pg_temp.assert_true(
+  not has_table_privilege('anon', 'public.site_content_publications', 'select') and
+  not has_table_privilege('anon', 'public.site_content_approvals', 'select') and
+  not has_table_privilege('anon', 'public.site_content_reviews', 'select'),
+  'anonymous readers can access only the published site-content view'
 );
 select pg_temp.assert_true(
   not has_table_privilege('anon', 'public.site_content_items', 'select') and
@@ -151,6 +186,14 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000011', true);
 select public.unpublish_editorial_content(
   '20000000-0000-0000-0000-000000000011', 'ar', '30000000-0000-0000-0000-000000000012'
+);
+select public.unpublish_site_content(
+  '40000000-0000-0000-0000-000000000014', 'ar', '50000000-0000-0000-0000-000000000016'
+);
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.published_site_content
+    where route_path = '/buy-property/amwaj-island/'),
+  'unpublishing Arabic site content preserves its English counterpart'
 );
 do $$ begin
   begin

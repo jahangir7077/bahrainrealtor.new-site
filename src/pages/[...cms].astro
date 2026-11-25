@@ -1,0 +1,33 @@
+---
+import SiteContentDetail from '../server/site-content/SiteContentDetail.astro';
+import {
+  getPublishedSiteContent,
+  listPublishedSiteContent,
+  type PublishedSiteContent,
+} from '../server/site-content/repository.ts';
+import { isSiteContentRoute } from '../server/site-content/routes.ts';
+
+const arabic = Astro.url.pathname.startsWith('/ar/');
+const language = arabic ? 'ar' : 'en';
+const routePath = Astro.url.pathname.replace(/^\/ar(?=\/)/, '');
+let content: PublishedSiteContent | null = null;
+let related: PublishedSiteContent[] = [];
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+if (!isSiteContentRoute(routePath)) {
+  Astro.response.status = 404;
+} else {
+  try {
+    [content, related] = await Promise.all([
+      getPublishedSiteContent(language, routePath),
+      listPublishedSiteContent(language),
+    ]);
+  } catch {
+    Astro.response.status = 503;
+  }
+  if (!content && Astro.response.status !== 503) Astro.response.status = 404;
+}
+if (!content || process.env.SEO_INDEXING_ENABLED !== 'true') {
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
+---
+<SiteContentDetail language={language} content={content} related={related} />

@@ -1,5 +1,6 @@
 import { listPublishedPropertyPaths } from '../server/properties/repository.ts';
 import { listPublishedEditorialPaths } from '../server/editorial/repository.ts';
+import { listPublishedSiteContentPaths } from '../server/site-content/repository.ts';
 import { sitemapXml } from '../utils/seo/sitemap.ts';
 
 export const prerender = false;
@@ -11,6 +12,7 @@ export async function GET() {
       ? [
           ...await listPublishedPropertyPaths(),
           ...await listPublishedEditorialPaths(),
+          ...await listPublishedSiteContentPaths(),
         ]
       : [];
     return new Response(sitemapXml(paths), {

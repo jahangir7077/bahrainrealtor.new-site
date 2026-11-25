@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { isSiteContentRoute } from './server/site-content/routes.ts';
 
 export const onRequest = defineMiddleware(async (_context, next) => {
   const response = await next();
@@ -16,8 +17,13 @@ export const onRequest = defineMiddleware(async (_context, next) => {
     process.env.SEO_INDEXING_ENABLED === 'true' &&
     response.status === 200 &&
     /^\/(?:ar\/)?blog\/(?:articles|faqs)?\/$/i.test(pathname);
+  const siteContentPath = pathname.replace(/^\/ar(?=\/)/, '');
+  const approvedSiteContentPage =
+    process.env.SEO_INDEXING_ENABLED === 'true' &&
+    response.status === 200 &&
+    isSiteContentRoute(siteContentPath);
   if (!seoEndpoint) response.headers.set('Cache-Control', 'no-store, max-age=0');
-  if (approvedPropertyPage || approvedGuidePage || approvedEditorialArchive) {
+  if (approvedPropertyPage || approvedGuidePage || approvedEditorialArchive || approvedSiteContentPage) {
     response.headers.delete('X-Robots-Tag');
   } else if (!seoEndpoint && !response.headers.has('X-Robots-Tag')) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');

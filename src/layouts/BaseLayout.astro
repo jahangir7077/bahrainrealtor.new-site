@@ -6,6 +6,7 @@ import SEOHead from '../components/SEOHead.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import { directionFor } from '../utils/site';
+import type { HreflangLink } from '../utils/seo/hreflang.ts';
 import type { Language } from '../types/site';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
   indexingEligible?: boolean;
   enableCanonical?: boolean;
   showOpenGraph?: boolean;
+  alternates?: readonly HreflangLink[];
 }
 
 const {
@@ -26,6 +28,7 @@ const {
   indexingEligible = false,
   enableCanonical = false,
   showOpenGraph = false,
+  alternates = [],
 } = Astro.props;
 
 const siteLocale = (value: Language) => localeConfig[value].language;
@@ -44,6 +47,7 @@ const siteLocale = (value: Language) => localeConfig[value].language;
       indexingEligible={indexingEligible}
       enableCanonical={enableCanonical}
       showOpenGraph={showOpenGraph}
+      alternates={alternates}
     />
   </head>
   <body>

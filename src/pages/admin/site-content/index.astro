@@ -7,7 +7,10 @@ import {
   listSiteContentRevisions,
   parseSiteContentArchive,
   parseSiteContentDraft,
+  parseSiteContentTransition,
   reviseSiteContentDraft,
+  SITE_CONTENT_ROUTES,
+  transitionSiteContent,
 } from '../../../server/admin-site-content/workflow.ts';
 import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session.ts';
 import {
@@ -69,6 +72,10 @@ if (!config) {
         } else if (action === 'archive') {
           const input = parseSiteContentArchive(form);
           if (input) completed = await archiveSiteContent(client, input);
+        } else if (action === 'review' || action === 'approve' ||
+                   action === 'publish' || action === 'unpublish') {
+          const input = parseSiteContentTransition(form, action);
+          if (input) target = await transitionSiteContent(client, action, input) ? input.revision : null;
         }
         if (target) return protectedRedirect(Astro.redirect(`/admin/site-content/?revision=${target}`, 303));
         if (completed) return protectedRedirect(Astro.redirect('/admin/site-content/', 303));
@@ -112,7 +119,7 @@ if (!config) {
   <p><a href="/admin/">Administration</a></p>
   {message && <p role="alert">{message}</p>}
   {available && <>
-    <p>These are private, localized drafts with immutable revision history. Saving or restoring records does not publish content or create public routes.</p>
+    <p>These are private, localized drafts with immutable revision history. Creating or revising a draft never publishes it; only pre-approved routes can be assigned.</p>
     <section>
       <h2>Recent revisions</h2>
       <p>Showing at most the 50 newest revisions.</p>
@@ -127,6 +134,7 @@ if (!config) {
       <dl>
         <dt>Record type</dt><dd>{detail.item.kind}</dd>
         <dt>Stable key</dt><dd>{detail.item.slug}</dd>
+        <dt>Public route</dt><dd>{detail.item.route_path ?? 'Private setting — no public route'}</dd>
         <dt>Record ID</dt><dd>{detail.item.id}</dd>
         <dt>Revision ID</dt><dd>{detail.revision.id}</dd>
         <dt>Language</dt><dd>{detail.revision.locale}</dd>
@@ -138,6 +146,40 @@ if (!config) {
         <dt>Created</dt><dd>{detail.revision.created_at}</dd>
         <dt>Record state</dt><dd>{detail.item.archived_at ? 'archived' : 'active'}</dd>
       </dl>
+      {detail.item.route_path && <>
+        <p>Arabic exact-revision human review: {detail.revision.locale === 'ar'
+          ? (detail.state.reviewed ? 'reviewed' : 'not reviewed')
+          : 'not required'}.
+          Approval: {detail.state.approved ? 'approved' : 'not approved'}.
+          Published revision: {detail.state.current ?? 'none'}.
+        </p>
+        {detail.revision.locale === 'ar' && !detail.state.reviewed && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="review" />
+          <input type="hidden" name="revision" value={detail.revision.id} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> I reviewed the complete Arabic text for this exact revision.</label>
+          <button type="submit">Record Arabic human review</button>
+        </form>}
+        {!detail.state.approved && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="approve" />
+          <input type="hidden" name="revision" value={detail.revision.id} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> I approve this complete revision for its selected language.</label>
+          <button type="submit">Approve revision</button>
+        </form>}
+        {detail.state.approved && detail.state.current !== detail.revision.id &&
+          (detail.revision.locale !== 'ar' || detail.state.reviewed) && <form method="post">
+            <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="publish" />
+            <input type="hidden" name="revision" value={detail.revision.id} />
+            <input type="hidden" name="expected" value={detail.state.current ?? 'none'} />
+            <label><input type="checkbox" name="confirm" value="yes" required /> Publish this approved language revision.</label>
+            <button type="submit">Publish</button>
+          </form>}
+        {detail.state.current && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="unpublish" />
+          <input type="hidden" name="revision" value={detail.revision.id} /><input type="hidden" name="expected" value={detail.state.current} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> Unpublish this locale's current revision.</label>
+          <button type="submit">Unpublish</button>
+        </form>}
+      </>}
       <form method="post">
         <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="archive" />
         <input type="hidden" name="item_id" value={detail.item.id} />
@@ -169,8 +211,9 @@ if (!config) {
       <h2>Create a private record</h2>
       <form method="post">
         <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="new" />
-        <p><label>Record type <select name="kind"><option value="area">Area</option><option value="project">Project</option><option value="setting">Website setting</option></select></label></p>
+        <p><label>Record type <select name="kind"><option value="landing">Landing page</option><option value="area">Area</option><option value="project">Projects hub</option><option value="setting">Website setting</option></select></label></p>
         <p><label>Stable key (slug) <input name="slug" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>Approved public route <select name="route_path"><option value="">Private setting — no public route</option>{SITE_CONTENT_ROUTES.map((path) => <option value={path}>{path}</option>)}</select></label></p>
         <p><label>Language <select name="locale"><option value="en">English</option><option value="ar">Arabic</option></select></label></p>
         <p><label>Title / setting name <input name="title" maxlength="200" required /></label></p>
         <p><label>Content / setting value <textarea name="body" maxlength="20000" required></textarea></label></p>

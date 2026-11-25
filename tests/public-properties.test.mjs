@@ -69,6 +69,38 @@ const editorialRows = [
     category_name: locale === 'en' ? 'Buying' : 'الشراء',
   })),
 ];
+const siteContentRows = [
+  ...['en', 'ar'].flatMap((locale) => [
+    {
+      id: locale === 'en' ? 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' : 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      kind: 'landing',
+      slug: 'buy-property',
+      route_path: '/buy-property/',
+      locale,
+      revision_id: locale === 'en' ? '12121212-1212-4212-8212-121212121212' : '13131313-1313-4313-8313-131313131313',
+      published_at: '2026-11-20T10:00:00Z',
+      title: locale === 'en' ? 'Buy property in Bahrain' : 'شراء عقار في البحرين',
+      body: locale === 'en' ? 'Published buying overview.' : 'نظرة عامة منشورة عن الشراء.',
+      summary: 'Reviewed summary',
+      seo_title: locale === 'en' ? 'Buy Bahrain property' : 'شراء عقار البحرين',
+      seo_description: locale === 'en' ? 'Reviewed buying guide.' : 'دليل شراء تمت مراجعته.',
+    },
+    {
+      id: locale === 'en' ? '14141414-1414-4414-8414-141414141414' : '15151515-1515-4515-8515-151515151515',
+      kind: 'area',
+      slug: 'buy-property-amwaj-island',
+      route_path: '/buy-property/amwaj-island/',
+      locale,
+      revision_id: locale === 'en' ? '16161616-1616-4616-8616-161616161616' : '17171717-1717-4717-8717-171717171717',
+      published_at: '2026-11-21T10:00:00Z',
+      title: locale === 'en' ? 'Property for sale in Amwaj Island' : 'عقارات للبيع في جزيرة أمواج',
+      body: locale === 'en' ? 'Verified local guidance.' : 'إرشادات محلية معتمدة.',
+      summary: 'Area summary',
+      seo_title: null,
+      seo_description: null,
+    },
+  ]),
+];
 let backend;
 let configured;
 let indexingEnabled;
@@ -120,7 +152,9 @@ before(async () => {
         return (!locale || locale === `eq.${item.locale}`) &&
           (!revisionIds || revisionIds.includes(item.revision_id));
       })
-      : (url.pathname.endsWith('/published_editorial') ? editorialRows : rows).filter((item) => {
+      : (url.pathname.endsWith('/published_site_content')
+        ? siteContentRows
+        : url.pathname.endsWith('/published_editorial') ? editorialRows : rows).filter((item) => {
       for (const [key, value] of url.searchParams) {
         if (value.startsWith('eq.') && String(item[key]) !== value.slice(3)) return false;
         if (value.startsWith('neq.') && String(item[key]) === value.slice(4)) return false;
@@ -224,6 +258,10 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.ok(hasSitemapPath('/ar/blog/articles/'));
   assert.ok(hasSitemapPath('/blog/faqs/'));
   assert.ok(hasSitemapPath('/ar/blog/faqs/'));
+  assert.ok(hasSitemapPath('/buy-property/'));
+  assert.ok(hasSitemapPath('/ar/buy-property/'));
+  assert.ok(hasSitemapPath('/buy-property/amwaj-island/'));
+  assert.ok(hasSitemapPath('/ar/buy-property/amwaj-island/'));
   assert.ok(xml.includes('<lastmod>2026-11-25T10:00:00.000Z</lastmod>'));
   const robotsOn = await (await fetch(`${indexingBase}/robots.txt`)).text();
   assert.match(robotsOn, /Sitemap: https:\/\/bahrainrealtor\.com\/sitemap\.xml/);
@@ -233,6 +271,30 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.match(propertyHtml, /<meta name="robots" content="index, follow"/);
   assert.match(propertyHtml, /<link rel="canonical" href="https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.doesNotMatch(property.headers.get('x-robots-tag') ?? '', /noindex/);
+});
+
+test('mapped area and landing pages render only published bilingual CMS content with SEO and internal links', async () => {
+  const path = '/buy-property/amwaj-island/';
+  const draftSafe = await fetch(`${base}${path}`);
+  assert.equal(draftSafe.status, 200);
+  const english = await draftSafe.text();
+  assert.match(english, /Property for sale in Amwaj Island/);
+  assert.match(english, /<meta name="robots" content="noindex, nofollow"/);
+  assert.match(english, /"@type":"WebPage"/);
+  assert.match(english, /href="\/buy-property\/"/);
+  const enabled = await fetch(`${indexingBase}${path}`);
+  assert.equal(enabled.status, 200);
+  const indexed = await enabled.text();
+  assert.match(indexed, /<title>Property for sale in Amwaj Island<\/title>/);
+  assert.match(indexed, /name="robots" content="index, follow"/);
+  assert.match(indexed, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/buy-property\/amwaj-island\/"/);
+  assert.match(indexed, /hreflang="en-BH"/);
+  assert.match(indexed, /hreflang="ar-BH"/);
+  const arabic = await fetch(`${indexingBase}/ar${path}`);
+  assert.equal(arabic.status, 200);
+  assert.match(await arabic.text(), /عقارات للبيع في جزيرة أمواج/);
+  assert.equal((await fetch(`${base}/buy-property/not-approved/`)).status, 404);
+  assert.equal((await fetch(`${indexingBase}/rent-property/`)).status, 404);
 });
 
 test('bilingual blog hubs link only to published CMS archives and remain noindex by default', async () => {

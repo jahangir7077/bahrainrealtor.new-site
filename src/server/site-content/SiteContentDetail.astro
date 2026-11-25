@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Container from '../../components/ui/Container.astro';
+import type { Language } from '../../i18n/config.ts';
+import { getPublishedSiteContent, type PublishedSiteContent } from './repository.ts';
+import { getPublicationEligibility } from '../../i18n/publication.ts';
+import type { PublicationVersion } from '../../i18n/publication.ts';
+import { contentMetadata } from '../../utils/seo/content-metadata.ts';
+import { breadcrumbSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
+import { hreflangForEquivalentPages, type HreflangLink } from '../../utils/seo/hreflang.ts';
+
+interface Props {
+  language: Language;
+  content: PublishedSiteContent | null;
+  related: PublishedSiteContent[];
+}
+
+const { language, content, related } = Astro.props;
+const arabic = language === 'ar';
+const sitePublication = (locale: Language, revisionId: string): PublicationVersion => {
+  const localizedPath = `${locale === 'ar' ? '/ar' : ''}${content!.routePath}`;
+  return {
+  status: 'published' as const,
+  revisionId,
+  publicationApprovedRevisionId: revisionId,
+  publishedRevisionId: revisionId,
+  ...(locale === 'ar' ? { humanReviewedRevisionId: revisionId } : {}),
+  routePath: localizedPath,
+  canonicalPath: localizedPath,
+  routeExists: true,
+  indexable: process.env.SEO_INDEXING_ENABLED === 'true',
+  redirected: false,
+  };
+};
+const publication = content ? sitePublication(language, content.revisionId) : null;
+const eligible = Boolean(publication && getPublicationEligibility(publication, language).indexingEligible);
+const metadata = content ? contentMetadata({
+  title: content.title,
+  description: content.seoDescription || content.summary || content.body,
+  seoTitle: content.seoTitle,
+  seoDescription: content.seoDescription,
+}) : {
+  title: arabic ? 'الصفحة غير متاحة' : 'Page unavailable',
+  description: arabic ? 'هذه الصفحة غير متاحة حالياً.' : 'This page is currently unavailable.',
+};
+const path = content ? `${arabic ? '/ar' : ''}${content.routePath}` : '';
+const routeSegments = content?.routePath.split('/').filter(Boolean) ?? [];
+const parentPath = routeSegments.length > 1
+  ? `/${routeSegments[0]}/`
+  : null;
+const sections = content ? content.body.split(/\n{2,}/).map((text) => text.trim()).filter(Boolean) : [];
+const schema = content && publication ? {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: metadata.title,
+  description: metadata.description,
+  url: new URL(path, 'https://bahrainrealtor.com').href,
+  dateModified: content.publishedAt,
+  inLanguage: arabic ? 'ar-BH' : 'en-BH',
+} : null;
+const breadcrumbs = content ? breadcrumbSchema([
+  { name: arabic ? 'الرئيسية' : 'Home', path: arabic ? '/ar/' : '/' },
+  ...(parentPath && parentPath !== content.routePath
+    ? [{ name: parentPath.includes('rent') ? (arabic ? 'للإيجار' : 'Rent') :
+      parentPath.includes('buy') ? (arabic ? 'للبيع' : 'Buy') :
+      parentPath.includes('residency') ? (arabic ? 'الإقامة' : 'Residency') :
+      (arabic ? 'المشاريع' : 'Projects'), path: `${arabic ? '/ar' : ''}${parentPath}` }]
+    : []),
+  { name: content.title, path },
+]) : null;
+const equivalentPath = content ? `${arabic ? '' : '/ar'}${content.routePath}` : '';
+let alternates: HreflangLink[] = [];
+if (eligible && equivalentPath) {
+  try {
+    const equivalent = await getPublishedSiteContent(arabic ? 'en' : 'ar', content!.routePath);
+    if (equivalent) {
+      const englishPublication = arabic
+        ? sitePublication('en', equivalent.revisionId)
+        : publication!;
+      const arabicPublication = arabic
+        ? publication!
+        : sitePublication('ar', equivalent.revisionId);
+      alternates = hreflangForEquivalentPages([
+        { language: 'en', publication: englishPublication },
+        { language: 'ar', publication: arabicPublication },
+      ]);
+    }
+  } catch {
+    alternates = [];
+  }
+}
+const links = related.filter((item) => item.routePath !== content?.routePath &&
+  item.routePath.split('/')[1] === content?.routePath.split('/')[1]);
+---
+
+<BaseLayout
+  title={metadata.title}
+  description={metadata.description}
+  language={language}
+  indexingEligible={eligible}
+  enableCanonical={eligible}
+  showOpenGraph
+  alternates={alternates}
+>
+  {schema && <script type="application/ld+json" set:html={safeJsonLd(schema)} />}
+  {breadcrumbs && <script type="application/ld+json" set:html={safeJsonLd(breadcrumbs)} />}
+  <article class="site-content" lang={language} dir={arabic ? 'rtl' : 'ltr'}>
+    <Container width="narrow">
+      {content ? <>
+        <Breadcrumbs language={language} items={[
+          { label: arabic ? 'الرئيسية' : 'Home', href: arabic ? '/ar/' : '/' },
+          ...(parentPath ? [{ label: arabic ? 'استعراض الصفحات' : 'Browse', href: `${arabic ? '/ar' : ''}${parentPath}` }] : []),
+          { label: content.title },
+        ]} />
+        <header><h1>{content.title}</h1>{content.summary && <p class="summary">{content.summary}</p>}</header>
+        <div class="body">{sections.map((section) => <p>{section}</p>)}</div>
+        {links.length > 0 && <nav aria-label={arabic ? 'صفحات ذات صلة' : 'Related pages'}>
+          <h2>{arabic ? 'صفحات ذات صلة' : 'Related pages'}</h2>
+          <ul>{links.map((item) => <li><a href={`${arabic ? '/ar' : ''}${item.routePath}`}>{item.title}</a></li>)}</ul>
+        </nav>}
+      </> : <h1>{arabic ? 'الصفحة غير متاحة' : 'Page unavailable'}</h1>}
+    </Container>
+  </article>
+</BaseLayout>
+
+<style>
+  .site-content { padding-block: var(--space-10) var(--space-20); }
+  header { margin-block: var(--space-8); }
+  header h1 { font-family: var(--font-display); }
+  .summary { max-width: 68ch; color: var(--color-text-secondary); font-size: 1.15rem; }
+  .body { max-width: 72ch; line-height: 1.85; white-space: normal; }
+  nav { margin-block-start: var(--space-12); padding-block-start: var(--space-6); border-block-start: 1px solid var(--color-border); }
+</style>
