@@ -1,5 +1,6 @@
 import { MAX_MEDIA_PER_REVISION, MAX_MULTIPART_BYTES, MEDIA_BUCKET, mediaAdmin, mediaMutationAllowed, mediaRows, protectedJson, readBoundedBody, revisionTarget, validRevisionId } from '../../../../server/media/admin.ts';
 import { MAX_MEDIA_BYTES, safeObjectKey, validateImage } from '../../../../server/media/validation.ts';
+import { MAX_OPTIMIZED_MEDIA_BYTES, optimizeImage } from '../../../../server/media/optimize.ts';
 import { isUuid } from '../../../../server/admin-properties/workflow.ts';
 
 export const prerender = false;
@@ -44,6 +45,7 @@ export async function POST({ request, cookies }: { request: Request; cookies: im
     if (file.size > MAX_MEDIA_BYTES) return protectedJson({ error: 'Image exceeds the 8 MiB limit.' }, 413);
     const image = await validateImage(file);
     if (!image) return protectedJson({ error: 'Only valid JPEG, PNG, or WebP images within the size and dimension limits are accepted.' }, 415);
+    const optimized = await optimizeImage(image.bytes);
     const target = await revisionTarget(auth.client, revisionId);
     if (!target) return protectedJson({ error: 'Revision not found.' }, 404);
     const current = await mediaRows(auth.client, revisionId);
@@ -51,10 +53,13 @@ export async function POST({ request, cookies }: { request: Request; cookies: im
     if (current.data.length >= MAX_MEDIA_PER_REVISION) {
       return protectedJson({ error: 'This revision already has the maximum of 20 images.' }, 409);
     }
-    const key = safeObjectKey(target.item_id, target.id, image.extension);
-    const imageBuffer = image.bytes.buffer.slice(image.bytes.byteOffset, image.bytes.byteOffset + image.bytes.byteLength) as ArrayBuffer;
+    const key = safeObjectKey(target.item_id, target.id, 'webp');
+    if (optimized.bytes.byteLength > MAX_OPTIMIZED_MEDIA_BYTES) {
+      return protectedJson({ error: 'The optimized image exceeds the storage limit.' }, 413);
+    }
+    const imageBuffer = optimized.bytes.buffer.slice(optimized.bytes.byteOffset, optimized.bytes.byteOffset + optimized.bytes.byteLength) as ArrayBuffer;
     const upload = await auth.client.storage.from(MEDIA_BUCKET).upload(key, imageBuffer, {
-      contentType: image.type,
+      contentType: 'image/webp',
       cacheControl: '0',
       upsert: false,
     });
@@ -64,10 +69,10 @@ export async function POST({ request, cookies }: { request: Request; cookies: im
       p_revision_id: target.id,
       p_locale: target.locale,
       p_object_path: key,
-      p_mime_type: image.type,
-      p_byte_size: file.size,
-      p_width: image.width,
-      p_height: image.height,
+      p_mime_type: 'image/webp',
+      p_byte_size: optimized.bytes.byteLength,
+      p_width: optimized.width,
+      p_height: optimized.height,
       p_alt_text: altText.trim(),
     });
     if (inserted.error) {

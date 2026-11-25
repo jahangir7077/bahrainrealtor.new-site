@@ -56,10 +56,11 @@ migration and admin setup have not been independently verified. Local SQL
 tests use stubbed Supabase roles/authentication; HTTP tests use mock backends.
 
 The website is not production-ready. The email provider and worker schedule
-are unconfigured; image transformation support,
-media backup/recovery, real TOTP/cookie behavior, concurrent hosted publishing,
-admin bootstrap/recovery, privacy/legal requirements and Hostinger runtime and
-deployment controls still need validation. No public project/area/settings
+are unconfigured; the forward migration restricting direct public access to
+private media has not been applied to the hosted project. Media optimization,
+real TOTP/cookie behavior, concurrent hosted publishing, admin
+bootstrap/recovery, privacy/legal requirements and Hostinger runtime and
+deployment controls still need hosted validation. No public project/area/settings
 routes, strategic URL changes, redirects or production indexing are authorized.
 Follow [`docs/frontend-backend-integration.md`](docs/frontend-backend-integration.md)
 for the development setup and migration restrictions. See the architecture,

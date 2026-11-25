@@ -41,9 +41,9 @@ select pg_temp.assert_true(
   'public property prices retain exact display and numeric search values');
 select pg_temp.assert_true(
   (select count(*) = 1 from public.published_content_media where item_id = '10000000-0000-0000-0000-000000000051')
-  and (select count(*) = 1 from public.content_media where item_id = '10000000-0000-0000-0000-000000000051')
-  and (select count(*) = 1 from storage.objects where bucket_id = 'private-media'),
-  'published media metadata and private originals are accessible');
+  and not has_table_privilege('anon', 'public.content_media', 'select')
+  and not exists (select 1 from storage.objects where bucket_id = 'private-media'),
+  'published metadata is available through the safe view without exposing originals');
 
 set local role authenticated;
 set local role service_role;
@@ -67,7 +67,6 @@ select pg_temp.assert_true(
   'archived content is not returned publicly');
 select pg_temp.assert_true(
   not exists (select 1 from public.published_content_media where item_id = '10000000-0000-0000-0000-000000000051')
-  and not exists (select 1 from public.content_media where item_id = '10000000-0000-0000-0000-000000000051')
   and not exists (select 1 from storage.objects where bucket_id = 'private-media'),
   'archived media metadata and private originals are inaccessible');
 set local role service_role;

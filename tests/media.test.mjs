@@ -3,6 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { MAX_MEDIA_PER_REVISION, mediaMutationAllowed, protectedJson, readBoundedBody } from '../src/server/media/admin.ts';
 import { MAX_MEDIA_BYTES, safeObjectKey, validateImage } from '../src/server/media/validation.ts';
+import sharp from 'sharp';
+import { optimizeImage } from '../src/server/media/optimize.ts';
+import { getOrCreateOptimizedImage } from '../src/server/media/cache.ts';
 
 const item = '11111111-1111-4111-8111-111111111111';
 const revision = '22222222-2222-4222-8222-222222222222';
@@ -25,6 +28,39 @@ test('image validation matches sniffed format and enforces byte and pixel bounds
   assert.equal(await validateImage(file(png(8000, 8000), 'image/png')), null);
   assert.equal(await validateImage(file(new Uint8Array(MAX_MEDIA_BYTES + 1), 'image/png')), null);
   assert.equal(await validateImage(file(new Uint8Array([0x89, 0x50]), 'image/png')), null);
+});
+
+test('optimization decodes, resizes, re-encodes WebP and strips metadata', async () => {
+  const source = await sharp({
+    create: { width: 2000, height: 1000, channels: 3, background: { r: 80, g: 110, b: 140 } },
+  }).jpeg().withMetadata({ exif: { IFD0: { ImageDescription: 'private-metadata' } } }).toBuffer();
+  const optimized = await optimizeImage(new Uint8Array(source));
+  const metadata = await sharp(optimized.bytes).metadata();
+  assert.equal(metadata.format, 'webp');
+  assert.equal(metadata.width, 1600);
+  assert.equal(metadata.height, 800);
+  assert.equal(metadata.exif, undefined);
+  assert.ok(optimized.bytes.byteLength > 0);
+  await assert.rejects(() => optimizeImage(new Uint8Array([0xff, 0xd8, 0xff])));
+});
+
+test('public image processing coalesces concurrent requests and caches bounded outputs', async () => {
+  const key = `media-cache-test-${crypto.randomUUID()}`;
+  let calls = 0;
+  const create = async () => {
+    calls += 1;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    return new Uint8Array([1, 2, 3]);
+  };
+  const [first, second] = await Promise.all([
+    getOrCreateOptimizedImage(key, create),
+    getOrCreateOptimizedImage(key, create),
+  ]);
+  assert.deepEqual(first, new Uint8Array([1, 2, 3]));
+  assert.deepEqual(second, first);
+  assert.equal(calls, 1);
+  await getOrCreateOptimizedImage(key, create);
+  assert.equal(calls, 1);
 });
 
 test('object keys are generated from UUIDs and a fixed image extension allowlist', () => {
@@ -62,7 +98,7 @@ test('multipart reads are capped and API responses cannot be cached or indexed',
   assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
 });
 
-test('admin APIs independently enforce admin MFA and mutation origin; public delivery signs transformed approved media only', async () => {
+test('admin APIs enforce MFA and public delivery requires published media, service storage access, and re-encoding', async () => {
   const listUpload = await readFile(new URL('../src/pages/api/admin/media/index.ts', import.meta.url), 'utf8');
   const mediaId = await readFile(new URL('../src/pages/api/admin/media/[id].ts', import.meta.url), 'utf8');
   const delivery = await readFile(new URL('../src/pages/api/media/[id].ts', import.meta.url), 'utf8');
@@ -73,8 +109,12 @@ test('admin APIs independently enforce admin MFA and mutation origin; public del
   }
   assert.match(listUpload, /storage\.from\(MEDIA_BUCKET\)\.upload/);
   assert.match(mediaId, /storage\.from\(MEDIA_BUCKET\)\.remove/);
-  assert.match(delivery, /createSignedUrl\(media\.data\.object_path, 300/);
-  assert.match(delivery, /transform: \{ width: 1600, height: 1200, resize: 'contain', quality: 80 \}/);
+  assert.match(delivery, /from\('published_content_media'\)/);
+  assert.match(delivery, /createServiceClient\(\)/);
+  assert.match(delivery, /storage\.from\(MEDIA_BUCKET\)\.download/);
+  assert.match(delivery, /optimizeImage/);
+  assert.match(delivery, /getOrCreateOptimizedImage/);
+  assert.match(delivery, /Content-Type': 'image\/webp'/);
   assert.doesNotMatch(delivery, /service_role|SUPABASE_SERVICE_ROLE_KEY/);
 });
 
@@ -104,6 +144,16 @@ test('upload API rejects full revisions before storage and repeats the cap in it
   const upload = await readFile(new URL('../src/pages/api/admin/media/index.ts', import.meta.url), 'utf8');
   assert.match(upload, /current\.data\.length >= MAX_MEDIA_PER_REVISION/);
   assert.match(upload, /rpc\('create_content_media'/);
+  assert.match(upload, /optimizeImage/);
+  assert.match(upload, /safeObjectKey\(target\.item_id, target\.id, 'webp'\)/);
   assert.match(upload, /Revision image limit reached/);
   assert.match(upload, /maximum of 20 images/);
+});
+
+test('forward migration blocks public access to private originals and metadata paths', async () => {
+  const migration = await readFile(new URL('../supabase/migrations/20261125000100_secure_media_delivery.sql', import.meta.url), 'utf8');
+  assert.match(migration, /revoke select on public\.content_media from anon/);
+  assert.match(migration, /drop policy content_media_published_read/);
+  assert.match(migration, /private_media_restrict_select[\s\S]*?private\.is_admin\(\)/);
+  assert.match(migration, /private_media_anonymous_denied[\s\S]*?using \(bucket_id <> 'private-media'\)/);
 });

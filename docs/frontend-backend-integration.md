@@ -65,14 +65,19 @@ tests.
 
 The public property listings query only published content, support bounded
 search and filters, exact decimal price sorting, pagination and related
-properties. Public images are served via short-lived transformed signed URLs
-for media attached to an exact published locale revision. Transform delivery
-depends on the project's Supabase Image Transformations support; it fails
-closed if unavailable. Supabase documents image resizing as a
-[Pro-plan-and-above feature](https://supabase.com/docs/guides/storage/serving/image-transformations).
-Consequently public transformed images cannot be assumed to work on the Free
-plan; a secure, tested alternative or a paid plan is needed. Originals remain
-in private storage.
+properties. Uploads and public delivery decode images on the server, rotate
+according to EXIF orientation, resize to at most 1600×1200, re-encode as WebP
+and strip source metadata. This uses the application’s Sharp dependency rather
+than paid Supabase Image Transformations. Configure
+`SUPABASE_SERVICE_ROLE_KEY` only in the server runtime: public delivery first
+checks the safe, published metadata view, then the service client reads the
+private original and streams only the re-encoded image. The new forward
+migration `supabase/migrations/20261125000100_secure_media_delivery.sql`
+revokes anonymous access to original object paths and media rows; apply it to
+the existing development project after review and explicit migration
+authorization. This change has been exercised against local PostgreSQL with
+stubbed Supabase roles, not against the hosted project. Sharp’s native runtime
+and image delivery still require validation on Hostinger.
 
 The private `/admin/` dashboard links property, media, editorial, site-content
 and enquiry management. Mutations check admin membership and MFA; public and
@@ -123,8 +128,10 @@ configuration and privacy/legal review.
    Do not print or share key values. Local `.env` is ignored; never commit it.
 
 4. The owner reports the five existing migrations were applied to the
-   development project. Do not run additional hosted migrations or target
-   production without separate approval. Do not create another project.
+   development project. The additional media-privacy migration is
+   `20261125000100_secure_media_delivery.sql`; review and apply it only to that
+   project after explicit authorization. Do not rerun the original migrations,
+   target production, or create another project.
 
 5. After an authorized migration, configure server-only secrets through the
    local `.env` or the approved environment's secret manager, never in the
