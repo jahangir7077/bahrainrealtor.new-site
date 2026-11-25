@@ -63,6 +63,28 @@ test('public image processing coalesces concurrent requests and caches bounded o
   assert.equal(calls, 1);
 });
 
+test('public image processing bounds concurrent work and rejects excess distinct jobs', async () => {
+  const keys = Array.from({ length: 27 }, () => `media-cache-limit-${crypto.randomUUID()}`);
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  let active = 0;
+  let maximumActive = 0;
+  const create = async () => {
+    active += 1;
+    maximumActive = Math.max(maximumActive, active);
+    await gate;
+    active -= 1;
+    return new Uint8Array([1]);
+  };
+  const accepted = keys.slice(0, 26).map((key) => getOrCreateOptimizedImage(key, create));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(active, 2);
+  await assert.rejects(getOrCreateOptimizedImage(keys[26], create), /capacity exceeded/);
+  release();
+  await Promise.all(accepted);
+  assert.equal(maximumActive, 2);
+});
+
 test('object keys are generated from UUIDs and a fixed image extension allowlist', () => {
   assert.equal(
     safeObjectKey(item, revision, 'webp', '33333333-3333-4333-8333-333333333333'),
