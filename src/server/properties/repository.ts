@@ -272,13 +272,13 @@ export async function getProperty(language: Language, path: { id: string; slug: 
   return property;
 }
 
-export async function listPublishedPropertyPaths(): Promise<string[]> {
-  const paths: string[] = [];
+export async function listPublishedPropertyPaths(): Promise<{ path: string; lastModified: string }[]> {
+  const paths: { path: string; lastModified: string }[] = [];
   const pageSize = 1000;
   for (let page = 0; page < 50; page += 1) {
     const start = page * pageSize;
     const { data, error } = await client().from('published_content')
-      .select('id,slug,locale,kind')
+      .select('id,slug,locale,kind,published_at')
       .eq('kind', 'property')
       .order('id', { ascending: true })
       .range(start, start + pageSize - 1);
@@ -288,10 +288,14 @@ export async function listPublishedPropertyPaths(): Promise<string[]> {
     for (const row of data) {
       if (row.kind !== 'property' || typeof row.id !== 'string' || !idPattern.test(row.id) ||
           typeof row.slug !== 'string' || !slugPattern.test(row.slug) ||
-          (row.locale !== 'en' && row.locale !== 'ar')) {
+          (row.locale !== 'en' && row.locale !== 'ar') ||
+          typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))) {
         throw new Error('Invalid public sitemap content');
       }
-      paths.push(propertyPath({ id: row.id, slug: row.slug }, row.locale));
+      paths.push({
+        path: propertyPath({ id: row.id, slug: row.slug }, row.locale),
+        lastModified: row.published_at,
+      });
     }
     if (data.length < pageSize) return paths;
   }

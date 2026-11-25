@@ -1,12 +1,26 @@
 import { site } from '../../config/site.ts';
 import { normalizeInternalPath } from '../../i18n/routes.ts';
 
-export function sitemapXml(paths: readonly string[]): string {
+export interface SitemapEntry {
+  path: string;
+  lastModified?: string;
+}
+
+export function sitemapXml(entries: readonly (string | SitemapEntry)[]): string {
   const origin = new URL(site.productionUrl).origin;
-  const urls = [...new Set(paths)]
-    .map((path) => normalizeInternalPath(path) === path ? path : null)
-    .filter((path): path is string => path !== null)
-    .map((path) => `  <url><loc>${escapeXml(new URL(path, origin).href)}</loc></url>`)
+  const urls = [...new Map(entries.map((entry) => {
+    const path = typeof entry === 'string' ? entry : entry.path;
+    return [path, typeof entry === 'string' ? undefined : entry.lastModified] as const;
+  }))]
+    .map(([path, lastModified]) => {
+      if (normalizeInternalPath(path) !== path) return null;
+      const location = `    <loc>${escapeXml(new URL(path, origin).href)}</loc>`;
+      const date = lastModified && Number.isFinite(Date.parse(lastModified))
+        ? `\n    <lastmod>${new Date(lastModified).toISOString()}</lastmod>`
+        : '';
+      return `  <url>\n${location}${date}\n  </url>`;
+    })
+    .filter((url): url is string => url !== null)
     .join('\n');
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',

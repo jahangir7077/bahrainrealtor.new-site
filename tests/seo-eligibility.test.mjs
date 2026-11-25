@@ -69,6 +69,7 @@ test('sitemap and robots responses use safe stable paths and preserve public med
   assert.equal((xml.match(/<url>/g) ?? []).length, 2);
   assert.match(xml, /https:\/\/bahrainrealtor\.com\/properties\/home-11111111-1111-4111-8111-111111111111\//);
   assert.match(xml, /https:\/\/bahrainrealtor\.com\/ar\/properties\//);
+  assert.match(sitemapXml([{ path: '/properties/home-11111111-1111-4111-8111-111111111111/', lastModified: '2026-11-25T10:00:00Z' }]), /<lastmod>2026-11-25T10:00:00.000Z<\/lastmod>/);
   assert.doesNotMatch(xml, /outside\.example|token=secret/);
   const robots = robotsTxt(false);
   assert.match(robots, /Disallow: \/admin\//);
