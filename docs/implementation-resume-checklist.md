@@ -24,36 +24,43 @@ DNS, external account, and publication safeguards are unchanged.
    local PostgreSQL 16. Verify actual Supabase Free quota/limits and account
    settings before media use; a media-object restore and hosted backup cycle
    remain untested.
-5. [x] Bilingual publishing — property/editorial and site-content SQL
-   workflows passed local tests for independent locale approval and
-   exact-revision Arabic human review. Hosted-auth integration remains
-   unverified.
+5. [~] Bilingual publishing — editorial and site-content workflows enforce
+   exact-revision Arabic human review. The property publication view has no
+   exact-revision Arabic review marker; Arabic property details therefore stay
+   noindex and out of the sitemap until that workflow exposes one. Hosted-auth
+   integration remains unverified.
 6. [~] Enquiries/notifications — endpoint mocks and isolated SQL tests pass
    for consent, atomic rate limiting, private outbox insertion, leasing,
    retry, stale-token rejection, and the eight-attempt ceiling. Worker batch
    size is bounded below its lease. Do not enable public forms until authorized
    migration/configuration and consent review; provider and scheduled worker
    are not configured.
-7. [~] Keywords/intents — 64 workbook targets and ownership are recorded.
-   Record explicit topic-cluster relationships and complete mapped route
-   coverage without splitting synonym intents.
+7. [x] Keywords/intents — all 69 unique workbook targets have one owner and
+   explicit topic-cluster membership; cluster coverage is regression-tested.
+   See [keyword map](keyword-map.md).
 8. [~] SEO disciplines — technical metadata/indexing safeguards exist.
-   Complete evidence-based local/off-page readiness; real profile,
-   credentials, citations and authority work require verified owner data.
-9. [x] Dynamic metadata/schema/sitemap/internal links — routed content uses
-   CMS SEO fields, WebPage and BreadcrumbList schema, eligible hreflang,
-   same-section related links and published-route sitemap entries; indexing
-   remains gated by publication and `SEO_INDEXING_ENABLED`.
-10. [ ] Semantic SEO, NLP, entities, AEO and GEO — apply to researched,
-    human-approved page content; do not generate or publish market/legal claims.
-11. [ ] Competitor benchmarking — no verified competitor observations are in
-    the repository; perform source-based review and record actionable changes.
+   Evidence-based local/off-page readiness still requires verified business
+   details, credentials, citations and owner-controlled profiles.
+9. [x] Dynamic metadata/schema/sitemap/internal links — CMS metadata,
+   WebPage/Article/FAQ/BreadcrumbList schema, eligible site-content/editorial
+   hreflang, contextual links and published-route sitemap entries are
+   implemented. Arabic property indexing is held back until exact review data
+   exists; all sitemap/indexing output remains gated by publication and
+   `SEO_INDEXING_ENABLED`.
+10. [~] Semantic SEO, NLP, entities, AEO and GEO — templates support structured,
+    accessible content; application to page copy requires verified research
+    and human-approved facts. No market/legal claims are generated.
+11. [~] Competitor benchmarking — dated search-result observations and safe
+    implementation implications are recorded in
+    [competitor benchmark](seo-competitor-benchmark.md). Direct page,
+    mobile/usability and enquiry-flow comparison remains pending.
 12. [~] Design/responsive UX — bilingual design system and templates exist.
     Complete representative-page responsive, keyboard and visual acceptance.
-13. [~] Automatic SEO/tracking — site-content metadata and sitemap paths are
-    CMS-driven. Confirm end-to-end migration-backed publishing before any
-    activation; GA4, conversion events, Search Console, Bing and IndexNow
-    remain unconfigured/unverified.
+13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
+    eligible alternates and sitemap paths. GA4, conversion events, Search
+    Console, Bing and IndexNow remain unconfigured; prerequisites and
+    activation gates are recorded separately in
+    [external dependencies](seo-external-dependencies.md).
 14. [~] Security/accessibility — existing security controls and regression
     tests cover key flows. Complete fresh security and accessibility review;
     CodeQL previously reported analysis failure, not a clean scan.
@@ -64,17 +71,20 @@ DNS, external account, and publication safeguards are unchanged.
     archive. Verify access-restricted staging, manual deployment, caching,
     resource limits, rollback, hosted database backup, and media restore only
     in authorized environments; do not deploy without authorization.
-17. [ ] Final validation — run the full existing test suite, Astro check,
-    production build, secret scan and successful CodeQL after implementation;
-    report actual results and unresolved external gates.
+17. [~] Final validation — focused SEO/route tests pass (15 tests). Complete
+    the existing full suite, Astro check, production build, secret scan and
+    successful CodeQL after implementation; report actual results and
+    unresolved external gates.
 
 Known verified limits: no production deployment or hosted migration was done;
-no competitor or performance measurements are verified; external analytics,
-search-platform, notification-provider and Hostinger account configuration
-remain unverified. All seven migrations and SQL assertions have been run only
-against disposable local PostgreSQL 16. Database restore testing used a
-synthetic archive, not hosted project data; hosted backup, media restore,
-provider delivery, and account-level Free quota remain unverified. No CMS
-content has been published; indexing remains disabled by default. Resume by
-validating the explicitly unverified hosted/account-dependent gates only after
-their separate authorization, then continue the remaining checklist.
+no full-page competitor, performance or field-search measurements are
+verified; external analytics, search-platform, notification-provider and
+Hostinger account configuration remain unverified. Arabic property indexing
+is withheld pending exact-revision review data. All seven migrations and SQL
+assertions have been run only against disposable local PostgreSQL 16. Database
+restore testing used a synthetic archive, not hosted project data; hosted
+backup, media restore, provider delivery, and account-level Free quota remain
+unverified. No CMS content has been published; indexing remains disabled by
+default. Resume by validating the explicitly unverified hosted/account
+dependencies only after separate authorization, then continue the remaining
+checklist.

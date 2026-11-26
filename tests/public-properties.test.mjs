@@ -322,6 +322,12 @@ test('bilingual blog hubs link only to published CMS archives and remain noindex
   assert.match(enabledHtml, /hreflang="en-BH"/);
   assert.match(enabledHtml, /hreflang="ar-BH"/);
   assert.match(enabledHtml, /href="https:\/\/bahrainrealtor\.com\/ar\/blog\/"/);
+  const articleArchive = await fetch(`${indexingBase}/blog/articles/`);
+  assert.equal(articleArchive.status, 200);
+  const archiveHtml = await articleArchive.text();
+  assert.match(archiveHtml, /hreflang="en-BH"/);
+  assert.match(archiveHtml, /hreflang="ar-BH"/);
+  assert.match(archiveHtml, /href="https:\/\/bahrainrealtor\.com\/ar\/blog\/articles\/"/);
 });
 
 test('bilingual guide routes use published CMS content, metadata, schema, and safe index gates', async () => {
@@ -343,7 +349,9 @@ test('bilingual guide routes use published CMS content, metadata, schema, and sa
   assert.match(html, /hreflang="ar-BH"/);
   const arabic = await fetch(`${indexingBase}/ar${path}`);
   assert.equal(arabic.status, 200);
-  assert.match(await arabic.text(), /الاستثمار في عقارات أمواج/);
+  const arabicHtml = await arabic.text();
+  assert.match(arabicHtml, /الاستثمار في عقارات أمواج/);
+  assert.match(arabicHtml, /href="https:\/\/bahrainrealtor\.com\/guides\/amwaj-property-investment-guide\/"/);
   for (const host of [base, indexingBase]) {
     const unavailable = await fetch(`${host}/guides/unpublished-guide/`);
     assert.equal(unavailable.status, 404);

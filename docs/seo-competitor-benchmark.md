@@ -11,7 +11,6 @@ and rankings are intentionally not treated as verified market facts.
 | --- | --- | --- |
 | [Property Finder Bahrain apartment listings](https://www.propertyfinder.bh/en/buy/apartments-for-sale.html), search result crawled 2026-11-26 11:10 UTC | The result presents Bahrain apartment listings with locality, property type and area measurements, and refers to maps and photos. | Keep property type, location and size as visible, verified listing facts. The current property detail and search templates already render these fields; do not copy changing inventory or volume counts. |
 | [Property Finder Bahrain property listings](https://www.propertyfinder.bh/en/buy/properties-for-sale.html), search result crawled 2026-11-26 17:08 UTC | The result displays varied property types and locations and includes listing facts such as plot/area, price and listing recency. | Continue to show verified property facts and status from CMS records; no property facts or recency should be generated or inferred. |
-| [Betterhomes property detail](https://www.bhomes.com/en/property/bh-r-299448), search result crawled 2026-11-23 10:16 UTC | The result title and excerpt include a named development, bedroom/bathroom counts, area, a reference, availability wording and a descriptive paragraph. | Preserve the current CMS-driven detail structure and require each fact and availability statement to be verified before publishing. |
 | [Savills Bahrain](https://www.savills.bh/), search result crawled 2026-11-25 23:30 UTC | The result positions its service across residential and commercial/industrial property and refers to market expertise. | Keep the approved keyword map's residential and commercial ownership distinct. Do not copy competitor claims or make equivalent business/credential claims without owner evidence. |
 
 ## Applied improvements and remaining evidence
@@ -27,4 +26,3 @@ and rankings are intentionally not treated as verified market facts.
   pages, inventing market copy, or changing the existing visible property
   facts. A live mobile/accessibility/performance/enquiry audit remains pending
   and must use an approved, non-production environment.
-

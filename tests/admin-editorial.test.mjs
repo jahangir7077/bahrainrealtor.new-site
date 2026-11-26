@@ -171,7 +171,7 @@ test('editorial route checks origin, CSRF, administrator membership and AAL2 on 
     if (publicRoute.includes('/articles/')) {
       assert.match(source, /getPublicationEligibility\(publication, '(?:en|ar)'\)\.routeAvailable/);
     } else {
-      assert.match(source, /faqs\.length > 0/);
+      assert.match(source, /getPublicationEligibility\(publication, '(?:en|ar)'\)\.routeAvailable/);
     }
     assert.doesNotMatch(source, /indexingEligible=\{true\}|enableCanonical=\{true\}/);
   }

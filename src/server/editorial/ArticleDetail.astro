@@ -29,10 +29,12 @@ if (eligible && article) {
   }
 }
 const equivalentPublication = equivalent?.publication[alternateLanguage];
-const alternates = publication && equivalentPublication
+const englishPublication = language === 'en' ? publication : equivalentPublication;
+const arabicPublication = language === 'ar' ? publication : equivalentPublication;
+const alternates = englishPublication && arabicPublication
   ? hreflangForEquivalentPages([
-      { language: 'en', publication: article?.publication.en ?? (language === 'en' ? publication : equivalentPublication) },
-      { language: 'ar', publication: article?.publication.ar ?? (language === 'ar' ? publication : equivalentPublication) },
+      { language: 'en', publication: englishPublication },
+      { language: 'ar', publication: arabicPublication },
     ])
   : [];
 const metadata = content
