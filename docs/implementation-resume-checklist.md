@@ -54,30 +54,44 @@ DNS, external account, and publication safeguards are unchanged.
     implementation implications are recorded in
     [competitor benchmark](seo-competitor-benchmark.md). Direct page,
     mobile/usability and enquiry-flow comparison remains pending.
-12. [~] Design/responsive UX — bilingual design system and templates exist.
-    Complete representative-page responsive, keyboard and visual acceptance.
+12. [~] Design/responsive UX — homepage search now submits to localized
+    published-property search, and invalid filters retain a correction form.
+    Corrected button styling and contrast. Local Chromium checked homepage
+    layout at 320px, 768px and 1440px, RTL direction, mobile menu and skip-link
+    focus; English search submission reached the expected unconfigured-backend
+    503. Mock-backed search integration tests pass. Full visual, keyboard,
+    screen-reader and authenticated admin acceptance remain pending.
 13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
     eligible alternates and sitemap paths. GA4, conversion events, Search
     Console, Bing and IndexNow remain unconfigured; prerequisites and
     activation gates are recorded separately in
     [external dependencies](seo-external-dependencies.md).
-14. [~] Security/accessibility — existing security controls and regression
-    tests cover key flows. Complete fresh security and accessibility review;
-    CodeQL previously reported analysis failure, not a clean scan.
-15. [ ] Performance — Lighthouse/Core Web Vitals targets have not been
-    measured; record real mobile and desktop measurements and fix regressions.
+14. [~] Security/accessibility — contrast and accessible-name findings were
+    corrected. Lighthouse checks do not establish WCAG 2.2 AA conformance;
+    complete manual and assistive-technology review. CodeQL reported no
+    analyzable changed languages and did not run an analysis; a successful
+    security analysis remains required.
+15. [~] Performance — Lighthouse 13.6.0 on the local Node 24 production
+    build, 2026-11-26, indexing off and no backend: English mobile homepage
+    performance/accessibility/best-practices/SEO 100/100/100/63; FCP 1.1s,
+    LCP 1.1s, TBT 0ms, CLS 0. Arabic desktop homepage 100/100/100/63; FCP
+    0.3s, LCP 0.3s, TBT 0ms, CLS 0. These single lab runs were concurrent,
+    not field measurements, and excluded real inventory/media. SEO deductions
+    reflect intentional noindex; do not activate indexing to improve scores.
+    Compression and render-blocking CSS were flagged; verify caching,
+    compression and Core Web Vitals on authorized staging with real content.
 16. [~] Hostinger/backup/rollback — preparation instructions and encrypted
     backup scripts exist; local database restore passed using a synthetic
     archive. Verify access-restricted staging, manual deployment, caching,
     resource limits, rollback, hosted database backup, and media restore only
     in authorized environments; do not deploy without authorization.
-17. [~] Final validation — focused SEO/route tests pass (15 tests). Complete
-    the existing full suite, Astro check, production build, secret scan and
-    successful CodeQL after implementation; report actual results and
-    unresolved external gates.
+17. [~] Final validation — Node 24.22.3 production build and Astro check
+    passed; targeted design and property tests passed (15 tests). Secret scan
+    was clean; full suite, representative hosted testing and successful
+    CodeQL analysis remain required.
 
 Known verified limits: no production deployment or hosted migration was done;
-no full-page competitor, performance or field-search measurements are
+no full-page competitor, hosted performance or field-search measurements are
 verified; external analytics, search-platform, notification-provider and
 Hostinger account configuration remain unverified. Arabic property indexing
 is withheld pending exact-revision review data. All seven migrations and SQL

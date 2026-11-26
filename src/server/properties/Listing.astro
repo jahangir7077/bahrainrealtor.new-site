@@ -36,11 +36,12 @@ const pageUrl = (page: number) => {
   <Container width="wide">
     <section class="listings">
       <h1>{title}</h1>
-      {error ? (
+      {error && (
         <p role="alert">{error === 'invalid'
           ? (arabic ? 'خيارات البحث غير صالحة.' : 'Invalid search filters.')
           : (arabic ? 'العقارات غير متاحة حالياً. يرجى المحاولة لاحقاً.' : 'Properties are temporarily unavailable. Please try again later.')}</p>
-      ) : (
+      )}
+      {error !== 'unavailable' && (
         <>
           <form method="get" action={base} class="filters">
             <label>{translate(language, 'search.keyword')}
@@ -83,7 +84,7 @@ const pageUrl = (page: number) => {
             </label>
             <button type="submit">{translate(language, 'search.search')}</button>
           </form>
-          {properties.length ? (
+          {!error && (properties.length ? (
             <div class="grid">
               {properties.map((property) => (
                 <article class="property">
@@ -102,7 +103,7 @@ const pageUrl = (page: number) => {
                 </article>
               ))}
             </div>
-          ) : <p>{translate(language, 'content.noProperties')}</p>}
+          ) : <p>{translate(language, 'content.noProperties')}</p>)}
           {filters && (filters.page > 1 || hasNext) && (
             <nav aria-label={translate(language, 'templates.pagination')} class="pagination">
               {filters.page > 1 && <a href={pageUrl(filters.page - 1)}>{arabic ? 'السابق' : 'Previous'}</a>}

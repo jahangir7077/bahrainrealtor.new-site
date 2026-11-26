@@ -455,6 +455,10 @@ test('invalid inputs are rejected without backend queries', async () => {
     assert.equal((await read(`/properties/?${query}`)).response.status, 400, query);
     assert.equal(requests.length, 0);
   }
+  const invalid = await read('/properties/?minimumPrice=5&maximumPrice=1');
+  assert.equal(invalid.response.status, 400);
+  assert.match(invalid.html, /Invalid search filters\./);
+  assert.match(invalid.html, /<form method="get" action="\/properties\/"/);
 });
 
 test('listing search applies bounded text and exact decimal price criteria with stable sort', async () => {

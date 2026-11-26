@@ -20,7 +20,7 @@ const base = language === 'ar' ? '/ar/properties/' : '/properties/';
     <label>
       {translate(language, 'search.transaction')}
       <select name="transaction">
-        <option value="">{translate(language, 'search.anyBedrooms')}</option>
+        <option value="">{language === 'ar' ? 'الكل' : 'Any'}</option>
         <option value="sale">{translate(language, 'search.buy')}</option>
         <option value="rent">{translate(language, 'search.rent')}</option>
       </select>
