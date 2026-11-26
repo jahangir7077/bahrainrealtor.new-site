@@ -292,6 +292,7 @@ export async function listPublishedPropertyPaths(): Promise<{ path: string; last
           typeof row.published_at !== 'string' || !Number.isFinite(Date.parse(row.published_at))) {
         throw new Error('Invalid public sitemap content');
       }
+      if (row.locale === 'ar') continue;
       paths.push({
         path: propertyPath({ id: row.id, slug: row.slug }, row.locale),
         lastModified: row.published_at,

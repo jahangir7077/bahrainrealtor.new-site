@@ -2,9 +2,14 @@
 import FaqTemplate from '../../../../components/templates/FaqTemplate.astro';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { translate } from '../../../../i18n/translate.ts';
-import { listPublishedFaqs } from '../../../../server/editorial/repository.ts';
+import {
+  editorialArchiveAlternates,
+  listPublishedFaqs,
+} from '../../../../server/editorial/repository.ts';
+import { getPublicationEligibility } from '../../../../i18n/publication.ts';
 
 let faqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
+let equivalentFaqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
 let unavailable = false;
 try {
   faqs = await listPublishedFaqs('ar');
@@ -13,7 +18,19 @@ try {
   Astro.response.status = 503;
 }
 Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
-const indexable = process.env.SEO_INDEXING_ENABLED === 'true' && faqs.length > 0;
+const indexable = process.env.SEO_INDEXING_ENABLED === 'true' &&
+  faqs.some((faq) => {
+    const publication = faq.publication.ar;
+    return Boolean(publication && getPublicationEligibility(publication, 'ar').routeAvailable);
+  });
+if (indexable) {
+  try {
+    equivalentFaqs = await listPublishedFaqs('en');
+  } catch {
+    equivalentFaqs = [];
+  }
+}
+const alternates = editorialArchiveAlternates(equivalentFaqs, faqs, '/blog/faqs/');
 if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 
@@ -24,6 +41,7 @@ if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   indexingEligible={indexable}
   enableCanonical={indexable}
   showOpenGraph
+  alternates={alternates}
 >
   <FaqTemplate language="ar" faqs={faqs} preview={false} unavailable={unavailable} />
 </BaseLayout>

@@ -12,7 +12,10 @@ Node.js compatibility, deployment controls, vendor capabilities, security,
 privacy requirements and costs remain subject to validation. The
 [architecture](website-architecture.md) records intended
 routes, and the [keyword map](keyword-map.md) records ownership and URL
-assignments from the existing workbook. Owner authorization on 2026-11-25
+assignments and topic clusters from the existing workbook. The
+[competitor benchmark](seo-competitor-benchmark.md) records dated evidence and
+its limits; the [external dependency register](seo-external-dependencies.md)
+tracks integrations and launch gates separately. Owner authorization on 2026-11-25
 extends development scope to mapped pages, templates, technical SEO, tracking
 readiness, competitor benchmarking and performance work. It does not permit
 production deployment, DNS or external account changes, production indexing,
@@ -48,7 +51,8 @@ approved 301 mappings are recorded as pending in the
 - Benchmark competitors only from cited, reproducible observations. Record
   useful gaps in performance, accessibility, mobile property presentation,
   navigation and enquiry completion; do not infer competitor weaknesses from
-  keyword-export presence alone.
+  keyword-export presence alone. Do not treat dated search snippets as a
+  substitute for direct page or usability inspection.
 
 ## English and Arabic
 
@@ -135,6 +139,7 @@ Before launch, check representative pages for metadata, canonical URLs,
 indexability, structured data, mobile usability, accessibility, performance,
 both languages, sitemap entries and redirects. Record actual measurements.
 Privacy/legal requirements, retention periods, monitoring ownership and
-provider costs must be validated before implementation. Keep the strategy,
+provider costs must be validated before implementation; see the separate
+[external dependency register](seo-external-dependencies.md). Keep the strategy,
 architecture and keyword map consistent when implementing the authorized
 scope; the production and content safeguards above remain in force.

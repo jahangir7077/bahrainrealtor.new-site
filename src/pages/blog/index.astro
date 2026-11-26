@@ -2,10 +2,16 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EditorialHub from '../../components/EditorialHub.astro';
 import { getPublicationEligibility } from '../../i18n/publication.ts';
-import { listPublishedArticles, listPublishedFaqs } from '../../server/editorial/repository.ts';
+import {
+  editorialArchiveAlternates,
+  listPublishedArticles,
+  listPublishedFaqs,
+} from '../../server/editorial/repository.ts';
 
 let articles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
 let faqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
+let equivalentArticles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
+let equivalentFaqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
 try {
   [articles, faqs] = await Promise.all([listPublishedArticles('en'), listPublishedFaqs('en')]);
 } catch {
@@ -20,6 +26,22 @@ const hasPublishedContent = articles.some((article) => {
   return Boolean(publication && getPublicationEligibility(publication, 'en').routeAvailable);
 });
 const indexable = process.env.SEO_INDEXING_ENABLED === 'true' && hasPublishedContent;
+if (indexable) {
+  try {
+    [equivalentArticles, equivalentFaqs] = await Promise.all([
+      listPublishedArticles('ar'),
+      listPublishedFaqs('ar'),
+    ]);
+  } catch {
+    equivalentArticles = [];
+    equivalentFaqs = [];
+  }
+}
+const alternates = editorialArchiveAlternates(
+  [...articles, ...faqs],
+  [...equivalentArticles, ...equivalentFaqs],
+  '/blog/',
+);
 if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 
@@ -30,6 +52,7 @@ if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   indexingEligible={indexable}
   enableCanonical={indexable}
   showOpenGraph
+  alternates={alternates}
 >
   <EditorialHub language="en" articleCount={articles.length} faqCount={faqs.length} />
 </BaseLayout>

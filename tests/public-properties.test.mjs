@@ -37,7 +37,7 @@ const rows = [
 ];
 const editorialRows = [
   ...['en', 'ar'].map((locale) => ({
-    id: locale === 'en' ? '66666666-6666-4666-8666-666666666666' : '77777777-7777-4777-8777-777777777777',
+    id: '66666666-6666-4666-8666-666666666666',
     kind: 'article',
     slug: 'amwaj-property-investment-guide',
     locale,
@@ -249,7 +249,7 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   const hasSitemapPath = (path) => sitemapUrls.some((url) =>
     url.origin === 'https://bahrainrealtor.com' && url.pathname === path);
   assert.ok(hasSitemapPath(`/properties/example-home-${id}/`));
-  assert.ok(hasSitemapPath(`/ar/properties/example-home-${id}/`));
+  assert.equal(hasSitemapPath(`/ar/properties/example-home-${id}/`), false);
   assert.ok(hasSitemapPath(`/properties/sold-home-${soldId}/`));
   assert.ok(hasSitemapPath('/guides/amwaj-property-investment-guide/'));
   assert.ok(hasSitemapPath('/blog/'));
@@ -271,6 +271,11 @@ test('sitemap and robots endpoints are served and indexing stays explicitly gate
   assert.match(propertyHtml, /<meta name="robots" content="index, follow"/);
   assert.match(propertyHtml, /<link rel="canonical" href="https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.doesNotMatch(property.headers.get('x-robots-tag') ?? '', /noindex/);
+  const arabicProperty = await fetch(`${indexingBase}/ar/properties/example-home-${id}/`);
+  assert.equal(arabicProperty.status, 200);
+  const arabicPropertyHtml = await arabicProperty.text();
+  assert.match(arabicPropertyHtml, /name="robots" content="noindex, nofollow"/);
+  assert.doesNotMatch(arabicPropertyHtml, /rel="canonical"/);
 });
 
 test('mapped area and landing pages render only published bilingual CMS content with SEO and internal links', async () => {
@@ -290,6 +295,7 @@ test('mapped area and landing pages render only published bilingual CMS content 
   assert.match(indexed, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/buy-property\/amwaj-island\/"/);
   assert.match(indexed, /hreflang="en-BH"/);
   assert.match(indexed, /hreflang="ar-BH"/);
+  assert.match(indexed, /href="https:\/\/bahrainrealtor\.com\/ar\/buy-property\/amwaj-island\/"/);
   const arabic = await fetch(`${indexingBase}/ar${path}`);
   assert.equal(arabic.status, 200);
   assert.match(await arabic.text(), /عقارات للبيع في جزيرة أمواج/);
@@ -311,7 +317,11 @@ test('bilingual blog hubs link only to published CMS archives and remain noindex
   assert.match(arabic.html, /href="\/ar\/blog\/faqs\/"/);
   const enabled = await fetch(`${indexingBase}/blog/`);
   assert.equal(enabled.status, 200);
-  assert.match(await enabled.text(), /name="robots" content="index, follow"/);
+  const enabledHtml = await enabled.text();
+  assert.match(enabledHtml, /name="robots" content="index, follow"/);
+  assert.match(enabledHtml, /hreflang="en-BH"/);
+  assert.match(enabledHtml, /hreflang="ar-BH"/);
+  assert.match(enabledHtml, /href="https:\/\/bahrainrealtor\.com\/ar\/blog\/"/);
 });
 
 test('bilingual guide routes use published CMS content, metadata, schema, and safe index gates', async () => {
@@ -329,11 +339,18 @@ test('bilingual guide routes use published CMS content, metadata, schema, and sa
   assert.match(html, /"@type":"Article"/);
   assert.match(html, /"@type":"BreadcrumbList"/);
   assert.match(html, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/guides\/amwaj-property-investment-guide\/"/);
+  assert.match(html, /hreflang="en-BH"/);
+  assert.match(html, /hreflang="ar-BH"/);
   const arabic = await fetch(`${indexingBase}/ar${path}`);
   assert.equal(arabic.status, 200);
   assert.match(await arabic.text(), /الاستثمار في عقارات أمواج/);
   for (const host of [base, indexingBase]) {
-    assert.equal((await fetch(`${host}/guides/unpublished-guide/`)).status, 404);
+    const unavailable = await fetch(`${host}/guides/unpublished-guide/`);
+    assert.equal(unavailable.status, 404);
+    const unavailableHtml = await unavailable.text();
+    assert.match(unavailableHtml, /<title>Article unavailable<\/title>/);
+    assert.match(unavailableHtml, /name="description" content="This article is currently unavailable\."/);
+    assert.match(unavailableHtml, /name="robots" content="noindex, nofollow"/);
   }
 });
 
@@ -347,6 +364,8 @@ test('FAQ archives emit visible-content schema and auto-enter the sitemap only w
   const html = await enabled.text();
   assert.match(html, /name="robots" content="index, follow"/);
   assert.match(html, /rel="canonical" href="https:\/\/bahrainrealtor\.com\/blog\/faqs\/"/);
+  assert.match(html, /hreflang="en-BH"/);
+  assert.match(html, /hreflang="ar-BH"/);
 });
 
 test('details use exact slug and ID, preserve sold pages and do not fall back across locales', async () => {
@@ -356,6 +375,7 @@ test('details use exact slug and ID, preserve sold pages and do not fall back ac
   assert.match(en.html, /"item":"https:\/\/bahrainrealtor\.com\/properties\/example-home-/);
   assert.match(en.html, /<title>Reviewed listing SEO title<\/title>/);
   assert.match(en.html, /<meta name="description" content="Reviewed listing search description\."\/?>/);
+  assert.doesNotMatch(en.html, /hreflang=/);
   assert.match(en.html, /Published &lt;home&gt;/);
   assert.match(en.html, /Approved description/);
   assert.match(en.html, /BHD|BD/);

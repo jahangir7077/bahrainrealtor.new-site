@@ -96,6 +96,31 @@ notes. Keep variants assigned to the same target together; do not create
 separate pages for synonyms. Programmatic-SEO combinations are not automatic:
 apply the workbook's inventory and unique-value conditions before indexing.
 
+## Topic clusters and cannibalization boundaries
+
+These clusters group the workbook's 69 unique targets (58 transactional
+buy-property pages, 10 guides and the homepage). They do not create new
+ownership or authorize new content. Each URL remains owned by the single
+primary keyword and intent in the table above.
+
+| Cluster | Intent boundary | Owned URLs |
+| --- | --- | --- |
+| National property type | Broad Bahrain-wide property or type searches; keep the general property page distinct from the type-specific pages. | `/buy-property/apartments-for-sale-in-bahrain/`, `/buy-property/buildings-for-sale-in-bahrain/`, `/buy-property/villas-for-sale-in-bahrain/`, `/buy-property/property-for-sale-in-bahrain/`, `/buy-property/commercial-property-for-sale-in-bahrain/`, `/buy-property/houses-for-sale-in-bahrain/`, `/buy-property/land-for-sale-in-bahrain/` |
+| National hub | Commercial / navigational, not a substitute for transactional inventory pages. | `/` |
+| Area and community inventory | Transactional inventory for a named area/community or an area-specific property type. Keep a general area page distinct from its type-specific pages only where the workbook gives each a distinct target and verified inventory/content supports it. | `/buy-property/apartments-for-sale-in-hidd/`, `/buy-property/houses-for-sale-in-busaiteen/`, `/buy-property/houses-for-sale-in-hidd/`, `/buy-property/villas-for-sale-in-durrat-al-bahrain/`, `/buy-property/land-for-sale-in-diyar-al-muharraq/`, `/buy-property/villas-for-sale-in-amwaj-islands/`, `/buy-property/villas-for-sale-in-saar/`, `/buy-property/houses-for-sale-in-isa-town/`, `/buy-property/villas-for-sale-in-hidd/`, `/buy-property/land-for-sale-in-hamala/`, `/buy-property/apartments-for-sale-in-riffa/`, `/buy-property/houses-for-sale-in-muharraq/`, `/buy-property/villas-for-sale-in-diyar-al-muharraq/`, `/buy-property/apartments-for-sale-in-busaiteen/`, `/buy-property/apartments-for-sale-in-amwaj-islands/`, `/buy-property/apartments-for-sale-in-juffair/`, `/buy-property/villas-for-sale-in-riffa/`, `/buy-property/houses-for-sale-in-riffa/`, `/buy-property/apartments-for-sale-in-bahrain-bay/`, `/buy-property/apartments-for-sale-in-bahrain-marina/`, `/buy-property/apartments-for-sale-in-dilmunia/`, `/buy-property/apartments-for-sale-in-diyar-al-muharraq/`, `/buy-property/apartments-for-sale-in-marassi/`, `/buy-property/apartments-for-sale-in-reef-island/`, `/buy-property/apartments-for-sale-in-seef/`, `/buy-property/apartments-for-sale-in-tala-island/`, `/buy-property/houses-for-sale-in-amwaj-islands/`, `/buy-property/houses-for-sale-in-saar/`, `/buy-property/land-for-sale-in-amwaj-islands/`, `/buy-property/property-for-sale-in-amwaj-islands/`, `/buy-property/property-for-sale-in-bahrain-bay/`, `/buy-property/property-for-sale-in-dilmunia/`, `/buy-property/property-for-sale-in-diyar-al-muharraq/`, `/buy-property/property-for-sale-in-hidd/`, `/buy-property/property-for-sale-in-janabiya/`, `/buy-property/property-for-sale-in-juffair/`, `/buy-property/property-for-sale-in-marassi/`, `/buy-property/property-for-sale-in-muharraq/`, `/buy-property/property-for-sale-in-reef-island/`, `/buy-property/property-for-sale-in-riffa/`, `/buy-property/property-for-sale-in-seef/`, `/buy-property/property-for-sale-in-tala-island/`, `/buy-property/property-for-sale-in-tubli/`, `/buy-property/villas-for-sale-in-hamala/`, `/buy-property/villas-for-sale-in-janabiya/`, `/buy-property/villas-for-sale-in-marassi/`, `/buy-property/villas-for-sale-in-tala-island/` |
+| Freehold ownership | Transactional freehold offering versus informational locations/eligibility; do not merge the guide into an inventory page. | `/buy-property/freehold-property-for-sale-in-bahrain/`, `/guides/freehold-property-areas-in-bahrain/` |
+| Investment | Distinguish transactional investment inventory from informational investment and market research. | `/buy-property/investment-properties-for-sale-in-bahrain/`, `/guides/amwaj-property-investment-guide/`, `/guides/amwaj-property-prices-market-guide/`, `/guides/bahrain-property-investment-guide/`, `/guides/bahrain-property-prices-market-guide/` |
+| Specialty residential | Specialty/duplex intent remains distinct from general residential and area inventory. | `/buy-property/specialty-residential-for-sale-in-amwaj-islands/`, `/buy-property/specialty-residential-property-for-sale-in-bahrain/` |
+| Area and community research | Informational location, community and living-cost intent; not transactional inventory. | `/guides/bahrain-area-community-guides/`, `/guides/living-in-amwaj-islands/` |
+| Buying and ownership research | Informational buying process, mortgage and comparison intent; not a listing page. | `/guides/bahrain-property-buying-guides/`, `/guides/bahrain-property-mortgage-guide/`, `/guides/how-to-buy-property-in-bahrain/` |
+
+Location-specific pages may share supporting terms with broader pages, but
+retain distinct URLs only as mapped above. Do not index an area/type
+combination merely because the route exists: require verified matching stock,
+distinct useful content and the workbook's demand and cannibalization review.
+When those conditions are not met, keep the page unpublished/noindex rather
+than splitting a broad page or publishing a thin doorway page.
+
 ## Ownership rules
 
 - Each approved indexable URL has one primary intent and primary keyword;

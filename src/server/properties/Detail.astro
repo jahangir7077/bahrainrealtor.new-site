@@ -29,7 +29,8 @@ const metadata = property
       seoDescription: property.seoDescription,
     })
   : { title, description: title };
-const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true' && Boolean(property);
+const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true' &&
+  Boolean(property) && language === 'en';
 const breadcrumbs = property ? breadcrumbSchema([
   { name: translate(language, 'navigation.home'), path: language === 'ar' ? '/ar/' : '/' },
   { name: arabic ? 'العقارات' : 'Properties', path: arabic ? '/ar/properties/' : '/properties/' },

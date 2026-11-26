@@ -2,10 +2,14 @@
 import ArticleArchive from '../../../../components/ArticleArchive.astro';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { translate } from '../../../../i18n/translate.ts';
-import { listPublishedArticles } from '../../../../server/editorial/repository.ts';
+import {
+  editorialArchiveAlternates,
+  listPublishedArticles,
+} from '../../../../server/editorial/repository.ts';
 import { getPublicationEligibility } from '../../../../i18n/publication.ts';
 
 let articles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
+let equivalentArticles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
 let unavailable = false;
 try {
   articles = await listPublishedArticles('ar');
@@ -19,6 +23,14 @@ const indexable = process.env.SEO_INDEXING_ENABLED === 'true' &&
     const publication = article.publication.ar;
     return Boolean(publication && getPublicationEligibility(publication, 'ar').routeAvailable);
   });
+if (indexable) {
+  try {
+    equivalentArticles = await listPublishedArticles('en');
+  } catch {
+    equivalentArticles = [];
+  }
+}
+const alternates = editorialArchiveAlternates(equivalentArticles, articles, '/blog/articles/');
 if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 
@@ -29,6 +41,7 @@ if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   indexingEligible={indexable}
   enableCanonical={indexable}
   showOpenGraph
+  alternates={alternates}
 >
   <ArticleArchive language="ar" articles={articles} unavailable={unavailable} />
 </BaseLayout>

@@ -1,12 +1,48 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Language } from '../../i18n/config.ts';
+import { getPublicationEligibility, type PublicationVersion } from '../../i18n/publication.ts';
 import type { ArticleRecord, FaqRecord } from '../../types/content.ts';
+import { hreflangForEquivalentPages } from '../../utils/seo/hreflang.ts';
+import type { HreflangLink } from '../../utils/seo/hreflang.ts';
 
 declare const process: { env: Record<string, string | undefined> };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const fields = 'id,kind,slug,locale,revision_id,published_at,title,body,summary,author_name,seo_title,seo_description,category_slug,category_name';
+type EditorialRecord = ArticleRecord | FaqRecord;
+
+export function editorialArchiveAlternates(
+  englishRecords: readonly EditorialRecord[],
+  arabicRecords: readonly EditorialRecord[],
+  path: string,
+): HreflangLink[] {
+  if (process.env.SEO_INDEXING_ENABLED !== 'true') return [];
+  const publicationFor = (
+    records: readonly EditorialRecord[],
+    language: Language,
+  ): PublicationVersion | null => {
+    for (const record of records) {
+      const publication = record.publication[language];
+      if (!publication || !getPublicationEligibility(publication, language).routeAvailable) continue;
+      const localizedPath = `${language === 'ar' ? '/ar' : ''}${path}`;
+      return {
+        ...publication,
+        routePath: localizedPath,
+        canonicalPath: localizedPath,
+        indexable: true,
+      };
+    }
+    return null;
+  };
+  const english = publicationFor(englishRecords, 'en');
+  const arabic = publicationFor(arabicRecords, 'ar');
+  if (!english || !arabic) return [];
+  return hreflangForEquivalentPages([
+    { language: 'en', publication: english },
+    { language: 'ar', publication: arabic },
+  ]);
+}
 
 function publicClient() {
   const url = process.env.SUPABASE_URL;

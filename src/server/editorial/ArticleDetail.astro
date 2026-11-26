@@ -6,6 +6,8 @@ import type { Language } from '../../i18n/config.ts';
 import type { ArticleRecord } from '../../types/content.ts';
 import { articleSchema, breadcrumbSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
 import { contentMetadata } from '../../utils/seo/content-metadata.ts';
+import { getPublishedArticle } from './repository.ts';
+import { hreflangForEquivalentPages } from '../../utils/seo/hreflang.ts';
 
 interface Props {
   language: Language;
@@ -16,6 +18,23 @@ const { language, article } = Astro.props;
 const content = article?.content[language];
 const publication = article?.publication[language];
 const eligible = Boolean(publication && getPublicationEligibility(publication, language).indexingEligible);
+const alternateLanguage = language === 'ar' ? 'en' : 'ar';
+let equivalent: ArticleRecord | null = null;
+if (eligible && article) {
+  try {
+    const candidate = await getPublishedArticle(alternateLanguage, article.slug);
+    if (candidate?.id === article.id) equivalent = candidate;
+  } catch {
+    equivalent = null;
+  }
+}
+const equivalentPublication = equivalent?.publication[alternateLanguage];
+const alternates = publication && equivalentPublication
+  ? hreflangForEquivalentPages([
+      { language: 'en', publication: article?.publication.en ?? (language === 'en' ? publication : equivalentPublication) },
+      { language: 'ar', publication: article?.publication.ar ?? (language === 'ar' ? publication : equivalentPublication) },
+    ])
+  : [];
 const metadata = content
   ? contentMetadata({
       title: content.title,
@@ -23,7 +42,10 @@ const metadata = content
       seoTitle: content.seoTitle,
       seoDescription: content.seoDescription,
     })
-  : { title: language === 'ar' ? 'المقال غير متاح' : 'Article unavailable', description: '' };
+  : {
+      title: language === 'ar' ? 'المقال غير متاح' : 'Article unavailable',
+      description: language === 'ar' ? 'هذا المقال غير متاح حالياً.' : 'This article is currently unavailable.',
+    };
 const path = article
   ? `${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`
   : '';
@@ -53,6 +75,7 @@ const breadcrumbs = article
   indexingEligible={eligible}
   enableCanonical={eligible}
   showOpenGraph
+  alternates={alternates}
 >
   {schema && <script type="application/ld+json" set:html={safeJsonLd(schema)} />}
   {breadcrumbs && <script type="application/ld+json" set:html={safeJsonLd(breadcrumbs)} />}
