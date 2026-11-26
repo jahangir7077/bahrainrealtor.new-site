@@ -172,3 +172,21 @@ object metadata. It is not automatically imported on restore. Recreating
 Storage objects requires a separately reviewed, local-only procedure that
 preserves the database/object-path relationship. No script here restores
 objects or writes to hosted Supabase.
+
+## Isolated restore validation
+
+The local database restore script has been exercised against a disposable
+loopback PostgreSQL 16 database using a synthetic encrypted custom-format
+`pg_dump` archive; the restored test row was verified. No hosted database
+connection, project backup, or production data was used. This confirms the
+encrypted stream and local `pg_restore` path only, not a hosted backup,
+Supabase Auth recovery, media-object restore, or a full project disaster
+recovery.
+
+Media handling uses the private Storage bucket and application-side Sharp
+re-encoding; it does not depend on paid Supabase Image Transformations. The
+bucket caps an individual object at 8 MiB, and the admin workflow caps a
+revision at 20 images. Verify the selected project's current plan quota and
+retention/egress limits in its account before loading media; account limits
+cannot be confirmed by this repository or local tests. Do not upgrade or
+activate paid services as part of this preparation.

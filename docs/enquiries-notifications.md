@@ -25,7 +25,10 @@ Configure these server-only environment variables:
 Run notification delivery by POSTing an empty request body to
 `/api/internal/enquiry-notifications` with the configured bearer credential. A
 scheduled caller should retry this bounded batch endpoint; it handles up to ten
-rows per call. Delivery uses the configured endpoint only, resolves and pins a public IP address,
+rows per database claim, while the HTTP worker claims at most four at a time so
+sequential deliveries remain within the database's two-minute lease with
+timeout margin. Delivery uses the configured endpoint only, resolves and pins
+a public IP address,
 rejects redirects, applies an eight-second timeout, and caps response reads.
 The provider receives an `enquiry.created` JSON event and an idempotency key.
 It should treat repeat deliveries with the same enquiry ID as duplicates.

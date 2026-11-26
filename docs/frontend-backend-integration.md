@@ -63,7 +63,11 @@ not independently verified here. Do not run further hosted migrations without
 separate approval.
 Local SQL tests use stubbed Supabase roles and authentication unless a real
 local Supabase stack is explicitly stated; they are not hosted-integration
-tests.
+tests. In an isolated PostgreSQL 16 container, all seven migrations were
+applied locally and every SQL test under `supabase/tests/` passed, including
+site-content publication, bilingual review, media policy, property
+management, and the enquiry outbox/retry workflow. This does not verify the
+hosted Supabase project or its account configuration.
 
 The public property listings query only published content, support bounded
 search and filters, exact decimal price sorting, pagination and related
@@ -93,7 +97,8 @@ WebPage/BreadcrumbList schema, contextual links, eligible reciprocal
 hreflang, and sitemap entries. Missing or unpublished content does not create
 a public route. Website settings remain private. The new site-content
 migration is pending review/application to an authorized development database;
-it has not been run against any hosted database. Enquiries use server-owned
+it has only been exercised on an isolated local database, not the hosted
+development project. Enquiries use server-owned
 bilingual consent, atomic rate limiting, spam checks, a private database
 outbox and a separately scheduled notification worker. The email delivery
 provider and worker schedule still require owner configuration and privacy/legal
