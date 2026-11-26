@@ -1,5 +1,6 @@
 ---
 import Container from './ui/Container.astro';
+import Button from './ui/Button.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { translate } from '../i18n/translate.ts';
 import type { Language } from '../i18n/config.ts';
@@ -25,7 +26,7 @@ const navItems = [
 
 <header class="site-header" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
   <Container width="wide" class="site-header__inner">
-    <a class="brand" href={home} aria-label={`Bahrain Realtor — ${translate(language, 'navigation.home')}`}>
+    <a class="brand" href={home}>
       <span class="brand__mark" aria-hidden="true">BR</span>
       <span class="brand__words">
         <strong>Bahrain Realtor</strong>
@@ -54,11 +55,11 @@ const navItems = [
 
     <div class="site-header__actions">
       <LanguageSwitcher language={language} />
-      <a class="button button--contact button--small site-header__contact" href={sectionHref('contact')}>
+      <div class="site-header__contact"><Button variant="contact" size="small" href={sectionHref('contact')}>
         {translate(language, 'navigation.contactAdvisor')}
-      </a>
+      </Button></div>
       <details class="mobile-menu">
-        <summary aria-label={translate(language, 'accessibility.menu')}>
+        <summary aria-label={translate(language, 'accessibility.openMenu')}>
           <span aria-hidden="true">☰</span>
           <span class="mobile-menu__label">{translate(language, 'accessibility.openMenu')}</span>
         </summary>

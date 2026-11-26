@@ -5,6 +5,7 @@ import EnquiryFormPreview from './EnquiryFormPreview.astro';
 import PropertySearch from './PropertySearch.astro';
 import PropertyTypeCard from './PropertyTypeCard.astro';
 import Card from './ui/Card.astro';
+import Button from './ui/Button.astro';
 import Container from './ui/Container.astro';
 import SectionHeading from './ui/SectionHeading.astro';
 import { translate } from '../i18n/translate.ts';
@@ -29,8 +30,8 @@ const text = (key: string) => translate(language, key);
         <h1>{text('home.title')}</h1>
         <p class="home-hero__lead">{text('home.introduction')}</p>
         <div class="home-hero__actions">
-          <a class="button button--contact button--large" href="#property-types">{text('home.explore')}</a>
-          <a class="button button--secondary button--large" href="#contact">{text('home.contact')}</a>
+          <Button variant="contact" size="large" href="#property-types">{text('home.explore')}</Button>
+          <Button variant="secondary" size="large" href="#contact">{text('home.contact')}</Button>
         </div>
       </div>
       <div class="home-hero__art" aria-hidden="true">
@@ -186,11 +187,16 @@ const text = (key: string) => translate(language, key);
 
   .eyebrow {
     margin-block-end: var(--space-4);
-    color: var(--color-gold);
+    color: var(--color-text-secondary);
     font-size: var(--type-small);
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  .home-hero .eyebrow,
+  .home-feature .eyebrow {
+    color: var(--color-gold);
   }
 
   h1,
@@ -219,9 +225,17 @@ const text = (key: string) => translate(language, key);
     margin-block-start: var(--space-6);
   }
 
-  .home-hero__actions .button--secondary {
+  .home-hero__actions :global(.button--secondary) {
     color: var(--color-white);
     border-color: var(--color-white);
+  }
+
+  .home-hero__actions :global(.button--secondary:hover) {
+    color: var(--color-navy);
+  }
+
+  .home-hero__actions :global(.button:focus-visible) {
+    outline-color: var(--color-focus-on-dark);
   }
 
   .home-hero__art {
@@ -256,6 +270,7 @@ const text = (key: string) => translate(language, key);
     inset-block-end: var(--space-5);
     inset-inline-start: var(--space-5);
     color: #e2e8f0;
+    background: #193550;
     font-size: 0.68rem;
     letter-spacing: 0.18em;
   }

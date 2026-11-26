@@ -18,7 +18,7 @@
   --color-surface-subtle: var(--color-ivory);
   --color-surface-dark: var(--color-navy);
   --color-text-primary: var(--color-charcoal);
-  --color-text-secondary: var(--color-slate);
+  --color-text-secondary: #596a80;
   --color-text-on-dark: var(--color-white);
   --color-text-on-accent: var(--color-navy);
   --color-link: var(--color-navy);

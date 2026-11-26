@@ -209,6 +209,22 @@ function latestPropertyQuery() {
   return requests.findLast((request) => request.path.endsWith('/published_content'));
 }
 
+test('homepage search submits localized filters to published property listings', async () => {
+  for (const [path, action] of [['/', '/properties/'], ['/ar/', '/ar/properties/']]) {
+    const response = await fetch(`${base}${path}`);
+    const html = await response.text();
+    assert.match(html, new RegExp(`<form method="get" action="${action}"`));
+    for (const name of ['transaction', 'location', 'propertyType', 'minimumPrice', 'maximumPrice', 'bedrooms']) {
+      assert.match(html, new RegExp(`name="${name}"`));
+    }
+    assert.doesNotMatch(html, /non-submitting preview/);
+  }
+  const search = await read('/properties/?transaction=rent&location=&propertyType=&minimumPrice=&maximumPrice=&bedrooms=3');
+  assert.equal(search.response.status, 200);
+  assert.match(search.html, /Rental 0/);
+  assert.doesNotMatch(search.html, /Published &lt;home&gt;/);
+});
+
 test('listing is bounded, filtered, linked, locale-specific and only queries the public view', async () => {
   requests = [];
   const { response, html } = await read('/properties/?transaction=rent&bedrooms=3');

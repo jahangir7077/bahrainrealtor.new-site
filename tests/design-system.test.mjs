@@ -28,6 +28,7 @@ test('approved brand colors and accessible semantic text pairs are present', asy
     ['#10243a', '#ffffff'],
     ['#263238', '#ffffff'],
     ['#64748b', '#ffffff'],
+    ['#596a80', '#faf8f4'],
     ['#10243a', '#c4a36b'],
     ['#ffffff', '#10243a'],
     ['#166534', '#f0fdf4'],

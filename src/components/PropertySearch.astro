@@ -7,67 +7,52 @@ interface Props {
 }
 
 const { language } = Astro.props;
-const areas = [
-  ['amwaj', 'areas.amwaj'],
-  ['tala', 'areas.tala'],
-  ['marassi', 'areas.marassi'],
-  ['diyar', 'areas.diyar'],
-  ['dilmunia', 'areas.dilmunia'],
-  ['manama', 'areas.manama'],
-] as const;
-const types = [
-  'apartments',
-  'villas',
-  'houses',
-  'land',
-  'buildings',
-  'commercial',
-  'freehold',
-] as const;
+const base = language === 'ar' ? '/ar/properties/' : '/properties/';
 ---
 
 <section class="search-panel" aria-labelledby={`search-title-${language}`} lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
   <div class="search-panel__heading">
     <h2 id={`search-title-${language}`}>{translate(language, 'search.title')}</h2>
-    <p id={`search-status-${language}`}>{translate(language, 'search.pending')}</p>
   </div>
-  <fieldset disabled aria-describedby={`search-status-${language}`}>
+  <form method="get" action={base}>
+  <fieldset>
     <legend>{translate(language, 'search.title')}</legend>
     <label>
       {translate(language, 'search.transaction')}
-      <select>
-        <option>{translate(language, 'search.buy')}</option>
-        <option>{translate(language, 'search.rent')}</option>
+      <select name="transaction">
+        <option value="">{translate(language, 'search.anyBedrooms')}</option>
+        <option value="sale">{translate(language, 'search.buy')}</option>
+        <option value="rent">{translate(language, 'search.rent')}</option>
       </select>
     </label>
     <label>
       {translate(language, 'search.location')}
-      <select>
-        <option>{translate(language, 'search.chooseLocation')}</option>
-        {areas.map(([key, translationKey]) => <option value={key}>{translate(language, translationKey)}</option>)}
-      </select>
+      <input name="location" maxlength="100" />
     </label>
     <label>
       {translate(language, 'search.propertyType')}
-      <select>
-        <option>{translate(language, 'search.chooseType')}</option>
-        {types.map((type) => <option value={type}>{translate(language, `categories.${type}`)}</option>)}
-      </select>
+      <input name="propertyType" maxlength="100" />
     </label>
     <label>
       {translate(language, 'search.minimumPrice')}
-      <input type="number" inputmode="numeric" min="0" />
+      <input name="minimumPrice" inputmode="decimal" maxlength="15" />
     </label>
     <label>
       {translate(language, 'search.maximumPrice')}
-      <input type="number" inputmode="numeric" min="0" />
+      <input name="maximumPrice" inputmode="decimal" maxlength="15" />
     </label>
     <label>
       {translate(language, 'search.bedrooms')}
-      <select><option>{translate(language, 'search.anyBedrooms')}</option></select>
+      <select name="bedrooms">
+        <option value="">{translate(language, 'search.anyBedrooms')}</option>
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+          <option value={count}>{count}+</option>
+        ))}
+      </select>
     </label>
-    <button type="button" disabled>{translate(language, 'search.search')}</button>
+    <button type="submit">{translate(language, 'search.search')}</button>
   </fieldset>
+  </form>
 </section>
 
 <style>
@@ -134,8 +119,4 @@ const types = [
     font-weight: 700;
   }
 
-  :disabled {
-    cursor: not-allowed;
-    opacity: 0.72;
-  }
 </style>
