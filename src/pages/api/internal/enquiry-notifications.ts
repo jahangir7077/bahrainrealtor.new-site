@@ -10,6 +10,7 @@ import {
 declare const process: { env: Record<string, string | undefined> };
 
 export const prerender = false;
+const NOTIFICATION_BATCH_SIZE = 4;
 
 function result(status: number, body: Record<string, unknown>): Response {
   return new Response(JSON.stringify(body), {
@@ -70,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   try {
-    const claim = await client.rpc('claim_enquiry_notifications', { p_limit: 10 });
+    const claim = await client.rpc('claim_enquiry_notifications', { p_limit: NOTIFICATION_BATCH_SIZE });
     if (claim.error || !Array.isArray(claim.data)) {
       return result(503, { message: 'Notification delivery is unavailable.' });
     }

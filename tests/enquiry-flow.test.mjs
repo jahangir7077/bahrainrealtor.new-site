@@ -230,3 +230,9 @@ test('migration implements atomic rate limiting and lease-based retry tracking',
   assert.match(migration, /private\.validate_enquiry\(\)/i);
   assert.match(migration, /window_started_at <= now\(\) - interval '15 minutes'/i);
 });
+
+test('notification worker bounds batches below the two-minute database lease', async () => {
+  const route = await readFile(new URL('../src/pages/api/internal/enquiry-notifications.ts', import.meta.url), 'utf8');
+  assert.match(route, /NOTIFICATION_BATCH_SIZE = 4/);
+  assert.match(route, /claim_enquiry_notifications', \{ p_limit: NOTIFICATION_BATCH_SIZE \}/);
+});

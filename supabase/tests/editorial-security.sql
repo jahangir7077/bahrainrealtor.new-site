@@ -119,7 +119,7 @@ select pg_temp.assert_true(
   'article and FAQ revisions capture immutable category snapshots'
 );
 select pg_temp.assert_true(
-  (select count(*) = 4 from public.site_content_revisions),
+  (select count(*) = 6 from public.site_content_revisions),
   'area, project and site setting edits create localized immutable revisions'
 );
 do $$ begin
