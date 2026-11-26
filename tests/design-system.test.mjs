@@ -73,3 +73,10 @@ test('interactive component sources preserve touch targets and accessible field 
   assert.match(badge, /<slot \/>/);
   assert.match(icon, /aria-hidden/);
 });
+
+test('property listing filters and pagination provide usable touch targets', async () => {
+  const listing = await read('src/server/properties/Listing.astro');
+  assert.match(listing, /\.filters input, \.filters select, \.filters button\s*\{[^}]*min-height:\s*var\(--target-min\)/);
+  assert.match(listing, /\.pagination a\s*\{[^}]*min-height:\s*var\(--target-min\)/);
+  assert.match(listing, /\.filters label\s*\{[^}]*max-width:\s*100%/);
+});

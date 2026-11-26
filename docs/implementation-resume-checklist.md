@@ -59,7 +59,11 @@ DNS, external account, and publication safeguards are unchanged.
     Corrected button styling and contrast. Local Chromium checked homepage
     layout at 320px, 768px and 1440px, RTL direction, mobile menu and skip-link
     focus; English search submission reached the expected unconfigured-backend
-    503. Mock-backed search integration tests pass. Full visual, keyboard,
+    503. Mock-backed search integration tests pass. Listing filter inputs and
+    pagination links now meet the 44px design target; Chromium measured all
+    nine filter controls at 44px and no horizontal document overflow at
+    320px on both English and Arabic invalid-filter pages. Pagination was not
+    browser-measured. Full visual, keyboard,
     screen-reader and authenticated admin acceptance remain pending.
 13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
     eligible alternates and sitemap paths. GA4, conversion events, Search
@@ -86,8 +90,8 @@ DNS, external account, and publication safeguards are unchanged.
     resource limits, rollback, hosted database backup, and media restore only
     in authorized environments; do not deploy without authorization.
 17. [~] Final validation — Node 24.22.3 production build and Astro check
-    passed; targeted design and property tests passed (15 tests). Secret scan
-    was clean; full suite, representative hosted testing and successful
+    passed; targeted design, property and keyword-map tests passed (17 tests).
+    Full suite, representative hosted testing and successful
     CodeQL analysis remain required.
 
 Known verified limits: no production deployment or hosted migration was done;
