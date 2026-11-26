@@ -71,38 +71,46 @@ DNS, external account, and publication safeguards are unchanged.
     activation gates are recorded separately in
     [external dependencies](seo-external-dependencies.md).
 14. [~] Security/accessibility — contrast and accessible-name findings were
-    corrected. Lighthouse checks do not establish WCAG 2.2 AA conformance;
-    complete manual and assistive-technology review. CodeQL reported no
-    analyzable changed languages and did not run an analysis; a successful
-    security analysis remains required.
+    corrected. Current CodeQL validation was skipped as all changes are
+    documentation-only; no local CodeQL CLI or repository CodeQL workflow is
+    available. This is not a successful CodeQL analysis. Lighthouse checks do
+    not establish WCAG 2.2 AA conformance; complete manual and
+    assistive-technology review.
 15. [~] Performance — Lighthouse 13.6.0 on the local Node 24 production
-    build, 2026-11-26, indexing off and no backend: English mobile homepage
-    performance/accessibility/best-practices/SEO 100/100/100/63; FCP 1.1s,
-    LCP 1.1s, TBT 0ms, CLS 0. Arabic desktop homepage 100/100/100/63; FCP
-    0.3s, LCP 0.3s, TBT 0ms, CLS 0. These single lab runs were concurrent,
-    not field measurements, and excluded real inventory/media. SEO deductions
-    reflect intentional noindex; do not activate indexing to improve scores.
-    Compression and render-blocking CSS were flagged; verify caching,
+    build, 2026-11-26, indexing off and no backend: English desktop homepage
+    performance/accessibility/best-practices/SEO 100/100/100/63; FCP/LCP
+    0.3s, TBT 0ms, CLS 0. Arabic mobile homepage 100/100/100/63; FCP/LCP
+    1.1s, TBT 0ms, CLS 0. These are single lab runs, not field measurements,
+    and exclude real inventory/media. The SEO deduction is the intentional
+    noindex gate; do not activate indexing to improve scores. Verify caching,
     compression and Core Web Vitals on authorized staging with real content.
 16. [~] Hostinger/backup/rollback — preparation instructions and encrypted
     backup scripts exist; local database restore passed using a synthetic
-    archive. Verify access-restricted staging, manual deployment, caching,
-    resource limits, rollback, hosted database backup, and media restore only
-    in authorized environments; do not deploy without authorization.
+    archive. Deployment settings remain Node 24, `npm run build`, output
+    `dist`, entry `server/entry.mjs`; keep secrets in the protected runtime
+    environment. Build/upload only to an authorized restricted staging site.
+    Verify access controls, automatic-deploy state, caching, resource limits,
+    rollback, hosted database backup and media restore before launch; see
+    [backup and recovery](backup-recovery.md). No upload or hosted backup was
+    performed.
 17. [~] Final validation — Node 24.22.3 production build and Astro check
-    passed; targeted design, property and keyword-map tests passed (17 tests).
-    Full suite, representative hosted testing and successful
-    CodeQL analysis remain required.
+    passed (115 files, zero diagnostics); all 111 existing tests passed.
+    Production preview returned 200 for `/` and `/ar/`, with noindex/no-store;
+    `/properties/` and `/admin/login` correctly fail closed with 503 absent
+    Supabase configuration. English desktop and Arabic mobile Lighthouse
+    results are recorded above. The working local preview is
+    `HOST=127.0.0.1 PORT=4321 SEO_INDEXING_ENABLED=false npm run start`
+    after `npm ci && npm run build`; no credentials are needed to view the
+    public shell. Hosted Supabase, Hostinger and successful CodeQL validation
+    remain blockers.
 
-Known verified limits: no production deployment or hosted migration was done;
-no full-page competitor, hosted performance or field-search measurements are
-verified; external analytics, search-platform, notification-provider and
-Hostinger account configuration remain unverified. Arabic property indexing
-is withheld pending exact-revision review data. All seven migrations and SQL
-assertions have been run only against disposable local PostgreSQL 16. Database
-restore testing used a synthetic archive, not hosted project data; hosted
-backup, media restore, provider delivery, and account-level Free quota remain
-unverified. No CMS content has been published; indexing remains disabled by
-default. Resume by validating the explicitly unverified hosted/account
-dependencies only after separate authorization, then continue the remaining
-checklist.
+Critical launch blockers: the Supabase publishable/server credentials and
+hosted schema/auth/storage configuration are unverified, so listings and admin
+return 503 without configuration. Notification provider, worker and
+consent/legal review are unconfigured. Hostinger restricted-staging access,
+manual deployment controls, caching/resource limits and rollback have not
+been verified. Hosted database backup and media recovery are untested; local
+restore used only a synthetic archive. No content is published; production
+indexing stays disabled and Arabic property indexing requires exact-revision
+review. CodeQL has not completed a successful analysis. Resolve these only
+with explicit authorization; do not deploy, migrate or activate indexing.
