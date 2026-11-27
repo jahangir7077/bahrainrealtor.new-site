@@ -244,8 +244,8 @@ test('homepage search submits localized filters to published property listings',
       ['exploreAreas', '/guides/bahrain-area-community-guides/'],
       ['marketInsights', '/guides/bahrain-property-prices-market-guide/'],
     ]) {
-      const link = `<a href="${localePrefix}${route}">${translations.navigation[name]}</a>`;
-      assert.ok(html.includes(link), `missing localized mapped navigation route ${route}`);
+      const link = new RegExp(`<a\\b[^>]*href="${localePrefix}${route}"[^>]*>${translations.navigation[name]}</a>`);
+      assert.match(html, link, `missing localized mapped navigation route ${route}`);
     }
     assert.doesNotMatch(html, /non-submitting preview/);
   }

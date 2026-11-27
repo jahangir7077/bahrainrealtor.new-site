@@ -89,10 +89,11 @@ DNS, external account, and publication safeguards are unchanged.
     2026-11-27 navigation follow-up: Buy, Rent, Investment, Projects, Home
     Loans, Explore Areas and Market Insights now link to the localized,
     approved CMS/keyword-mapped routes. Their normal publication gates remain
-    enforced; links may return 404 until approved content is published. About,
-    Hot Deals and Contact remain homepage section links because no dedicated
-    approved URL is in the current route/keyword map. Do not invent those
-    routes; request an owner-approved mapping before creating them.
+    enforced; links may return 404 until approved content is published.
+    English/Arabic navigation URL assertions and route publication tests pass.
+    About, Hot Deals and Contact remain homepage section links because no
+    dedicated approved URL is in the current route/keyword map. Do not invent
+    those routes; request an owner-approved mapping before creating them.
 13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
     eligible alternates and sitemap paths. GA4, conversion events, Search
     Console, Bing and IndexNow remain unconfigured; prerequisites and
