@@ -210,12 +210,21 @@ function latestPropertyQuery() {
 }
 
 test('homepage search submits localized filters to published property listings', async () => {
-  for (const [path, action] of [['/', '/properties/'], ['/ar/', '/ar/properties/']]) {
+  const { en } = await import('../src/i18n/translations/en.ts');
+  const { ar } = await import('../src/i18n/translations/ar.ts');
+  for (const [path, action, translations] of [['/', '/properties/', en], ['/ar/', '/ar/properties/', ar]]) {
     const response = await fetch(`${base}${path}`);
     const html = await response.text();
     assert.match(html, new RegExp(`<form method="get" action="${action}"`));
     for (const name of ['transaction', 'location', 'propertyType', 'minimumPrice', 'maximumPrice', 'bedrooms']) {
       assert.match(html, new RegExp(`name="${name}"`));
+    }
+    assert.match(html, /type="radio" name="transaction" value="sale" checked/);
+    assert.match(html, /type="radio" name="transaction" value="rent"/);
+    assert.match(html, /href="tel:\+97332083778"/);
+    assert.match(html, /href="https:\/\/wa\.me\/97332083778"/);
+    for (const name of ['home', 'buyProperty', 'rentProperty', 'investBahrain', 'projects', 'financing', 'exploreAreas', 'marketInsights', 'aboutJahangir', 'hotDeals', 'blog', 'contact']) {
+      assert.ok(html.includes(translations.navigation[name]), `missing ${name} navigation`);
     }
     assert.doesNotMatch(html, /non-submitting preview/);
   }

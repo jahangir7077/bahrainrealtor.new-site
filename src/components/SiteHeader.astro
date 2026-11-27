@@ -12,15 +12,20 @@ interface Props {
 const { language } = Astro.props;
 const home = language === 'ar' ? '/ar/' : '/';
 const sectionHref = (id: string) => `${home}#${id}`;
+const prefix = language === 'ar' ? '/ar' : '';
 const navItems = [
-  ['navigation.buyRent', 'property-types'],
-  ['navigation.areas', 'areas'],
-  ['navigation.projects', 'projects'],
-  ['navigation.investment', 'investment'],
-  ['navigation.financing', 'financing'],
-  ['navigation.insights', 'insights'],
-  ['navigation.about', 'about'],
-  ['navigation.contact', 'contact'],
+  ['navigation.home', home],
+  ['navigation.buyProperty', `${prefix}/properties/?transaction=sale`],
+  ['navigation.rentProperty', `${prefix}/properties/?transaction=rent`],
+  ['navigation.investBahrain', sectionHref('investment')],
+  ['navigation.projects', sectionHref('projects')],
+  ['navigation.financing', sectionHref('financing')],
+  ['navigation.exploreAreas', sectionHref('areas')],
+  ['navigation.marketInsights', sectionHref('insights')],
+  ['navigation.aboutJahangir', sectionHref('about')],
+  ['navigation.hotDeals', sectionHref('hot-deals')],
+  ['navigation.blog', `${prefix}/blog/`],
+  ['navigation.contact', sectionHref('contact')],
 ] as const;
 ---
 
@@ -29,27 +34,16 @@ const navItems = [
     <a class="brand" href={home}>
       <span class="brand__mark" aria-hidden="true">BR</span>
       <span class="brand__words">
-        <strong>Bahrain Realtor</strong>
+        <strong>Jahangir Realtor Bahrain</strong>
         <span>{translate(language, 'development.banner')}</span>
       </span>
     </a>
 
     <nav class="site-nav site-nav--desktop" aria-label={translate(language, 'accessibility.mainNavigation')}>
       <ul>
-        {navItems.slice(0, 3).map(([key, id]) => (
-          <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
+        {navItems.map(([key, href]) => (
+          <li><a href={href}>{translate(language, key)}</a></li>
         ))}
-        <li class="site-nav__more">
-          <details>
-            <summary>{translate(language, 'navigation.explore')}</summary>
-            <ul>
-              {navItems.slice(3, 7).map(([key, id]) => (
-                <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
-              ))}
-              <li><a href={sectionHref('insights')}>{translate(language, 'navigation.blog')}</a></li>
-            </ul>
-          </details>
-        </li>
       </ul>
     </nav>
 
@@ -65,10 +59,9 @@ const navItems = [
         </summary>
         <nav aria-label={translate(language, 'accessibility.mainNavigation')}>
           <ul>
-            {navItems.map(([key, id]) => (
-              <li><a href={sectionHref(id)}>{translate(language, key)}</a></li>
+            {navItems.map(([key, href]) => (
+              <li><a href={href}>{translate(language, key)}</a></li>
             ))}
-            <li><a href={sectionHref('insights')}>{translate(language, 'navigation.blog')}</a></li>
           </ul>
         </nav>
       </details>
@@ -98,6 +91,7 @@ const navItems = [
     min-height: 5.25rem;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: var(--space-5);
   }
 
@@ -147,6 +141,8 @@ const navItems = [
     list-style: none;
   }
 
+  .site-nav--desktop { order: 3; width: 100%; }
+  .site-nav--desktop ul { flex-wrap: wrap; column-gap: var(--space-4); row-gap: 0; }
   .site-nav a,
   .site-nav summary,
   .mobile-menu summary {
@@ -236,6 +232,8 @@ const navItems = [
       border-radius: var(--radius-card);
       background: var(--color-surface);
       box-shadow: var(--shadow-card);
+      max-height: min(75vh, 40rem);
+      overflow-y: auto;
     }
 
     .mobile-menu ul {

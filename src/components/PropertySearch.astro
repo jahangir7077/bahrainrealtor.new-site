@@ -17,14 +17,10 @@ const base = language === 'ar' ? '/ar/properties/' : '/properties/';
   <form method="get" action={base}>
   <fieldset>
     <legend>{translate(language, 'search.title')}</legend>
-    <label>
-      {translate(language, 'search.transaction')}
-      <select name="transaction">
-        <option value="">{language === 'ar' ? 'الكل' : 'Any'}</option>
-        <option value="sale">{translate(language, 'search.buy')}</option>
-        <option value="rent">{translate(language, 'search.rent')}</option>
-      </select>
-    </label>
+    <div class="transaction-options" role="group" aria-label={translate(language, 'search.transaction')}>
+      <label><input type="radio" name="transaction" value="sale" checked /><span>{translate(language, 'search.buy')}</span></label>
+      <label><input type="radio" name="transaction" value="rent" /><span>{translate(language, 'search.rent')}</span></label>
+    </div>
     <label>
       {translate(language, 'search.location')}
       <input name="location" maxlength="100" />
@@ -99,7 +95,33 @@ const base = language === 'ar' ? '/ar/properties/' : '/properties/';
     font-weight: 700;
   }
 
-  input,
+  .transaction-options {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: var(--space-2);
+  }
+
+  .transaction-options label { position: relative; }
+  .transaction-options input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .transaction-options span {
+    display: grid;
+    min-width: 6rem;
+    min-height: var(--target-min);
+    padding-inline: var(--space-4);
+    place-items: center;
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+    cursor: pointer;
+  }
+  .transaction-options input:checked + span { color: var(--color-white); background: var(--color-navy); }
+  .transaction-options input:focus-visible + span { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+
+  input:not([type="radio"]),
   select {
     width: 100%;
     min-height: var(--target-min);

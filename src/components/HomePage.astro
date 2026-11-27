@@ -43,6 +43,13 @@ const text = (key: string) => translate(language, key);
     </Container>
   </section>
 
+  <section class="section home-section--soft" id="hot-deals" aria-labelledby={`deals-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2}><span id={`deals-title-${language}`}>{text('navigation.hotDeals')}</span></SectionHeading>
+      <EmptyState language={language} title={text('content.noProperties')} description={text('content.publishedAfterReview')} />
+    </Container>
+  </section>
+
   <section class="section" id="property-types" aria-labelledby={`categories-title-${language}`}>
     <Container width="wide">
       <SectionHeading level={2} eyebrow={text('navigation.buyRent')} description={text('home.categoriesDescription')}>
@@ -156,12 +163,16 @@ const text = (key: string) => translate(language, key);
       <div>
         <p class="eyebrow">{text('navigation.contact')}</p>
         <h2 id={`contact-title-${language}`}>{text('home.contactTitle')}</h2>
-        <p>{text('home.contactDescription')}</p>
-        <p>{text('content.contactPending')}</p>
+        <p>{text('form.notConnected')}</p>
+        <div class="home-hero__actions">
+          <Button variant="contact" size="large" href="tel:+97332083778">{text('home.call')}</Button>
+          <Button variant="secondary" size="large" href="https://wa.me/97332083778">{text('home.whatsapp')}</Button>
+        </div>
       </div>
       <EnquiryFormPreview language={language} />
     </Container>
   </section>
+  <a class="floating-whatsapp" href="https://wa.me/97332083778">{text('home.whatsapp')}</a>
 </div>
 
 <style>
@@ -237,6 +248,26 @@ const text = (key: string) => translate(language, key);
   .home-hero__actions :global(.button:focus-visible) {
     outline-color: var(--color-focus-on-dark);
   }
+
+  .home-feature--contact :global(.button--secondary) { color: var(--color-white); border-color: var(--color-white); }
+  .home-feature--contact :global(.button--secondary:hover) { color: var(--color-navy); }
+  .floating-whatsapp {
+    position: fixed;
+    z-index: 4;
+    inset-inline-end: var(--space-4);
+    inset-block-end: var(--space-4);
+    display: flex;
+    align-items: center;
+    min-height: var(--target-min);
+    padding: var(--space-3) var(--space-4);
+    border-radius: 999px;
+    color: #fff;
+    background: #126735;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow-card);
+  }
+  .floating-whatsapp:hover { color: #fff; background: #0c5028; }
 
   .home-hero__art {
     position: relative;
