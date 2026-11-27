@@ -54,20 +54,22 @@ The current migrations are ordered:
 5. `supabase/migrations/20261124000500_property_search_archive.sql`
 6. `supabase/migrations/20261125000100_secure_media_delivery.sql`
 7. `supabase/migrations/20261125000200_site_content_publication.sql`
+8. `supabase/migrations/20261127000100_homepage_featured_properties.sql`
 
 They provide administrator membership/MFA policies, immutable content
 revisions and per-locale publication, enquiry and notification queues,
 private media metadata and storage policies, editorial/site-content records,
-property search and archive safeguards. Hosted execution is owner-reported,
-not independently verified here. Do not run further hosted migrations without
-separate approval.
+property search and archive safeguards, and audited admin-only featured
+property selection with a public view limited to eligible English listings.
+Hosted execution is owner-reported, not independently verified here. Do not
+run further hosted migrations without separate approval.
 Local SQL tests use stubbed Supabase roles and authentication unless a real
 local Supabase stack is explicitly stated; they are not hosted-integration
-tests. In an isolated PostgreSQL 16 container, all seven migrations were
+tests. In an isolated PostgreSQL 16 instance, all eight migrations were
 applied locally and every SQL test under `supabase/tests/` passed, including
-site-content publication, bilingual review, media policy, property
-management, and the enquiry outbox/retry workflow. This does not verify the
-hosted Supabase project or its account configuration.
+site-content publication, bilingual review, media policy, featured-property
+selection, property management, and the enquiry outbox/retry workflow. This
+does not verify the hosted Supabase project or its account configuration.
 
 The public property listings query only published content, support bounded
 search and filters, exact decimal price sorting, pagination and related

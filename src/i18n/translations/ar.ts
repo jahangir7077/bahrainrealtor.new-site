@@ -55,6 +55,7 @@ export const ar = {
     investmentTitle: 'قرارات عقارية مدروسة',
     investmentDescription: 'ينبغي أن تستند القرارات العقارية والمالية وقرارات الإقامة إلى معلومات موثقة وإرشاد مهني مستقل.',
     projectsTitle: 'المشاريع',
+    projectContact: 'استفسر عن المشاريع في البحرين',
     projectsDescription: 'ستُعرض معلومات المشاريع الموثقة عند توفرها.',
     financeTitle: 'التمويل العقاري',
     financeDescription: 'ستُضاف معلومات التمويل بعد التحقق منها مع الجهات المختصة.',

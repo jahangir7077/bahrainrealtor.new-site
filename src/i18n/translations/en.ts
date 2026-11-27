@@ -52,6 +52,7 @@ export const en = {
     investmentTitle: 'Property decisions, with care',
     investmentDescription: 'Property, residency and financial decisions should be based on verified information and independent professional guidance.',
     projectsTitle: 'Projects',
+    projectContact: 'Ask about Bahrain projects',
     projectsDescription: 'Verified project information will appear here when available.',
     financeTitle: 'Home finance',
     financeDescription: 'Financing information will be added after verification with appropriate providers.',

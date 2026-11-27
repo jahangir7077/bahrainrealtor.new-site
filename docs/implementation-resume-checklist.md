@@ -65,15 +65,27 @@ DNS, external account, and publication safeguards are unchanged.
     320px on both English and Arabic invalid-filter pages. Pagination was not
     browser-measured. Full visual, keyboard,
     screen-reader and authenticated admin acceptance remain pending.
-    2026-11-27 homepage work: separate bilingual navigation, Buy/Rent search
-    controls, contact links and homepage-only featured placeholder added.
-    The specified `public/images/` hero asset and an approved portrait/profile
-    were not found; `public/homepage-hero.webp.jpg` exists outside the
-    specified directory and needs owner confirmation before use. Featured and
-    hot-deal selection has no existing published selection marker; do not
-    present arbitrary properties as featured. Arabic wording needs review.
-    Live-site visual comparison could not be completed because the site was
-    unreachable from this environment.
+    2026-11-27 homepage corrections: separate bilingual navigation; responsive
+    Buy/Rent forms with localized Area and Property Type dropdowns; requested
+    H1 and approved bilingual introduction; featured listings selected by an
+    audited admin-only workflow, shown only on the homepage and only when
+    eligible English inventory exists. The JPEG at
+    `public/homepage-hero.webp.jpg` was verified and converted to optimized
+    1440×810 WebP at `public/images/homepage-hero.webp` (121,388 bytes).
+    Featured inventory has an empty state that omits the section. Hot Deals
+    navigation points to contact until approved deal inventory exists; no
+    unverified deals are asserted. Removed customer-facing “pending” copy from
+    homepage sections while retaining the enquiry preview safeguards.
+    `jahengir-akram-profile.jpg` is not present; no substitute portrait is
+    used. Arabic property featured listings remain withheld until the exact
+    revision human-review marker is available. Final Node 24.22.3 Astro check
+    and production build passed; 34 focused frontend, search, admin workflow,
+    localization and design-system tests passed. All eight migrations and
+    every SQL test passed on a disposable local PostgreSQL 16 instance.
+    Chromium screenshots were captured at 1440×1000 and 390×844 in English
+    and Arabic; mobile RTL search submitted localized filters and showed no
+    horizontal overflow. No hosted migration or production action was
+    performed.
 13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
     eligible alternates and sitemap paths. GA4, conversion events, Search
     Console, Bing and IndexNow remain unconfigured; prerequisites and

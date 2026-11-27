@@ -19,7 +19,6 @@ interface Props {
 const { language, featuredProperties } = Astro.props;
 const categories = ['apartments', 'villas', 'houses', 'land', 'buildings', 'commercial', 'freehold'] as const;
 const areas = ['amwaj', 'tala', 'marassi', 'diyar', 'dilmunia', 'manama'] as const;
-const services = ['sales', 'rentals', 'investment', 'management', 'offPlan', 'secondary'] as const;
 const text = (key: string) => translate(language, key);
 ---
 
@@ -29,7 +28,6 @@ const text = (key: string) => translate(language, key);
       <div class="home-hero__copy">
         <p class="eyebrow">{text('home.eyebrow')}</p>
         <h1>{text('home.title')}</h1>
-        <p class="home-hero__lead">{text('home.introductionOne')}</p>
         <div class="home-hero__actions">
           <Button variant="contact" size="large" href="#property-types">{text('home.explore')}</Button>
           <Button variant="secondary" size="large" href="#contact">{text('home.contact')}</Button>
@@ -88,6 +86,9 @@ const text = (key: string) => translate(language, key);
       <SectionHeading level={2} eyebrow={text('navigation.projects')}>
         <span id={`projects-title-${language}`}>{text('home.projectsTitle')}</span>
       </SectionHeading>
+      <Button variant="primary" href={language === 'ar' ? '/ar/#contact' : '/#contact'}>
+        {text('home.projectContact')}
+      </Button>
     </Container>
   </section>
 
@@ -96,6 +97,9 @@ const text = (key: string) => translate(language, key);
       <div>
         <p class="eyebrow">{text('navigation.financing')}</p>
         <h2 id={`finance-title-${language}`}>{text('home.financeTitle')}</h2>
+        <Button variant="primary" href={language === 'ar' ? '/ar/#contact' : '/#contact'}>
+          {text('home.contact')}
+        </Button>
       </div>
     </Container>
   </section>
@@ -105,6 +109,9 @@ const text = (key: string) => translate(language, key);
       <SectionHeading level={2} eyebrow={text('navigation.blog')}>
         <span id={`insights-title-${language}`}>{text('home.insightsTitle')}</span>
       </SectionHeading>
+      <Button variant="primary" href={language === 'ar' ? '/ar/blog/' : '/blog/'}>
+        {text('navigation.blog')}
+      </Button>
     </Container>
   </section>
 
@@ -135,7 +142,10 @@ const text = (key: string) => translate(language, key);
       <EnquiryFormPreview language={language} />
     </Container>
   </section>
-  <a class="floating-whatsapp" href="https://wa.me/97332083778">{text('home.whatsapp')}</a>
+  <a class="floating-whatsapp" href="https://wa.me/97332083778" aria-label={text('home.whatsapp')}>
+    <span class="floating-whatsapp__label">{text('home.whatsapp')}</span>
+    <span class="floating-whatsapp__mobile-label" aria-hidden="true">WA</span>
+  </a>
 </div>
 
 <style>
@@ -191,13 +201,6 @@ const text = (key: string) => translate(language, key);
     line-height: 1.08;
   }
 
-  .home-hero__lead {
-    max-width: 54ch;
-    color: #e2e8f0;
-    font-size: clamp(1.05rem, 2vw, 1.25rem);
-    line-height: 1.7;
-  }
-
   .home-hero h1 { max-width: 22ch; }
 
   .home-hero__actions {
@@ -239,10 +242,40 @@ const text = (key: string) => translate(language, key);
     box-shadow: var(--shadow-card);
   }
   .floating-whatsapp:hover { color: #fff; background: #0c5028; }
+  .floating-whatsapp__mobile-label { display: none; }
 
-  .search-panel {
-    grid-column: 1 / -1;
-    margin-block-start: var(--space-2);
+  @media (max-width: 52rem) {
+    .floating-whatsapp {
+      width: 3.5rem;
+      min-width: 3.5rem;
+      min-height: 3.5rem;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .floating-whatsapp__label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .floating-whatsapp__mobile-label {
+      display: inline;
+      font-size: var(--type-small);
+    }
+  }
+
+  .search-panel { margin-block-start: var(--space-2); }
+
+  @media (min-width: 52.01rem) {
+    .home-hero__inner {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .search-panel { grid-column: auto; }
   }
 
   .home-card-grid {
