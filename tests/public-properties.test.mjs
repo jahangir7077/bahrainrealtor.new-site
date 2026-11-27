@@ -234,6 +234,19 @@ test('homepage search submits localized filters to published property listings',
     for (const name of ['home', 'buyProperty', 'rentProperty', 'investBahrain', 'projects', 'financing', 'exploreAreas', 'marketInsights', 'aboutJahangir', 'hotDeals', 'blog', 'contact']) {
       assert.ok(html.includes(translations.navigation[name]), `missing ${name} navigation`);
     }
+    const localePrefix = path === '/ar/' ? '/ar' : '';
+    for (const [name, route] of [
+      ['buyProperty', '/buy-property/'],
+      ['rentProperty', '/rent-property/'],
+      ['investBahrain', '/guides/bahrain-property-investment-guide/'],
+      ['projects', '/projects/'],
+      ['financing', '/guides/bahrain-property-mortgage-guide/'],
+      ['exploreAreas', '/guides/bahrain-area-community-guides/'],
+      ['marketInsights', '/guides/bahrain-property-prices-market-guide/'],
+    ]) {
+      const link = `<a href="${localePrefix}${route}">${translations.navigation[name]}</a>`;
+      assert.ok(html.includes(link), `missing localized mapped navigation route ${route}`);
+    }
     assert.doesNotMatch(html, /non-submitting preview/);
   }
   const search = await read('/properties/?transaction=rent&location=&propertyType=&minimumPrice=&maximumPrice=&bedrooms=3');

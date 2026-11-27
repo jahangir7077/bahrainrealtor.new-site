@@ -13,15 +13,16 @@ const { language } = Astro.props;
 const home = language === 'ar' ? '/ar/' : '/';
 const sectionHref = (id: string) => `${home}#${id}`;
 const prefix = language === 'ar' ? '/ar' : '';
+const routeHref = (path: string) => `${prefix}${path}`;
 const navItems = [
   ['navigation.home', home],
-  ['navigation.buyProperty', `${prefix}/properties/?transaction=sale`],
-  ['navigation.rentProperty', `${prefix}/properties/?transaction=rent`],
-  ['navigation.investBahrain', sectionHref('investment')],
-  ['navigation.projects', sectionHref('projects')],
-  ['navigation.financing', sectionHref('financing')],
-  ['navigation.exploreAreas', sectionHref('areas')],
-  ['navigation.marketInsights', sectionHref('insights')],
+  ['navigation.buyProperty', routeHref('/buy-property/')],
+  ['navigation.rentProperty', routeHref('/rent-property/')],
+  ['navigation.investBahrain', routeHref('/guides/bahrain-property-investment-guide/')],
+  ['navigation.projects', routeHref('/projects/')],
+  ['navigation.financing', routeHref('/guides/bahrain-property-mortgage-guide/')],
+  ['navigation.exploreAreas', routeHref('/guides/bahrain-area-community-guides/')],
+  ['navigation.marketInsights', routeHref('/guides/bahrain-property-prices-market-guide/')],
   ['navigation.aboutJahangir', sectionHref('about')],
   ['navigation.hotDeals', sectionHref('contact')],
   ['navigation.blog', `${prefix}/blog/`],
