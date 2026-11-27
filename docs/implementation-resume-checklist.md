@@ -92,11 +92,9 @@ DNS, external account, and publication safeguards are unchanged.
     activation gates are recorded separately in
     [external dependencies](seo-external-dependencies.md).
 14. [~] Security/accessibility — contrast and accessible-name findings were
-    corrected. Current CodeQL validation was skipped as all changes are
-    documentation-only; no local CodeQL CLI or repository CodeQL workflow is
-    available. This is not a successful CodeQL analysis. Lighthouse checks do
-    not establish WCAG 2.2 AA conformance; complete manual and
-    assistive-technology review.
+    corrected. Current CodeQL analysis for the homepage and CMS-selection
+    changes reported zero JavaScript alerts. Lighthouse checks do not establish
+    WCAG 2.2 AA conformance; complete manual and assistive-technology review.
 15. [~] Performance — Lighthouse 13.6.0 on the local Node 24 production
     build, 2026-11-26, indexing off and no backend: English desktop homepage
     performance/accessibility/best-practices/SEO 100/100/100/63; FCP/LCP
@@ -122,8 +120,7 @@ DNS, external account, and publication safeguards are unchanged.
     results are recorded above. The working local preview is
     `HOST=127.0.0.1 PORT=4321 SEO_INDEXING_ENABLED=false npm run start`
     after `npm ci && npm run build`; no credentials are needed to view the
-    public shell. Hosted Supabase, Hostinger and successful CodeQL validation
-    remain blockers.
+    public shell. Hosted Supabase and Hostinger verification remain blockers.
 
 Critical launch blockers: the Supabase publishable/server credentials and
 hosted schema/auth/storage configuration are unverified, so listings and admin
@@ -133,5 +130,6 @@ manual deployment controls, caching/resource limits and rollback have not
 been verified. Hosted database backup and media recovery are untested; local
 restore used only a synthetic archive. No content is published; production
 indexing stays disabled and Arabic property indexing requires exact-revision
-review. CodeQL has not completed a successful analysis. Resolve these only
-with explicit authorization; do not deploy, migrate or activate indexing.
+review. The latest CodeQL analysis reported no JavaScript alerts. Resolve
+remaining blockers only with explicit authorization; do not deploy, migrate or
+activate indexing.
