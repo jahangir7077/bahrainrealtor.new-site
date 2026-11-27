@@ -1,0 +1,56 @@
+---
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+import { normalizeInternalPath } from '../i18n/routes.ts';
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  language: Language;
+  items: readonly BreadcrumbItem[];
+}
+
+const { language, items } = Astro.props;
+---
+
+<nav aria-label={translate(language, 'accessibility.breadcrumbs')} lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <ol class="breadcrumbs">
+    {items.map((item, index) => {
+      const href = item.href ? normalizeInternalPath(item.href) : null;
+      const isCurrent = index === items.length - 1 || !href;
+      return (
+        <li>
+          {href && !isCurrent ? <a href={href}>{item.label}</a> : <span aria-current={isCurrent ? 'page' : undefined}>{item.label}</span>}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+  }
+
+  .breadcrumbs li + li::before {
+    content: "/";
+    margin-inline-end: var(--space-2);
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumbs [aria-current="page"] {
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+</style>

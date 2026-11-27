@@ -1,0 +1,358 @@
+---
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import Card from '../../components/ui/Card.astro';
+import Container from '../../components/ui/Container.astro';
+import FormField from '../../components/ui/FormField.astro';
+import Icon from '../../components/ui/Icon.astro';
+import SectionHeading from '../../components/ui/SectionHeading.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const isProduction = import.meta.env.PROD;
+if (isProduction) Astro.response.status = 404;
+---
+
+<BaseLayout
+  title={isProduction ? 'Page not found' : 'Design system showcase'}
+  description="Local-only design system specimens."
+  language="en"
+  showChrome={false}
+>
+  {isProduction ? (
+    <Container>
+      <h1>Page not found</h1>
+      <p>The requested page could not be found.</p>
+    </Container>
+  ) : (
+    <Container width="wide" class="showcase">
+      <header class="showcase__intro">
+        <p class="eyebrow">Local development only</p>
+        <h1>Design system showcase</h1>
+        <p>
+          Fictional UI specimens for Bahrain Realtor. This is not a live site,
+          property listing, or offer of availability.
+        </p>
+      </header>
+
+      <section class="section" aria-labelledby="color-title">
+        <SectionHeading level={2} eyebrow="Foundation" description="Navy leads; champagne gold is reserved for accents.">
+          <span id="color-title">Brand colors</span>
+        </SectionHeading>
+        <div class="swatches">
+          {[
+            ['Deep navy', '#10243A'],
+            ['Champagne gold', '#C4A36B'],
+            ['Warm ivory', '#FAF8F4'],
+            ['White', '#FFFFFF'],
+            ['Charcoal', '#263238'],
+            ['Slate', '#64748B'],
+            ['Border', '#E2E8F0'],
+          ].map(([label, color]) => (
+            <div class="swatch">
+              <span class="swatch__color" style={`--swatch-color:${color}`}></span>
+              <strong>{label}</strong>
+              <code>{color}</code>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="type-title">
+        <SectionHeading level={2} eyebrow="Type" description="Fluid sizes use rem units; Arabic uses generous leading and no Latin tracking.">
+          <span id="type-title">Typography</span>
+        </SectionHeading>
+        <div class="type-specimens">
+          <p class="type-specimens__hero">Hero heading · Playfair Display</p>
+          <p class="type-specimens__h1">Heading one · Bahrain Realtor</p>
+          <p class="type-specimens__h2">Heading two · considered and clear</p>
+          <p class="type-specimens__h3">Heading three · balanced detail</p>
+          <p class="type-specimens__h4">Heading four · supporting title</p>
+          <p>Body text · Inter is specified for English interface and reading text.</p>
+          <p class="text-small">Small text · labels and supporting information.</p>
+          <div lang="ar" dir="rtl" class="arabic-sample">
+            <h2>الأسلوب البصري — تجربة تطويرية</h2>
+            <p>نموذج توضيحي للخط العربي واتجاه الكتابة من اليمين إلى اليسار.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="spacing-title">
+        <SectionHeading level={2} eyebrow="Rhythm" description="A 4px-based scale supports compact controls and spacious sections.">
+          <span id="spacing-title">Spacing scale</span>
+        </SectionHeading>
+        <div class="spacing-list">
+          {[
+            ['4', '--space-1'],
+            ['8', '--space-2'],
+            ['12', '--space-3'],
+            ['16', '--space-4'],
+            ['20', '--space-5'],
+            ['24', '--space-6'],
+            ['32', '--space-8'],
+            ['40', '--space-10'],
+            ['48', '--space-12'],
+            ['56', '--space-14'],
+            ['64', '--space-16'],
+            ['80', '--space-20'],
+            ['96', '--space-24'],
+          ].map(([pixels, token]) => (
+            <div class="spacing-row">
+              <code>{pixels}px</code>
+              <span class="spacing-row__sample" style={`--sample-size:var(${token})`}></span>
+              <code>{token}</code>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="button-title">
+        <SectionHeading level={2} eyebrow="Controls">
+          <span id="button-title">Buttons and states</span>
+        </SectionHeading>
+        <div class="showcase-row">
+          <Button>Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="text">Text link</Button>
+          <Button variant="contact">Contact style</Button>
+          <Button size="small">Small</Button>
+          <Button size="large">Large</Button>
+          <Button disabled>Disabled</Button>
+          <Button href="#cards" variant="secondary">
+            Continue <Icon name="arrow" />
+          </Button>
+        </div>
+        <div class="showcase-row surface-dark dark-demo">
+          <Button variant="secondary">Outline on dark</Button>
+          <Button variant="contact">Gold accent</Button>
+        </div>
+      </section>
+
+      <section class="section" id="cards" aria-labelledby="card-title">
+        <SectionHeading level={2} eyebrow="Surfaces">
+          <span id="card-title">Cards and containers</span>
+        </SectionHeading>
+        <div class="ds-grid">
+          <Card>
+            <h3>White surface</h3>
+            <p>Fictional design specimen — not a property listing.</p>
+          </Card>
+          <Card variant="ivory" bordered>
+            <h3>Ivory surface</h3>
+            <p>A restrained border and comfortable interior spacing.</p>
+          </Card>
+          <Card variant="dark">
+            <h3>Dark premium surface</h3>
+            <p>High-contrast white text with gold used as an accent.</p>
+          </Card>
+        </div>
+        <Container width="narrow" class="width-demo">
+          <p>Narrow editorial container · standard and wide containers use the same responsive gutters.</p>
+        </Container>
+      </section>
+
+      <section class="section" aria-labelledby="badge-title">
+        <SectionHeading level={2} eyebrow="Status">
+          <span id="badge-title">Badges</span>
+        </SectionHeading>
+        <div class="showcase-row">
+          <Badge>Neutral</Badge>
+          <Badge variant="success">Success</Badge>
+          <Badge variant="warning">Warning</Badge>
+          <Badge variant="error">Error</Badge>
+          <Badge variant="info">Information</Badge>
+          <Badge variant="premium">Premium accent</Badge>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="field-title">
+        <SectionHeading level={2} eyebrow="Forms" description="Visual-only controls; there is no form submission or personal-data collection.">
+          <span id="field-title">Form field states</span>
+        </SectionHeading>
+        <div class="field-demo">
+          <FormField id="demo-name" label="Example text field" placeholder="Visible placeholder" helpText="Supporting hint associated with the field." />
+          <FormField id="demo-select" label="Example select" type="select" placeholder="Choose an example" options={[{ value: 'one', label: 'Option one' }, { value: 'two', label: 'Option two' }]} />
+          <FormField id="demo-message" label="Example textarea" type="textarea" rows={3} />
+          <FormField id="demo-error" label="Example error state" required error="Example validation message." />
+          <FormField id="demo-disabled" label="Example disabled state" disabled value="Not editable" />
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="rtl-title" lang="ar" dir="rtl">
+        <SectionHeading level={2} eyebrow="العربية" description="اتجاه RTL ومحاذاة منطقية وعناصر تحكم مناسبة للوحة المفاتيح.">
+          <span id="rtl-title">معاينة اللغة العربية</span>
+        </SectionHeading>
+        <div class="showcase-row">
+          <Button>زر أساسي</Button>
+          <Button variant="secondary">زر ثانوي <Icon name="arrow" /></Button>
+          <Badge variant="premium">عنصر توضيحي</Badge>
+        </div>
+        <Card variant="ivory">
+          <h3>نموذج بطاقة</h3>
+          <p>هذا محتوى افتراضي لعرض التنسيق، وليس إعلاناً عقارياً.</p>
+        </Card>
+      </section>
+
+      <section class="section" aria-labelledby="container-title">
+        <SectionHeading level={2}>
+          <span id="container-title">Responsive layout</span>
+        </SectionHeading>
+        <div class="responsive-demo" aria-label="Responsive 4, 8 and 12-column grid specimen">
+          {Array.from({ length: 12 }, (_, index) => <span>{index + 1}</span>)}
+        </div>
+      </section>
+    </Container>
+  )}
+</BaseLayout>
+
+<style>
+  .showcase__intro {
+    padding-block: clamp(var(--space-8), 8vw, var(--space-16));
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .showcase__intro h1 {
+    max-width: 16ch;
+    font-size: var(--type-hero);
+  }
+
+  .showcase__intro > p:last-child {
+    max-width: 55ch;
+    color: var(--color-text-secondary);
+  }
+
+  .swatches,
+  .showcase-row,
+  .spacing-list,
+  .type-specimens,
+  .field-demo {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .swatches {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  }
+
+  .swatch {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-card);
+  }
+
+  .swatch__color {
+    width: 100%;
+    height: 3rem;
+    background: var(--swatch-color);
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+  }
+
+  .type-specimens > * {
+    margin-block-end: 0;
+  }
+
+  .type-specimens :is(.type-specimens__hero, .type-specimens__h1, .type-specimens__h2, .type-specimens__h3, .type-specimens__h4) {
+    font-weight: 600;
+    line-height: var(--leading-heading);
+  }
+
+  .type-specimens__hero {
+    font-family: var(--font-display);
+    font-size: var(--type-hero);
+  }
+
+  .type-specimens__h1 {
+    font-size: var(--type-h1);
+  }
+
+  .type-specimens__h2 {
+    font-size: var(--type-h2);
+  }
+
+  .type-specimens__h3 {
+    font-size: var(--type-h3);
+  }
+
+  .type-specimens__h4 {
+    font-size: var(--type-h4);
+  }
+
+  .arabic-sample {
+    padding: var(--space-6);
+    background: var(--color-surface);
+    border-inline-start: 4px solid var(--color-gold);
+  }
+
+  .spacing-row {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr) 8rem;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .spacing-row__sample {
+    width: min(var(--sample-size), 100%);
+    height: 1rem;
+    background: var(--color-gold);
+    border-radius: 999px;
+  }
+
+  .showcase-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .dark-demo {
+    margin-block-start: var(--space-6);
+    padding: var(--space-6);
+    border-radius: var(--radius-card);
+  }
+
+  .width-demo {
+    margin-block-start: var(--space-6);
+    padding: var(--space-4);
+    background: var(--color-surface-subtle);
+    border-inline-start: 4px solid var(--color-gold);
+  }
+
+  .field-demo {
+    max-width: 42rem;
+  }
+
+  .responsive-demo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .responsive-demo span {
+    display: grid;
+    min-height: 3rem;
+    place-items: center;
+    color: var(--color-text-on-dark);
+    background: var(--color-navy);
+    border-radius: var(--radius-button);
+  }
+
+  @media (min-width: 48rem) {
+    .field-demo {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .responsive-demo {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .responsive-demo {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+  }
+</style>

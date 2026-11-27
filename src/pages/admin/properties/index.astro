@@ -1,0 +1,228 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session';
+import { one, protectedRedirect, protectResponse, readForm, validMutation } from '../../../server/auth/security';
+import { contentArchived, createDraft, createFactsDraft, createNewDraft, getPropertyRevision, isUuid, listRevisions, parseDraft, parseFactsDraft, parseFeaturedSelection, parseLifecycleTransition, parseNewDraft, parseTransition, publicationState, setPropertyFeatured, transition, transitionLifecycle } from '../../../server/admin-properties/workflow';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+let available = false;
+let revisions: Awaited<ReturnType<typeof listRevisions>> = [];
+let detail: Awaited<ReturnType<typeof getPropertyRevision>> = null;
+let state: Awaited<ReturnType<typeof publicationState>> | null = null;
+let archived = false;
+
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Property administration is unavailable.';
+} else if (Astro.request.method !== 'GET' && Astro.request.method !== 'POST') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else if (Astro.request.method === 'POST' && !validMutation(Astro.request, config.origin)) {
+  Astro.response.status = 403;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    const user = await membership(client);
+    if (!user) {
+      if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/login', 303));
+      Astro.response.status = 403;
+      message = 'Request could not be completed.';
+    } else {
+      const mfa = await mfaState(client);
+      if (!mfa) throw new Error('MFA unavailable');
+      if (!mfa.authorized) {
+        if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+        Astro.response.status = 403;
+        message = 'Request could not be completed.';
+      } else if (Astro.request.method === 'POST') {
+        const form = await readForm(Astro.request);
+        const action = form && one(form, 'action', 16);
+        let target: string | null = null;
+        if (form && action === 'new') {
+          const draft = parseNewDraft(form);
+          if (draft) target = await createNewDraft(client, draft);
+        } else if (form && action === 'facts') {
+          const facts = parseFactsDraft(form);
+          if (facts) target = await createFactsDraft(client, facts);
+        } else if (form && action === 'feature') {
+          const selection = parseFeaturedSelection(form);
+          if (selection) {
+            await setPropertyFeatured(client, selection.item, selection.featured);
+            target = selection.revision;
+          }
+        } else if (form && action === 'draft') {
+          const draft = parseDraft(form);
+          if (draft) target = await createDraft(client, user.id, draft);
+        } else if (form && (action === 'approve' || action === 'publish')) {
+          const input = parseTransition(form, action);
+          if (input && await transition(client, action, input)) target = input.revision;
+        } else if (form && (action === 'unpublish' || action === 'archive' || action === 'unarchive')) {
+          const input = parseLifecycleTransition(form, action);
+          if (input && await transitionLifecycle(client, action, input)) target = input.revision;
+        }
+        if (target) return protectedRedirect(Astro.redirect(`/admin/properties/?revision=${target}`, 303));
+        Astro.response.status = 400;
+        message = 'Request could not be completed. Check the submitted fields.';
+      } else {
+        const requested = Astro.url.searchParams.getAll('revision');
+        if (requested.length > 1 || (requested.length === 1 && !isUuid(requested[0]))) {
+          Astro.response.status = 400;
+          message = 'Invalid revision.';
+        } else {
+          revisions = await listRevisions(client);
+          if (requested.length === 1) {
+            detail = await getPropertyRevision(client, requested[0], true);
+            if (!detail) {
+              Astro.response.status = 404;
+              message = 'Property revision not found.';
+            } else {
+              state = await publicationState(client, detail.item.id, detail.revision.locale, detail.revision.id);
+              archived = await contentArchived(client, detail.item.id);
+            }
+          }
+          available = true;
+        }
+      }
+    }
+  } catch {
+    Astro.response.status = Astro.request.method === 'POST' ? 409 : 503;
+    message = Astro.request.method === 'POST'
+      ? 'The operation failed or the publication changed. No success was recorded; reload and check the current state.'
+      : 'Property administration is unavailable.';
+  }
+}
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Property administration</title></head>
+<body><main>
+  <h1>Property administration</h1>
+  <p><a href="/admin/">Administration</a></p>
+  {message && <p role="alert">{message}</p>}
+  {available && <>
+    <p>Revisions are immutable. Approval is separate for each language; Arabic requires human review. Publication is a separate action.</p>
+    <p>Both published languages must use the same property facts. Publishing may be rejected if the other language uses different facts.</p>
+    <h2>Recent property revisions</h2>
+    <p>Showing at most the 50 newest revisions.</p>
+    <ul>{revisions.map((revision) => <li><a href={`/admin/properties/?revision=${revision.id}`}>{revision.title}</a> ({revision.locale})</li>)}</ul>
+    {detail && state && <section>
+      <h2>Private revision preview</h2>
+      <dl>
+        <dt>Property ID</dt><dd>{detail.item.id}</dd><dt>Slug</dt><dd>{detail.item.slug}</dd>
+        <dt>Revision ID</dt><dd>{detail.revision.id}</dd><dt>Language</dt><dd>{detail.revision.locale}</dd>
+        <dt>Title</dt><dd>{detail.revision.title}</dd><dt>Body</dt><dd style="white-space: pre-wrap">{detail.revision.body}</dd>
+        <dt>Summary</dt><dd>{detail.revision.summary ?? '—'}</dd>
+        <dt>Area</dt><dd>{detail.revision.area_name}</dd><dt>Property type</dt><dd>{detail.revision.property_type}</dd>
+        <dt>SEO title</dt><dd>{detail.revision.seo_title ?? '—'}</dd><dt>SEO description</dt><dd>{detail.revision.seo_description ?? '—'}</dd>
+        <dt>Transaction</dt><dd>{detail.version.transaction_type}</dd><dt>Availability</dt><dd>{detail.version.availability}</dd>
+        <dt>Price (BHD)</dt><dd>{detail.version.price_bhd ?? '—'}</dd><dt>Bedrooms</dt><dd>{detail.version.bedrooms ?? '—'}</dd>
+        <dt>Bathrooms</dt><dd>{detail.version.bathrooms ?? '—'}</dd><dt>Size (m²)</dt><dd>{detail.version.size_square_meters ?? '—'}</dd>
+        <dt>Location</dt><dd>{detail.version.location_name}</dd>
+      </dl>
+      <p>Approval: {state.approved ? 'approved' : 'not approved'}. Current published revision: {state.current ?? 'none'}.</p>
+      <p>Archive status: {archived ? 'archived' : 'active'}.</p>
+      <h3>Homepage featured property</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="feature" />
+        <input type="hidden" name="item" value={detail.item.id} />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <p><label>Homepage display
+          <select name="featured">
+            <option value="yes" selected={detail.item.isFeatured}>Featured</option>
+            <option value="no" selected={!detail.item.isFeatured}>Not featured</option>
+          </select>
+        </label></p>
+        <label><input type="checkbox" name="confirm" value="yes" required /> Confirm homepage selection change. Up to six properties can be featured.</label>
+        <button type="submit">Save homepage selection</button>
+      </form>
+      <h3>Create a new shared property facts and status revision</h3>
+      <p>Unpublish every language before saving new shared facts. Each language needs independent review and publication afterward.</p>
+      <form method="post">
+        <input type="hidden" name="action" value="facts" /><input type="hidden" name="revision" value={detail.revision.id} />
+        <p><label>Transaction <select name="transaction_type">
+          <option value="sale" selected={detail.version.transaction_type === 'sale'}>Sale</option>
+          <option value="rent" selected={detail.version.transaction_type === 'rent'}>Rent</option>
+        </select></label></p>
+        <p><label>Availability <select name="availability">
+          <option value="available" selected={detail.version.availability === 'available'}>Available</option>
+          <option value="reserved" selected={detail.version.availability === 'reserved'}>Reserved</option>
+          <option value="sold" selected={detail.version.availability === 'sold'}>Sold</option>
+          <option value="rented" selected={detail.version.availability === 'rented'}>Rented</option>
+          <option value="unavailable" selected={detail.version.availability === 'unavailable'}>Unavailable</option>
+        </select></label></p>
+        <p><label>Price (BHD) <input name="price_bhd" value={detail.version.price_bhd ?? ''} inputmode="decimal" maxlength="15" /></label></p>
+        <p><label>Bedrooms <input name="bedrooms" value={detail.version.bedrooms ?? ''} inputmode="numeric" maxlength="5" /></label></p>
+        <p><label>Bathrooms <input name="bathrooms" value={detail.version.bathrooms ?? ''} inputmode="numeric" maxlength="5" /></label></p>
+        <p><label>Size (m²) <input name="size_square_meters" value={detail.version.size_square_meters ?? ''} inputmode="decimal" maxlength="13" /></label></p>
+        <p><label>Location <input name="location_name" value={detail.version.location_name} maxlength="200" required /></label></p>
+        <label><input type="checkbox" name="confirm" value="yes" required /> I reviewed the new shared facts and confirm all currently published languages were unpublished first.</label>
+        <button type="submit">Save new property facts revision</button>
+      </form>
+      {state.current && <form method="post">
+        <input type="hidden" name="action" value="unpublish" /><input type="hidden" name="item" value={detail.item.id} />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <input type="hidden" name="locale" value={detail.revision.locale} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I understand this removes the current {detail.revision.locale} page from public view.</label>
+        <button type="submit">Unpublish this language</button>
+      </form>}
+      {!archived ? <form method="post">
+        <input type="hidden" name="action" value="archive" /><input type="hidden" name="item" value={detail.item.id} />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I understand archiving hides all published language versions.</label>
+        <button type="submit">Archive property in all languages</button>
+      </form> : <form method="post">
+        <input type="hidden" name="action" value="unarchive" /><input type="hidden" name="item" value={detail.item.id} />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I understand previously published revisions may become visible again.</label>
+        <button type="submit">Unarchive property</button>
+      </form>}
+      {!state.approved && <form method="post">
+        <input type="hidden" name="action" value="approve" /><input type="hidden" name="revision" value={detail.revision.id} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> I reviewed this complete revision, including its language and property details.</label>
+        <button type="submit">Approve this revision</button>
+      </form>}
+      {state.approved && state.current !== detail.revision.id && <form method="post">
+        <input type="hidden" name="action" value="publish" /><input type="hidden" name="revision" value={detail.revision.id} />
+        <input type="hidden" name="expected" value={state.current ?? 'none'} />
+        <label><input type="checkbox" name="confirm" value="yes" required /> Publish this approved language revision, replacing the current revision shown above if any.</label>
+        <button type="submit">Publish</button>
+      </form>}
+      <h3>Create a new text revision using these property details</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="draft" /><input type="hidden" name="revision" value={detail.revision.id} />
+        <p><label>Language <select name="locale"><option value="en" selected={detail.revision.locale === 'en'}>English</option><option value="ar" selected={detail.revision.locale === 'ar'}>Arabic</option></select></label></p>
+        <p><label>Title <input name="title" value={detail.revision.title} maxlength="200" required /></label></p>
+        <p><label>Body <textarea name="body" maxlength="4000" required>{detail.revision.body}</textarea></label></p>
+        <p><label>Summary <textarea name="summary" maxlength="500">{detail.revision.summary ?? ''}</textarea></label></p>
+        <p><label>Area <input name="area_name" value={detail.revision.area_name ?? ''} maxlength="200" required /></label></p>
+        <p><label>Property type <input name="property_type" value={detail.revision.property_type ?? ''} maxlength="200" required /></label></p>
+        <p><label>SEO title <input name="seo_title" value={detail.revision.seo_title ?? ''} maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500">{detail.revision.seo_description ?? ''}</textarea></label></p>
+        <button type="submit">Save new draft revision</button>
+      </form>
+    </section>}
+    <section><h2>Create a property draft</h2>
+      <p>The slug and property ID are permanent. Creating a draft does not publish it.</p>
+      <form method="post">
+        <input type="hidden" name="action" value="new" />
+        <p><label>Slug <input name="slug" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>Language <select name="locale"><option value="en">English</option><option value="ar">Arabic</option></select></label></p>
+        <p><label>Transaction <select name="transaction_type"><option value="sale">Sale</option><option value="rent">Rent</option></select></label></p>
+        <p><label>Availability <select name="availability"><option value="available">Available</option><option value="reserved">Reserved</option><option value="sold">Sold</option><option value="rented">Rented</option><option value="unavailable">Unavailable</option></select></label></p>
+        <p><label>Price (BHD) <input name="price_bhd" inputmode="decimal" maxlength="15" /></label></p>
+        <p><label>Bedrooms <input name="bedrooms" inputmode="numeric" maxlength="5" /></label></p>
+        <p><label>Bathrooms <input name="bathrooms" inputmode="numeric" maxlength="5" /></label></p>
+        <p><label>Size (m²) <input name="size_square_meters" inputmode="decimal" maxlength="13" /></label></p>
+        <p><label>Location <input name="location_name" maxlength="200" required /></label></p>
+        <p><label>Title <input name="title" maxlength="200" required /></label></p>
+        <p><label>Body <textarea name="body" maxlength="4000" required></textarea></label></p>
+        <p><label>Area <input name="area_name" maxlength="200" required /></label></p>
+        <p><label>Property type <input name="property_type" maxlength="200" required /></label></p>
+        <p><label>SEO title <input name="seo_title" maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500"></textarea></label></p>
+        <button type="submit">Create draft</button>
+      </form>
+    </section>
+  </>}
+</main></body></html>

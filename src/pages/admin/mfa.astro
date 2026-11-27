@@ -1,0 +1,83 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../server/auth/session';
+import { one, protectedRedirect, protectResponse, readForm, validMutation } from '../../server/auth/security';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+let secret = '';
+let enrolledId = '';
+let factorIds: string[] = [];
+let canEnroll = false;
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Administration is unavailable.';
+} else if (Astro.request.method !== 'GET' && Astro.request.method !== 'POST') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else if (Astro.request.method === 'POST' && !validMutation(Astro.request, config.origin)) {
+  Astro.response.status = 403;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    if (!await membership(client)) return protectedRedirect(Astro.redirect('/admin/login', 303));
+    const state = await mfaState(client);
+    if (!state) throw new Error('MFA unavailable');
+    if (state.authorized) return protectedRedirect(Astro.redirect('/admin/', 303));
+    canEnroll = !state.hasVerifiedFactor;
+    factorIds = state.factors.filter((factor) => factor.factor_type === 'totp' &&
+      (factor.status === 'verified' || (canEnroll && factor.status === 'unverified'))).map((factor) => factor.id);
+    if (Astro.request.method === 'POST') {
+      const form = await readForm(Astro.request);
+      const action = form && one(form, 'action', 20);
+      if (action === 'enroll' && canEnroll) {
+        const result = await client.auth.mfa.enroll({ factorType: 'totp' });
+        if (result.error || !result.data?.totp?.secret) throw new Error('Enrollment failed');
+        secret = result.data.totp.secret;
+        enrolledId = result.data.id;
+      } else if (action === 'verify' && form) {
+        const factorId = one(form, 'factor', 128);
+        const code = one(form, 'code', 6);
+        const factor = state.factors.find((item) => item.id === factorId && item.factor_type === 'totp');
+        const permitted = factor && (factor.status === 'verified' || (factor.status === 'unverified' && !state.hasVerifiedFactor));
+        if (!permitted || !code || !/^\d{6}$/.test(code)) throw new Error('Invalid factor');
+        const result = await client.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+        if (result.error) throw new Error('Verification failed');
+        return protectedRedirect(Astro.redirect('/admin/', 303));
+      } else {
+        throw new Error('Invalid action');
+      }
+    }
+  } catch {
+    Astro.response.status = 400;
+    message = 'Verification could not be completed. Try again or contact the site owner.';
+  }
+}
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Administrator verification</title></head>
+<body><main>
+  <h1>Administrator verification</h1>
+  {message && <p role="alert">{message}</p>}
+  {secret && enrolledId && <section>
+    <h2>Set up an authenticator</h2>
+    <p>Enter this secret into your authenticator app. Keep it private; it is shown only once.</p>
+    <p><code>{secret}</code></p>
+    <form method="post">
+      <input type="hidden" name="action" value="verify" />
+      <input type="hidden" name="factor" value={enrolledId} />
+      <label>Six-digit code <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required /></label>
+      <button type="submit">Verify setup</button>
+    </form>
+  </section>}
+  {!secret && factorIds.map((id) => <form method="post">
+    <input type="hidden" name="action" value="verify" />
+    <input type="hidden" name="factor" value={id} />
+    <label>Authenticator code <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required /></label>
+    <button type="submit">Verify</button>
+  </form>)}
+  {!secret && canEnroll && <form method="post"><input type="hidden" name="action" value="enroll" /><button type="submit">Set up authenticator</button></form>}
+  {!secret && !canEnroll && factorIds.length === 0 && <p>No usable authenticator is available. Contact the site owner.</p>}
+  <form method="post" action="/admin/logout"><button type="submit">Sign out</button></form>
+</main></body></html>

@@ -1,0 +1,10 @@
+---
+import { translate } from '../i18n/translate';
+import type { Language } from '../i18n/config';
+interface Props {
+  language: Language;
+}
+const { language } = Astro.props;
+---
+
+<p>{translate(language, 'development.placeholder')}</p>

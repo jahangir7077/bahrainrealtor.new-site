@@ -1,0 +1,43 @@
+---
+import Card from './ui/Card.astro';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  name: string;
+  details?: string;
+}
+
+const { language, name, details } = Astro.props;
+---
+
+<Card variant="ivory" bordered>
+  <article lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <span class="area-card__index" aria-hidden="true">BHR</span>
+    <h3>{name}</h3>
+    {details && <p>{details}</p>}
+  </article>
+</Card>
+
+<style>
+  .area-card__index {
+    display: inline-block;
+    margin-block-end: var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  h3 {
+    margin-block: 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--type-h4);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+  }
+</style>

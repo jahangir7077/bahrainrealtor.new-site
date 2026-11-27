@@ -1,0 +1,109 @@
+---
+import Breadcrumbs from '../Breadcrumbs.astro';
+import Container from '../ui/Container.astro';
+import { formatDate } from '../../i18n/formatting.ts';
+import { getPublicationEligibility } from '../../i18n/publication.ts';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { ArticleRecord } from '../../types/content.ts';
+
+interface Props {
+  language: Language;
+  article?: ArticleRecord;
+  preview?: boolean;
+}
+
+const { language, article, preview = true } = Astro.props;
+const content = article?.content[language];
+const publication = article?.publication[language];
+const eligible = Boolean(publication && getPublicationEligibility(publication, language).routeAvailable);
+const publishedDate = article?.publishedAt ? formatDate(article.publishedAt, language) : null;
+const updatedDate = article?.updatedAt ? formatDate(article.updatedAt, language) : null;
+const sections = content?.sections?.filter((section) => /^[A-Za-z0-9_-]+$/.test(section.id)) ?? [];
+---
+
+<article class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="narrow">
+    <Breadcrumbs language={language} items={[{ label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' }, { label: content && eligible ? content.title : translate(language, 'templates.article') }]} />
+    {article && content && eligible ? (
+      <>
+        <header class="article-heading">
+          {preview && <p class="eyebrow">{translate(language, 'templates.previewNotice')}</p>}
+          <h1>{content.title}</h1>
+          <p>{content.summary}</p>
+          <div class="article-meta">
+            <span>{translate(language, 'templates.author')}: <bdi>{article.authorName}</bdi></span>
+            {publishedDate && <time datetime={article.publishedAt}>{publishedDate}</time>}
+            {updatedDate && <time datetime={article.updatedAt}>{updatedDate}</time>}
+          </div>
+        </header>
+        {sections.length > 0 && (
+          <nav class="article-toc" aria-label={translate(language, 'templates.tableOfContents')}>
+            <h2>{translate(language, 'templates.tableOfContents')}</h2>
+            <ol>
+              {sections.map((section) => <li><a href={`#${section.id}`}>{section.heading}</a></li>)}
+            </ol>
+          </nav>
+        )}
+        <div class="article-body">
+          {sections.length > 0
+            ? sections.map((section) => (
+                <section id={section.id}>
+                  <h2>{section.heading}</h2>
+                  <p>{section.body}</p>
+                </section>
+              ))
+            : <p>{content.body}</p>}
+        </div>
+      </>
+    ) : (
+      <>
+        <h1>{translate(language, 'templates.article')}</h1>
+        <p role="status">{translate(language, 'content.noArticles')}</p>
+      </>
+    )}
+  </Container>
+</article>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  .article-heading {
+    padding-block: var(--space-8);
+  }
+
+  .article-heading h1 {
+    font-family: var(--font-display);
+  }
+
+  .article-heading > p {
+    max-width: 62ch;
+    line-height: 1.7;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+  }
+
+  .article-toc {
+    margin-block: var(--space-6);
+    padding: var(--space-5);
+    border-inline-start: 2px solid var(--color-gold);
+    background: var(--color-surface-subtle);
+  }
+
+  .article-toc h2,
+  .article-body h2 {
+    font-size: var(--type-h3);
+  }
+
+  .article-body {
+    line-height: 1.8;
+  }
+</style>

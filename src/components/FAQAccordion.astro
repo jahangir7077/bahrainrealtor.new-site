@@ -1,0 +1,60 @@
+---
+import type { Language } from '../i18n/config.ts';
+import type { FaqRecord } from '../types/content.ts';
+import { translate } from '../i18n/translate.ts';
+import { getPublicationEligibility } from '../i18n/publication.ts';
+
+interface Props {
+  language: Language;
+  faqs: readonly FaqRecord[];
+}
+
+const { language, faqs } = Astro.props;
+const available = faqs
+  .filter((faq) => {
+    const publication = faq.publication[language];
+    return Boolean(publication && getPublicationEligibility(publication, language).routeAvailable);
+  })
+  .map((faq) => faq.content[language])
+  .filter((content): content is NonNullable<typeof content> => Boolean(content));
+---
+
+{available.length ? (
+  <div class="faq-list" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    {available.map((faq, index) => (
+      <details class="faq-item">
+        <summary id={`faq-question-${language}-${index}`}>{faq.question}</summary>
+        <div class="faq-item__answer" aria-labelledby={`faq-question-${language}-${index}`}>{faq.answer}</div>
+      </details>
+    ))}
+  </div>
+) : (
+  <p role="status">{translate(language, 'content.noFaqs')}</p>
+)}
+
+<style>
+  .faq-list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .faq-item {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .faq-item summary {
+    display: flex;
+    min-height: var(--target-min);
+    align-items: center;
+    padding: var(--space-4);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .faq-item__answer {
+    padding: 0 var(--space-4) var(--space-4);
+    line-height: 1.7;
+  }
+</style>

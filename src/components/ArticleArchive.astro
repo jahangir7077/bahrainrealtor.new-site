@@ -1,0 +1,100 @@
+---
+import Breadcrumbs from './Breadcrumbs.astro';
+import Container from './ui/Container.astro';
+import { formatDate } from '../i18n/formatting.ts';
+import { getPublicationEligibility } from '../i18n/publication.ts';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+import type { ArticleRecord } from '../types/content.ts';
+
+interface Props {
+  language: Language;
+  articles: readonly ArticleRecord[];
+  unavailable?: boolean;
+}
+
+const { language, articles, unavailable = false } = Astro.props;
+const visibleArticles = articles.filter((article) => {
+  const publication = article.publication[language];
+  return Boolean(article.content[language] && publication &&
+    getPublicationEligibility(publication, language).routeAvailable);
+});
+---
+
+<section class="page-template" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <Container width="narrow">
+    <Breadcrumbs language={language} items={[
+      { label: translate(language, 'navigation.home'), href: language === 'ar' ? '/ar/' : '/' },
+      { label: translate(language, 'navigation.blog') },
+    ]} />
+    <header>
+      <h1>{translate(language, 'navigation.blog')}</h1>
+    </header>
+    {unavailable ? (
+      <p role="alert">{translate(language, 'content.editorialUnavailable')}</p>
+    ) : visibleArticles.length ? (
+      <div class="article-list">
+        {visibleArticles.map((article) => {
+          const content = article.content[language]!;
+          return (
+            <article class="article-entry">
+              <p class="article-entry__category">{content.categoryName}</p>
+              <h2><a href={`${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`}>{content.title}</a></h2>
+              <p class="article-entry__summary">{content.summary}</p>
+              <div class="article-entry__meta">
+                <span>{translate(language, 'templates.author')}: <bdi>{article.authorName}</bdi></span>
+                {article.publishedAt && <time datetime={article.publishedAt}>{formatDate(article.publishedAt, language)}</time>}
+              </div>
+              <div class="article-entry__body">{content.body}</div>
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p role="status">{translate(language, 'content.noArticles')}</p>
+    )}
+  </Container>
+</section>
+
+<style>
+  .page-template {
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  header {
+    padding-block: var(--space-8);
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+  }
+
+  .article-list {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .article-entry {
+    padding-block-end: var(--space-8);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .article-entry__category,
+  .article-entry__meta {
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+  }
+
+  .article-entry__summary,
+  .article-entry__body {
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+
+  .article-entry__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+</style>

@@ -1,0 +1,377 @@
+---
+import AreaCard from './AreaCard.astro';
+import FeaturedProperties from './FeaturedProperties.astro';
+import EnquiryFormPreview from './EnquiryFormPreview.astro';
+import PropertySearch from './PropertySearch.astro';
+import PropertyTypeCard from './PropertyTypeCard.astro';
+import Button from './ui/Button.astro';
+import Container from './ui/Container.astro';
+import SectionHeading from './ui/SectionHeading.astro';
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+import type { PublicProperty } from '../server/properties/repository.ts';
+
+interface Props {
+  language: Language;
+  featuredProperties: PublicProperty[];
+}
+
+const { language, featuredProperties } = Astro.props;
+const categories = ['apartments', 'villas', 'houses', 'land', 'buildings', 'commercial', 'freehold'] as const;
+const areas = ['amwaj', 'tala', 'marassi', 'diyar', 'dilmunia', 'manama'] as const;
+const text = (key: string) => translate(language, key);
+---
+
+<div class="home-page" lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <section class="home-hero">
+    <Container width="wide" class="home-hero__inner">
+      <div class="home-hero__copy">
+        <p class="eyebrow">{text('home.eyebrow')}</p>
+        <h1>{text('home.title')}</h1>
+        <div class="home-hero__actions">
+          <Button variant="contact" size="large" href="#property-types">{text('home.explore')}</Button>
+          <Button variant="secondary" size="large" href="#contact">{text('home.contact')}</Button>
+        </div>
+      </div>
+      <PropertySearch language={language} />
+    </Container>
+  </section>
+
+  <FeaturedProperties language={language} properties={featuredProperties} />
+
+  <section class="section" id="property-types" aria-labelledby={`categories-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.buyRent')}>
+        <span id={`categories-title-${language}`}>{text('home.categoriesTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--categories">
+        {categories.map((category) => (
+          <PropertyTypeCard
+            language={language}
+            title={text(`categories.${category}`)}
+          />
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="areas" aria-labelledby={`areas-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.explore')}>
+        <span id={`areas-title-${language}`}>{text('home.areasTitle')}</span>
+      </SectionHeading>
+      <div class="home-card-grid home-card-grid--areas">
+        {areas.map((area) => (
+          <AreaCard
+            language={language}
+            name={text(`areas.${area}`)}
+          />
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-feature" id="investment" aria-labelledby={`investment-title-${language}`}>
+    <Container width="wide" class="home-feature__inner">
+      <div>
+        <p class="eyebrow">{text('navigation.investment')}</p>
+        <h2 id={`investment-title-${language}`}>{text('home.investmentTitle')}</h2>
+        <p>{text('home.investmentDescription')}</p>
+      </div>
+    </Container>
+  </section>
+
+  <section class="section" id="projects" aria-labelledby={`projects-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.projects')}>
+        <span id={`projects-title-${language}`}>{text('home.projectsTitle')}</span>
+      </SectionHeading>
+      <Button variant="primary" href={language === 'ar' ? '/ar/#contact' : '/#contact'}>
+        {text('home.projectContact')}
+      </Button>
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="financing" aria-labelledby={`finance-title-${language}`}>
+    <Container width="wide" class="home-split">
+      <div>
+        <p class="eyebrow">{text('navigation.financing')}</p>
+        <h2 id={`finance-title-${language}`}>{text('home.financeTitle')}</h2>
+        <Button variant="primary" href={language === 'ar' ? '/ar/#contact' : '/#contact'}>
+          {text('home.contact')}
+        </Button>
+      </div>
+    </Container>
+  </section>
+
+  <section class="section" id="insights" aria-labelledby={`insights-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2} eyebrow={text('navigation.blog')}>
+        <span id={`insights-title-${language}`}>{text('home.insightsTitle')}</span>
+      </SectionHeading>
+      <Button variant="primary" href={language === 'ar' ? '/ar/blog/' : '/blog/'}>
+        {text('navigation.blog')}
+      </Button>
+    </Container>
+  </section>
+
+  <section class="section home-section--soft" id="about" aria-labelledby={`about-title-${language}`}>
+    <Container width="wide" class="home-split">
+      <div class="advisor-mark" aria-hidden="true">BR</div>
+      <div>
+        <p class="eyebrow">{text('navigation.about')}</p>
+        <h2 id={`about-title-${language}`}>{text('home.aboutTitle')}</h2>
+        <p>{text('home.introductionOne')}</p>
+        <p>{text('home.introductionTwo')}</p>
+        <p>{text('home.introductionThree')}</p>
+      </div>
+    </Container>
+  </section>
+
+  <section class="section home-feature home-feature--contact" id="contact" aria-labelledby={`contact-title-${language}`}>
+    <Container width="wide" class="contact-grid">
+      <div>
+        <p class="eyebrow">{text('navigation.contact')}</p>
+        <h2 id={`contact-title-${language}`}>{text('home.contactTitle')}</h2>
+        <p>{text('form.notConnected')}</p>
+        <div class="home-hero__actions">
+          <Button variant="contact" size="large" href="tel:+97332083778">{text('home.call')}</Button>
+          <Button variant="secondary" size="large" href="https://wa.me/97332083778">{text('home.whatsapp')}</Button>
+        </div>
+      </div>
+      <EnquiryFormPreview language={language} />
+    </Container>
+  </section>
+  <a class="floating-whatsapp" href="https://wa.me/97332083778" aria-label={text('home.whatsapp')}>
+    <span class="floating-whatsapp__label">{text('home.whatsapp')}</span>
+    <span class="floating-whatsapp__mobile-label" aria-hidden="true">WA</span>
+  </a>
+</div>
+
+<style>
+  .home-hero {
+    overflow: hidden;
+    color: var(--color-white);
+    background-color: var(--color-navy);
+    background-image:
+      linear-gradient(90deg, rgb(9 24 40 / 88%) 0%, rgb(9 24 40 / 74%) 52%, rgb(9 24 40 / 48%) 100%),
+      url('/images/homepage-hero.webp');
+    background-position: center;
+    background-size: cover;
+  }
+
+  .home-hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-8);
+    min-height: min(45rem, calc(100svh - 8rem));
+    padding-block: clamp(var(--space-8), 5vw, var(--space-14));
+  }
+
+  .home-hero__copy {
+    position: relative;
+    z-index: 1;
+    max-width: 58rem;
+  }
+
+  .eyebrow {
+    margin-block-end: var(--space-4);
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .home-hero .eyebrow,
+  .home-feature .eyebrow {
+    color: var(--color-gold);
+  }
+
+  h1,
+  h2 {
+    max-width: 18ch;
+    margin-block: 0 var(--space-5);
+    font-family: var(--font-display);
+  }
+
+  h1 {
+    font-size: var(--type-h1);
+    line-height: 1.08;
+  }
+
+  .home-hero h1 { max-width: 22ch; }
+
+  .home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+
+  .home-hero__actions :global(.button--secondary) {
+    color: var(--color-white);
+    border-color: var(--color-white);
+  }
+
+  .home-hero__actions :global(.button--secondary:hover) {
+    color: var(--color-navy);
+  }
+
+  .home-hero__actions :global(.button:focus-visible) {
+    outline-color: var(--color-focus-on-dark);
+  }
+
+  .home-feature--contact :global(.button--secondary) { color: var(--color-white); border-color: var(--color-white); }
+  .home-feature--contact :global(.button--secondary:hover) { color: var(--color-navy); }
+  .floating-whatsapp {
+    position: fixed;
+    z-index: 4;
+    inset-inline-end: var(--space-4);
+    inset-block-end: var(--space-4);
+    display: flex;
+    align-items: center;
+    min-height: var(--target-min);
+    padding: var(--space-3) var(--space-4);
+    border-radius: 999px;
+    color: #fff;
+    background: #126735;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow-card);
+  }
+  .floating-whatsapp:hover { color: #fff; background: #0c5028; }
+  .floating-whatsapp__mobile-label { display: none; }
+
+  @media (max-width: 52rem) {
+    .floating-whatsapp {
+      width: 3.5rem;
+      min-width: 3.5rem;
+      min-height: 3.5rem;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .floating-whatsapp__label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .floating-whatsapp__mobile-label {
+      display: inline;
+      font-size: var(--type-small);
+    }
+  }
+
+  .search-panel { margin-block-start: var(--space-2); }
+
+  @media (min-width: 52.01rem) {
+    .home-hero__inner {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+
+    .search-panel { grid-column: auto; }
+  }
+
+  .home-card-grid {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .home-card-grid--categories {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  }
+
+  .home-card-grid--areas {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .home-section--soft {
+    background: var(--color-surface-subtle);
+  }
+
+  .home-feature {
+    color: var(--color-white);
+    background: var(--color-navy);
+  }
+
+  .home-feature h2 {
+    color: var(--color-white);
+    font-size: var(--type-h2);
+  }
+
+  .home-feature p {
+    max-width: 58ch;
+    color: #e2e8f0;
+    line-height: 1.7;
+  }
+
+  .home-feature__inner,
+  .home-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(15rem, 0.8fr);
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  .advisor-mark {
+    display: grid;
+    min-height: 14rem;
+    place-items: center;
+    border: 1px solid var(--color-gold);
+    border-radius: 50%;
+    color: var(--color-navy);
+    background: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 6rem);
+  }
+
+  .home-page h3 {
+    margin-block: 0 var(--space-3);
+  }
+
+  .home-page .card p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(17rem, 1.1fr);
+    align-items: start;
+    gap: var(--space-8);
+  }
+
+  @media (max-width: 52rem) {
+    .home-hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .home-feature__inner,
+    .home-split,
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .advisor-mark {
+      min-height: 10rem;
+      max-width: 16rem;
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .home-hero {
+      background-image:
+        linear-gradient(180deg, rgb(9 24 40 / 72%), rgb(9 24 40 / 82%)),
+        url('/images/homepage-hero.webp');
+      background-position: center;
+    }
+
+    .home-hero__inner { min-height: auto; }
+  }
+</style>

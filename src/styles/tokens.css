@@ -1,0 +1,63 @@
+:root {
+  color-scheme: light;
+
+  --color-navy: #10243a;
+  --color-gold: #c4a36b;
+  --color-ivory: #faf8f4;
+  --color-white: #ffffff;
+  --color-charcoal: #263238;
+  --color-slate: #64748b;
+  --color-border: #e2e8f0;
+  --color-success: #166534;
+  --color-error: #b91c1c;
+
+  --color-primary: var(--color-navy);
+  --color-secondary: var(--color-gold);
+  --color-page: var(--color-ivory);
+  --color-surface: var(--color-white);
+  --color-surface-subtle: var(--color-ivory);
+  --color-surface-dark: var(--color-navy);
+  --color-text-primary: var(--color-charcoal);
+  --color-text-secondary: #596a80;
+  --color-text-on-dark: var(--color-white);
+  --color-text-on-accent: var(--color-navy);
+  --color-link: var(--color-navy);
+  --color-link-hover: #263f5a;
+  --color-border-interactive: var(--color-slate);
+  --color-focus: var(--color-navy);
+  --color-focus-on-dark: var(--color-gold);
+  --color-success-text: var(--color-success);
+  --color-success-surface: #f0fdf4;
+  --color-warning-text: #713f12;
+  --color-warning-surface: #fffbeb;
+  --color-error-text: var(--color-error);
+  --color-error-surface: #fef2f2;
+  --color-info-text: var(--color-navy);
+  --color-info-surface: #eff6ff;
+  --color-disabled-text: #475569;
+  --color-disabled-surface: #e2e8f0;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  --content-standard: 80rem;
+  --content-wide: 90rem;
+  --content-narrow: 45rem;
+  --page-gutter: clamp(1rem, 4vw, 2rem);
+  --radius-card: 0.75rem;
+  --radius-button: 0.5rem;
+  --shadow-card: 0 0.5rem 1.5rem rgb(16 36 58 / 8%);
+  --shadow-card-hover: 0 0.75rem 2rem rgb(16 36 58 / 14%);
+  --target-min: 2.75rem;
+}

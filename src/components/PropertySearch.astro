@@ -1,0 +1,153 @@
+---
+import { translate } from '../i18n/translate.ts';
+import { propertyAreas, propertyTypes } from '../i18n/property-taxonomy.ts';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+}
+
+const { language } = Astro.props;
+const base = language === 'ar' ? '/ar/properties/' : '/properties/';
+---
+
+<section class="search-panel" aria-labelledby={`search-title-${language}`} lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+  <div class="search-panel__heading">
+    <h2 id={`search-title-${language}`}>{translate(language, 'search.title')}</h2>
+  </div>
+  <form method="get" action={base}>
+  <fieldset>
+    <legend>{translate(language, 'search.title')}</legend>
+    <div class="transaction-options" role="group" aria-label={translate(language, 'search.transaction')}>
+      <label><input type="radio" name="transaction" value="sale" checked /><span>{translate(language, 'search.buy')}</span></label>
+      <label><input type="radio" name="transaction" value="rent" /><span>{translate(language, 'search.rent')}</span></label>
+    </div>
+    <label>
+      {translate(language, 'search.location')}
+      <select name="area">
+        <option value="">{translate(language, 'search.chooseLocation')}</option>
+        {propertyAreas.map((area) => <option value={translate(language, `areas.${area}`)}>{translate(language, `areas.${area}`)}</option>)}
+      </select>
+    </label>
+    <label>
+      {translate(language, 'search.propertyType')}
+      <select name="propertyType">
+        <option value="">{translate(language, 'search.chooseType')}</option>
+        {propertyTypes.map((propertyType) => (
+          <option value={language === 'ar' ? propertyType.ar : propertyType.en}>{translate(language, propertyType.key)}</option>
+        ))}
+      </select>
+    </label>
+    <label>
+      {translate(language, 'search.minimumPrice')}
+      <input name="minimumPrice" inputmode="decimal" maxlength="15" />
+    </label>
+    <label>
+      {translate(language, 'search.maximumPrice')}
+      <input name="maximumPrice" inputmode="decimal" maxlength="15" />
+    </label>
+    <label>
+      {translate(language, 'search.bedrooms')}
+      <select name="bedrooms">
+        <option value="">{translate(language, 'search.anyBedrooms')}</option>
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+          <option value={count}>{count}+</option>
+        ))}
+      </select>
+    </label>
+    <button type="submit">{translate(language, 'search.search')}</button>
+  </fieldset>
+  </form>
+</section>
+
+<style>
+  .search-panel {
+    padding: clamp(var(--space-5), 4vw, var(--space-8));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  .search-panel__heading h2 {
+    margin-block: 0 var(--space-2);
+    font-family: var(--font-display);
+  }
+
+  .search-panel__heading p {
+    color: var(--color-text-secondary);
+  }
+
+  fieldset {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    align-items: end;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  label {
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--type-small);
+    font-weight: 700;
+  }
+
+  .transaction-options {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: var(--space-2);
+  }
+
+  .transaction-options label { position: relative; }
+  .transaction-options input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .transaction-options span {
+    display: grid;
+    min-width: 6rem;
+    min-height: var(--target-min);
+    padding-inline: var(--space-4);
+    place-items: center;
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+    cursor: pointer;
+  }
+  .transaction-options input:checked + span { color: var(--color-white); background: var(--color-navy); }
+  .transaction-options input:focus-visible + span { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+
+  input:not([type="radio"]),
+  select {
+    width: 100%;
+    min-height: var(--target-min);
+    padding-inline: var(--space-3);
+    border: 1px solid var(--color-border-interactive);
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+  }
+
+  button {
+    min-height: var(--target-min);
+    padding-inline: var(--space-4);
+    border: 0;
+    border-radius: var(--radius-button);
+    color: var(--color-white);
+    background: var(--color-navy);
+    font-weight: 700;
+  }
+
+</style>

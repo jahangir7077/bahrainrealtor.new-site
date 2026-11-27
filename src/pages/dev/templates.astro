@@ -1,0 +1,16 @@
+---
+import TemplateShowcase from '../../components/TemplateShowcase.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+
+const isProduction = import.meta.env.PROD;
+if (isProduction) Astro.response.status = 404;
+---
+
+<BaseLayout title="Template showcase" description="Local-only page template specimens." language="en">
+  {isProduction ? (
+    <Container><h1>Page not found</h1></Container>
+  ) : (
+    <TemplateShowcase language="en" />
+  )}
+</BaseLayout>

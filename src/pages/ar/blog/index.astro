@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import EditorialHub from '../../../components/EditorialHub.astro';
+import { getPublicationEligibility } from '../../../i18n/publication.ts';
+import {
+  editorialArchiveAlternates,
+  listPublishedArticles,
+  listPublishedFaqs,
+} from '../../../server/editorial/repository.ts';
+
+let articles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
+let faqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
+let equivalentArticles: Awaited<ReturnType<typeof listPublishedArticles>> = [];
+let equivalentFaqs: Awaited<ReturnType<typeof listPublishedFaqs>> = [];
+try {
+  [articles, faqs] = await Promise.all([listPublishedArticles('ar'), listPublishedFaqs('ar')]);
+} catch {
+  Astro.response.status = 503;
+}
+Astro.response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+const hasPublishedContent = articles.some((article) => {
+  const publication = article.publication.ar;
+  return Boolean(publication && getPublicationEligibility(publication, 'ar').routeAvailable);
+}) || faqs.some((faq) => {
+  const publication = faq.publication.ar;
+  return Boolean(publication && getPublicationEligibility(publication, 'ar').routeAvailable);
+});
+const indexable = process.env.SEO_INDEXING_ENABLED === 'true' && hasPublishedContent;
+if (indexable) {
+  try {
+    [equivalentArticles, equivalentFaqs] = await Promise.all([
+      listPublishedArticles('en'),
+      listPublishedFaqs('en'),
+    ]);
+  } catch {
+    equivalentArticles = [];
+    equivalentFaqs = [];
+  }
+}
+const alternates = editorialArchiveAlternates(
+  [...equivalentArticles, ...equivalentFaqs],
+  [...articles, ...faqs],
+  '/blog/',
+);
+if (!indexable) Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+---
+
+<BaseLayout
+  title="المدونة"
+  description="مقالات عقارية منشورة وإجابات تمت مراجعتها."
+  language="ar"
+  indexingEligible={indexable}
+  enableCanonical={indexable}
+  showOpenGraph
+  alternates={alternates}
+>
+  <EditorialHub language="ar" articleCount={articles.length} faqCount={faqs.length} />
+</BaseLayout>

@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import PropertyStatus from '../../components/PropertyStatus.astro';
+import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
+import { translate } from '../../i18n/translate.ts';
+import { propertyPath, type Filters, type PublicProperty } from './repository.ts';
+import { propertyAreas, propertyTypes } from '../../i18n/property-taxonomy.ts';
+import type { Language } from '../../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  filters: Filters | null;
+  properties: PublicProperty[];
+  hasNext: boolean;
+  error?: 'invalid' | 'unavailable';
+}
+const { language, filters, properties, hasNext, error } = Astro.props;
+const arabic = language === 'ar';
+const title = arabic ? 'العقارات' : 'Properties';
+const base = arabic ? '/ar/properties/' : '/properties/';
+const pageUrl = (page: number) => {
+  const query = new URLSearchParams();
+  if (filters?.transaction) query.set('transaction', filters.transaction);
+  if (filters?.bedrooms !== undefined) query.set('bedrooms', String(filters.bedrooms));
+  if (filters?.area) query.set('area', filters.area);
+  if (filters?.query) query.set('q', filters.query);
+  if (filters?.location) query.set('location', filters.location);
+  if (filters?.propertyType) query.set('propertyType', filters.propertyType);
+  if (filters?.minimumPrice) query.set('minimumPrice', filters.minimumPrice);
+  if (filters?.maximumPrice) query.set('maximumPrice', filters.maximumPrice);
+  if (filters?.sort && filters.sort !== 'newest') query.set('sort', filters.sort);
+  query.set('page', String(page));
+  return `${base}?${query}`;
+};
+---
+<BaseLayout title={title} description={title} language={language}>
+  <Container width="wide">
+    <section class="listings">
+      <h1>{title}</h1>
+      {error && (
+        <p role="alert">{error === 'invalid'
+          ? (arabic ? 'خيارات البحث غير صالحة.' : 'Invalid search filters.')
+          : (arabic ? 'العقارات غير متاحة حالياً. يرجى المحاولة لاحقاً.' : 'Properties are temporarily unavailable. Please try again later.')}</p>
+      )}
+      {error !== 'unavailable' && (
+        <>
+          <form method="get" action={base} class="filters">
+            <label>{translate(language, 'search.keyword')}
+              <input name="q" value={filters?.query ?? ''} maxlength="80" />
+            </label>
+            <label>{translate(language, 'search.transaction')}
+              <select name="transaction">
+                <option value="" selected={!filters?.transaction}>{arabic ? 'الكل' : 'Any'}</option>
+                <option value="sale" selected={filters?.transaction === 'sale'}>{translate(language, 'search.buy')}</option>
+                <option value="rent" selected={filters?.transaction === 'rent'}>{translate(language, 'search.rent')}</option>
+              </select>
+            </label>
+            <label>{translate(language, 'search.bedrooms')}
+              <select name="bedrooms">
+                <option value="" selected={filters?.bedrooms === undefined}>{translate(language, 'search.anyBedrooms')}</option>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((count) => (
+                  <option value={count} selected={filters?.bedrooms === count}>{count}+</option>
+                ))}
+              </select>
+            </label>
+            <label>{translate(language, 'search.location')}
+              <select name="area">
+                <option value="">{translate(language, 'search.chooseLocation')}</option>
+                {propertyAreas.map((area) => {
+                  const name = translate(language, `areas.${area}`);
+                  return <option value={name} selected={filters?.area === name}>{name}</option>;
+                })}
+              </select>
+            </label>
+            <label>{translate(language, 'search.propertyType')}
+              <select name="propertyType">
+                <option value="">{translate(language, 'search.chooseType')}</option>
+                {propertyTypes.map((propertyType) => (
+                  <option
+                    value={language === 'ar' ? propertyType.ar : propertyType.en}
+                    selected={filters?.propertyType === (language === 'ar' ? propertyType.ar : propertyType.en)}
+                  >{translate(language, propertyType.key)}</option>
+                ))}
+              </select>
+            </label>
+            <label>{translate(language, 'search.minimumPrice')}
+              <input name="minimumPrice" value={filters?.minimumPrice ?? ''} inputmode="decimal" maxlength="15" />
+            </label>
+            <label>{translate(language, 'search.maximumPrice')}
+              <input name="maximumPrice" value={filters?.maximumPrice ?? ''} inputmode="decimal" maxlength="15" />
+            </label>
+            <label>{translate(language, 'search.sort')}
+              <select name="sort">
+                <option value="newest" selected={filters?.sort === 'newest'}>{translate(language, 'search.newest')}</option>
+                <option value="price_asc" selected={filters?.sort === 'price_asc'}>{translate(language, 'search.lowestPrice')}</option>
+                <option value="price_desc" selected={filters?.sort === 'price_desc'}>{translate(language, 'search.highestPrice')}</option>
+                <option value="bedrooms" selected={filters?.sort === 'bedrooms'}>{translate(language, 'search.mostBedrooms')}</option>
+              </select>
+            </label>
+            <button type="submit">{translate(language, 'search.search')}</button>
+          </form>
+          {!error && (properties.length ? (
+            <div class="grid">
+              {properties.map((property) => (
+                <article class="property">
+                  {property.images[0] && <img
+                    src={`/api/media/${property.images[0].id}`}
+                    alt={property.images[0].altText}
+                    width={property.images[0].width}
+                    height={property.images[0].height}
+                    loading="lazy"
+                  />}
+                  <PropertyStatus language={language} status={property.availability} />
+                  <h2><a href={propertyPath(property, language)}>{property.title}</a></h2>
+                  <p>{property.areaName}</p>
+                  {property.priceBhd !== undefined && <p><bdi dir="ltr">{formatCurrency(property.priceBhd, language)}</bdi></p>}
+                  {property.bedrooms !== undefined && <p><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bedrooms')}</p>}
+                </article>
+              ))}
+            </div>
+          ) : <p>{translate(language, 'content.noProperties')}</p>)}
+          {filters && (filters.page > 1 || hasNext) && (
+            <nav aria-label={translate(language, 'templates.pagination')} class="pagination">
+              {filters.page > 1 && <a href={pageUrl(filters.page - 1)}>{arabic ? 'السابق' : 'Previous'}</a>}
+              <span>{filters.page}</span>
+              {hasNext && <a href={pageUrl(filters.page + 1)}>{arabic ? 'التالي' : 'Next'}</a>}
+            </nav>
+          )}
+        </>
+      )}
+    </section>
+  </Container>
+</BaseLayout>
+<style>
+  .listings { padding-block: var(--space-10) var(--space-20); }
+  .filters, .pagination { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-4); margin-block: var(--space-6); }
+  .filters label { display: grid; max-width: 100%; gap: var(--space-2); }
+  .filters input, .filters select, .filters button {
+    max-width: 100%;
+    min-height: var(--target-min);
+    padding-inline: var(--space-3);
+  }
+  .pagination a { display: inline-flex; min-height: var(--target-min); align-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-5); }
+  .property { border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-5); }
+  .property h2 { font-family: var(--font-display); }
+  .property img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-small); }
+</style>

@@ -1,0 +1,834 @@
+# MASTER PROJECT INSTRUCTIONS — BAHRAINREALTOR.BH
+
+## 1. Your role
+
+Act as a senior multidisciplinary website development team with expertise in:
+
+- Astro website architecture and development
+- Premium real estate website UI/UX
+- Technical SEO and on-page SEO
+- Local SEO for Bahrain
+- Keyword research and search-intent mapping
+- Content strategy and editorial quality
+- Answer Engine Optimization (AEO)
+- Entity-based and semantic SEO
+- Core Web Vitals and website performance
+- Structured data and schema implementation
+- Conversion rate optimization
+- Accessibility and responsive web development
+
+Your task is to audit, plan, restructure, redesign and rebuild BahrainRealtor.bh into a premium, technically excellent, SEO-focused Bahrain real estate website.
+
+The business objective is to attract qualified property buyers, tenants, investors and residency-related enquiries.
+
+The target is to compete for top-three Google organic positions for selected high-value search queries. Never promise rankings or fabricate performance results.
+
+The website must look professionally designed by an experienced human design team. Avoid generic AI-generated website aesthetics, generic layouts, repetitive stock sections, excessive gradients, artificial-looking illustrations and generic marketing language.
+
+## 2. Important project rules
+
+1. Work in small, controlled stages.
+2. Audit before changing existing code or content.
+3. Do not delete existing pages, content, metadata or assets before evaluating their value.
+4. Preserve valuable existing URLs wherever possible.
+5. Never invent property listings, prices, project names, RERA details, awards, reviews, statistics or business credentials.
+6. Never copy competitor content.
+7. Never generate thin pages just to target additional keywords.
+8. Do not keyword-stuff.
+9. Do not create multiple URLs targeting the same search intent.
+10. Do not deploy, modify DNS or change domain settings without explicit approval.
+11. Keep the website maintainable and easy for a beginner to manage.
+12. Explain technical actions in simple language.
+
+## 3. Official website architecture
+
+Use this structure as the approved information architecture.
+
+### HOME
+/
+
+### BUY PROPERTY
+/buy-property/
+
+Area landing pages:
+
+- /buy-property/amwaj-island/
+- /buy-property/tala-island/
+- /buy-property/marassi-al-bahrain/
+- /buy-property/diyar-al-muharraq/
+- /buy-property/dilmunia-island/
+- /buy-property/manama-capital/
+
+### RENT PROPERTY
+/rent-property/
+
+Area landing pages:
+
+- /rent-property/amwaj-island/
+- /rent-property/tala-island/
+- /rent-property/marassi-al-bahrain/
+- /rent-property/diyar-al-muharraq/
+- /rent-property/dilmunia-island/
+- /rent-property/manama-capital/
+
+### PROJECTS
+/projects/
+
+Create a project directory showing:
+
+- Project name
+- Project location
+- Project image
+- Short factual introduction
+- Link to its individual project page
+
+Individual project URL pattern:
+
+/projects/project-name/
+
+Only use actual, verified project names and information.
+
+### BLOG
+/blog/
+
+Sections:
+
+- /blog/articles/
+- /blog/faqs/
+
+Articles and FAQs must serve distinct informational intents and link naturally to relevant commercial pages.
+
+### BAHRAIN RESIDENCY
+/bahrain-residency/
+
+Dedicated pages:
+
+- /bahrain-residency/golden-visa-bahrain/
+- /bahrain-residency/self-sponsorship-visa/
+
+Each page should cover:
+
+- Overview
+- Eligibility
+- Requirements
+- Required documents
+- Application process
+- Relevant fees, when verified
+- Official sources
+- Important limitations and disclaimers
+- Last updated date
+
+Verify all immigration information against current authoritative Bahrain government sources. Never present outdated rules as current.
+
+### REALTOR PROFILE — WEBSITE FOOTER
+
+Include a professional Jahangir Realtor profile with:
+
+- Professional photograph, when supplied
+- Full name and professional title
+- Short professional introduction
+- Years of experience
+- RERA licence number
+- Contact number
+- WhatsApp contact button
+
+Use placeholders until verified details are supplied. Never invent credentials or contact information.
+
+## 4. Existing keyword research — mandatory source
+
+Use the uploaded workbook:
+
+Bahrain_Property_Keyword_Master_PSEO(1).xlsx
+
+It contains:
+
+- Master Keywords: 352 rows
+- Page & Cannibalization Map: 69 rows
+- Informational Keywords: 79 rows
+- Source Review
+- Method & SEO Notes
+- Programmatic SEO Keywords: 243 combinations
+- pSEO Page Templates
+- pSEO Notes
+
+Read all eight sheets before assigning keywords or writing SEO content.
+
+Preserve the original keyword data and its source information.
+
+Important volume rules:
+
+- Existing search volumes are the highest reported values from the supplied source exports, not summed totals.
+- Do not convert missing volumes into zero.
+- Do not invent search volumes.
+- Do not describe strategic priority estimates as measured search volumes.
+- The 243 generated programmatic combinations are opportunities, not verified search-volume data.
+
+Original source exports include data from Property Finder, Bayut, Weetas, HouseMe and Mourjan, along with the supplied document and Markdown research.
+
+Use the workbook as the starting point, then validate opportunities with current search data when available.
+
+Do not discard keywords simply because they are outside the six main specialist areas. Classify them as:
+
+- Core launch target
+- Secondary content opportunity
+- Future expansion
+- Not currently relevant
+- Requires more research
+
+Do not automatically add new navigation sections for every keyword group.
+
+## 5. Keyword mapping and cannibalization prevention
+
+This is one of the highest-priority requirements.
+
+Create a central keyword-to-URL mapping before writing content.
+
+For every indexable URL, define:
+
+- One primary keyword
+- Supporting keywords
+- Search intent
+- Target audience
+- Page type
+- Proposed SEO title
+- Meta description
+- H1
+- Internal linking targets
+- Canonical URL
+- Content differentiation
+- Cannibalization risk
+
+### Strict rules
+
+- One primary search intent per indexable page.
+- Similar keyword variations belong to the same page when intent is identical.
+- Do not create multiple pages for singular/plural variations.
+- Do not create separate pages for close synonyms.
+- Do not create separate pages merely because a keyword has a slightly different word order.
+- Do not assign the same primary keyword to competing URLs.
+- Do not copy the same keyword-heavy introduction across multiple location pages.
+- Do not create pages whose only difference is the area name.
+- Do not create unnecessary overlapping FAQs or blog articles.
+
+The main Buy Property page should target broad buying intent.
+
+The main Rent Property page should target broad rental intent.
+
+Each area-specific buying page should focus on property purchase intent in that area.
+
+Each area-specific rental page should focus on rental intent in that area.
+
+Individual project pages should focus on the specific development, its location, characteristics and available units.
+
+Blog pages should answer informational questions rather than compete with transactional listing pages.
+
+Residency pages should focus on visa eligibility and application information, not property-listing intent.
+
+Where two existing pages compete for the same query, recommend consolidation, redirection or intent differentiation based on evidence.
+
+Never merge URLs automatically.
+
+### Keyword usage and content repetition
+
+Use the primary keyword naturally in relevant locations, such as:
+
+- SEO title
+- H1
+- Opening section
+- Relevant subheadings
+- Image alt text where descriptive
+- Internal links where appropriate
+
+Do not force the same exact phrase into every section.
+
+Use meaningful synonyms, natural language, related entities and contextual terminology.
+
+Avoid repetitive sentences, repeated introductions, boilerplate paragraphs, unnatural keyword density and excessive exact-match anchors.
+
+Common grammatical words may naturally recur. The goal is not to eliminate ordinary repeated words, but to eliminate repetitive and unnatural content.
+
+## 6. Original content and plagiarism standards
+
+All website copy must be independently written.
+
+Do not copy, spin, paraphrase sentence by sentence or imitate the structure of competitor pages.
+
+Target less than 5% external text similarity where measured by a suitable plagiarism-checking service.
+
+This is a target, not a guarantee. Similarity tools can produce false positives, especially for common industry terminology, names and factual statements.
+
+For every important page:
+
+- Research the topic.
+- Identify what competitors are missing.
+- Add original, useful information.
+- Include Bahrain-specific context.
+- Use verified facts.
+- Add practical advice and examples where appropriate.
+- Make the content genuinely useful to the reader.
+
+Never fabricate first-hand experience, property transactions, testimonials or personal expertise.
+
+Keep a record of authoritative sources for factual claims.
+
+## 7. Website audit — mandatory before redesign
+
+Audit the existing website before implementation.
+
+Check both:
+
+- https://bahrainrealtor.com/
+- https://bahrainrealtor.bh/
+
+First establish which domain is live, which domain is owned and which should become the canonical domain. Do not assume redirect ownership or change DNS.
+
+If either site cannot be accessed, report that limitation and request access, screenshots, exports or a crawl.
+
+### Audit all available pages
+
+Review:
+
+- URL and indexability
+- Page titles
+- Meta descriptions
+- H1/H2/H3 hierarchy
+- Content quality and depth
+- Keyword targeting
+- Search intent
+- Duplicate and near-duplicate content
+- Thin content
+- Internal links
+- Broken links
+- Images and alt text
+- Canonical tags
+- Robots directives
+- Sitemap
+- Robots.txt
+- Structured data
+- Mobile usability
+- Page speed
+- Core Web Vitals
+- Redirects
+- 404 pages
+- Navigation
+- Enquiry forms
+- WhatsApp links
+- Conversion opportunities
+
+Use a real crawl where possible. Do not claim to have audited pages that could not be accessed.
+
+### Required audit deliverables
+
+Create:
+
+/docs/audit/current-site-audit.md
+
+/docs/audit/url-inventory.csv
+
+/docs/audit/technical-seo-audit.md
+
+/docs/audit/content-quality-audit.md
+
+/docs/audit/keyword-cannibalization-audit.md
+
+/docs/audit/competitor-analysis.md
+
+/docs/audit/redesign-recommendations.md
+
+Each issue should include:
+
+- Affected URL
+- Observed issue
+- Evidence
+- SEO or UX impact
+- Priority
+- Recommended fix
+
+Classify findings as Critical, High, Medium or Low.
+
+Do not modify production content during the audit.
+
+## 8. Competitor research
+
+Benchmark relevant Bahrain property websites, including:
+
+- Property Finder Bahrain
+- Bayut Bahrain
+- Weetas
+- HouseMe
+- Other relevant local property agencies and portals discovered during research
+
+Review:
+
+- Navigation
+- Property search experience
+- Listing presentation
+- Filters
+- Area landing pages
+- Project pages
+- Content depth
+- Internal linking
+- Mobile experience
+- Page performance
+- Trust signals
+- Enquiry journey
+- SEO page structure
+- Schema implementation where observable
+
+Identify weaknesses and opportunities.
+
+Do not copy their design, content or page structure blindly.
+
+The objective is to produce a better specialist experience through stronger local knowledge, clearer navigation, high-quality listings, better project information and faster pages.
+
+Document evidence and distinguish observed facts from assumptions.
+
+## 9. Premium design and UI/UX direction
+
+Create a premium, editorial-quality real estate brand experience.
+
+Design characteristics:
+
+- Sophisticated
+- Modern
+- Clean
+- Trustworthy
+- Spacious
+- Professional
+- Luxury-oriented without looking exaggerated
+- Easy to navigate
+- Strong typography
+- High-quality real property photography
+- Consistent spacing and alignment
+- Excellent mobile experience
+
+Avoid:
+
+- Generic AI website designs
+- Excessive gradients
+- Overused glassmorphism
+- Random decorative icons
+- Too many rounded cards
+- Repetitive section layouts
+- Stock photos that misrepresent actual properties
+- Fake statistics and testimonials
+- Excessive animations
+- Distracting popups
+
+Create a coherent design system with:
+
+- Brand colours
+- Typography scale
+- Spacing system
+- Buttons
+- Forms
+- Navigation
+- Property cards
+- Project cards
+- Image treatments
+- Responsive breakpoints
+- Hover and focus states
+
+Use supplied real property photography and verified project images whenever available.
+
+Do not invent project photographs or imply a stock image depicts a specific development.
+
+### Homepage design
+
+Recommended section order:
+
+1. Premium hero section with a strong property-search experience.
+2. Buy / Rent selector.
+3. Location and property-type search.
+4. Featured properties.
+5. Explore the six specialist areas.
+6. Featured projects.
+7. Latest properties for rent.
+8. Why choose BahrainRealtor.
+9. Helpful property guides.
+10. Bahrain residency information.
+11. Jahangir Realtor profile.
+12. Strong contact and WhatsApp calls to action.
+
+Make the primary action immediately understandable.
+
+### Property search experience
+
+Design a usable search interface with:
+
+- Buy or Rent
+- Location
+- Property type
+- Price range
+- Bedrooms
+- Search button
+
+Only implement filters supported by actual listing data.
+
+### Property cards
+
+Show relevant available information:
+
+- Main image
+- Listing title
+- Price and currency
+- Location
+- Property type
+- Bedrooms
+- Bathrooms
+- Area
+- Furnishing status where verified
+- Listing reference
+- Enquiry action
+
+Never invent listing information.
+
+### Project cards
+
+Show:
+
+- Actual project name
+- Location
+- Verified image
+- Short description
+- Property types
+- View project link
+
+## 10. Content requirements
+
+Every indexable landing page must have a distinct purpose.
+
+Create useful, human-written content based on the actual location, property inventory, development and search intent.
+
+For area-specific pages, cover relevant facts such as:
+
+- Location and setting
+- Available property types
+- Lifestyle and facilities
+- Transport and accessibility
+- Nearby destinations
+- Ownership considerations where relevant
+- Current available listings
+- Buyer or tenant considerations
+- Relevant FAQs
+
+Only state facts that can be verified.
+
+Do not repeat the same generic area introduction across all six locations.
+
+For project pages, use development-specific details rather than generic real estate copy.
+
+For informational articles, answer the user's question directly and provide supporting context.
+
+## 11. On-page SEO
+
+Implement:
+
+- Unique SEO titles
+- Unique meta descriptions
+- One clear H1 per page
+- Logical H2/H3 structure
+- Descriptive URL slugs
+- Relevant internal links
+- Descriptive image alt text
+- Canonical tags
+- Open Graph metadata
+- Social sharing metadata
+- Breadcrumbs where useful
+- Relevant contextual anchor text
+- Proper pagination handling
+- Indexation controls for filtered pages
+
+Avoid duplicated title templates and meta descriptions across different locations.
+
+Do not use keyword stuffing.
+
+## 12. AEO, NLP and entity enrichment
+
+Optimize content so search engines and answer engines can understand and extract useful information.
+
+Use:
+
+- Direct answers to important questions
+- Clear definitions
+- Concise explanatory sections
+- Useful comparison tables
+- Well-structured FAQs
+- Contextual terminology
+- Named locations
+- Verified project and developer names
+- Relevant property entities
+- Author and business information
+- Reliable source references
+- Clear dates for time-sensitive information
+
+Use natural language and semantic coverage rather than repeating exact keywords.
+
+Do not create content solely to manipulate AI-generated answers.
+
+Do not invent entities, authority, affiliations or facts.
+
+## 13. Structured data and schema
+
+Evaluate and implement appropriate structured data, such as:
+
+- Organization or RealEstateAgent, where appropriate
+- Person for the realtor profile
+- WebSite
+- WebPage
+- BreadcrumbList
+- Article
+- FAQPage only when eligible and supported by visible page content
+- Appropriate listing or property-related schema where supported by the actual data
+
+Use valid JSON-LD.
+
+Do not invent aggregate ratings, reviews, addresses, prices or credentials.
+
+Test structured data using Google's Rich Results Test and Schema.org validation tools where applicable.
+
+Schema must accurately represent visible page content.
+
+## 14. Technical SEO and performance
+
+Build the website with Astro using a lightweight architecture.
+
+Prioritize:
+
+- Static generation for appropriate pages
+- Minimal JavaScript
+- Efficient CSS
+- Responsive images
+- Modern image formats such as WebP or AVIF
+- Lazy loading below-the-fold images
+- Proper image dimensions
+- Font optimization
+- Minimal third-party scripts
+- No unnecessary client-side frameworks
+- Accessible navigation
+- Semantic HTML
+- Clean URL architecture
+- XML sitemap
+- Robots.txt
+- Canonical URLs
+- Proper redirects
+- 404 page
+- Secure HTTPS
+
+### Core Web Vitals targets
+
+Aim for Google's good thresholds at the 75th percentile:
+
+- LCP: 2.5 seconds or less
+- INP: 200 milliseconds or less
+- CLS: 0.1 or less
+
+Measure real results when field data is available. Use Lighthouse and PageSpeed Insights for laboratory and field diagnostics as appropriate.
+
+Do not claim a performance score without running the test.
+
+## 15. Arabic and multilingual SEO
+
+Preserve the Arabic keyword opportunities in the supplied workbook.
+
+If Arabic pages are included:
+
+- Use native-quality Arabic content.
+- Use appropriate Arabic URL slugs.
+- Implement correct hreflang.
+- Set the correct language attributes.
+- Avoid machine-translated doorway pages.
+- Keep English and Arabic content aligned by search intent.
+- Do not create duplicate language versions without proper localization.
+
+Arabic pages must have real user value, not merely translated keyword lists.
+
+## 16. Programmatic SEO rules
+
+The workbook includes 243 generated pSEO combinations.
+
+Do not publish all of them automatically.
+
+Evaluate each opportunity based on:
+
+- Search intent
+- Inventory availability
+- Number of matching listings
+- Unique local information
+- Distinct user value
+- Search demand
+- Cannibalization risk
+
+Index only pages with sufficient unique value and inventory.
+
+Use noindex for low-value filter combinations where appropriate.
+
+Never create hundreds of near-identical pages by changing only the location or bedroom number.
+
+## 17. Astro and repository standards
+
+Use Astro as the primary framework.
+
+Create reusable components and data-driven templates.
+
+Keep project information, articles, FAQs and property records organized separately from presentation components.
+
+Use TypeScript where practical.
+
+Use accessible semantic HTML.
+
+Keep dependencies minimal.
+
+Create reusable layouts, components and design tokens.
+
+Keep the project buildable throughout development.
+
+Do not install unnecessary libraries.
+
+Add documentation explaining how a beginner can edit the site and run it locally.
+
+Create:
+
+/docs/website-architecture.md
+
+/docs/seo-strategy.md
+
+/docs/content-guidelines.md
+
+/docs/deployment-guide.md
+
+## 18. GitHub and deployment
+
+Use GitHub for version control.
+
+Make changes in small logical stages.
+
+Explain the changes before major edits.
+
+Review diffs before committing.
+
+Do not overwrite the existing repository without checking its contents.
+
+Do not expose API keys, credentials or private contact information in public source code.
+
+Netlify deployment will be manual after approval.
+
+Expected production build:
+
+npm run build
+
+Expected output directory:
+
+dist
+
+Do not connect automatic deployment or modify DNS unless explicitly requested.
+
+## 19. Required development stages
+
+Work in the following order.
+
+### Stage 1 — Discovery and audit
+
+Inspect the repository, live website, existing pages, uploaded keyword workbook and available assets.
+
+Produce the audit reports.
+
+Do not redesign or delete anything yet.
+
+### Stage 2 — SEO architecture
+
+Produce:
+
+- Final sitemap
+- URL inventory
+- Keyword-to-URL map
+- Search-intent map
+- Cannibalization risk register
+- Content plan
+- Redirect recommendations
+
+Wait for approval before major implementation.
+
+### Stage 3 — Design system
+
+Create the premium visual direction, typography, colour palette, spacing and component designs.
+
+Build a homepage mockup or initial implementation for review.
+
+### Stage 4 — Astro foundation
+
+Build the layout, header, footer, navigation, SEO utilities and responsive foundation.
+
+### Stage 5 — Homepage
+
+Implement the approved homepage design.
+
+### Stage 6 — Buy and Rent
+
+Build the main pages and six area pages for each transaction type.
+
+### Stage 7 — Projects
+
+Build the project directory and reusable individual project template.
+
+### Stage 8 — Blog and FAQs
+
+Build article and FAQ templates.
+
+### Stage 9 — Bahrain Residency
+
+Build the Golden Visa and Self-Sponsorship Visa guides using verified official information.
+
+### Stage 10 — Realtor profile
+
+Build the verified Jahangir profile and contact section.
+
+### Stage 11 — SEO and quality assurance
+
+Run technical checks, metadata checks, schema validation, accessibility checks, broken-link checks, responsive tests and performance measurements.
+
+### Stage 12 — Production preparation
+
+Prepare the production build, GitHub commit and manual Netlify deployment instructions.
+
+## 20. How you must communicate with the website owner
+
+The owner is a beginner in web development.
+
+Therefore:
+
+- Explain each task in simple language.
+- Avoid overwhelming instructions.
+- Work on one milestone at a time.
+- Show what files you will create or edit.
+- Explain why the change matters.
+- Report completed work.
+- Report errors honestly.
+- Ask for missing business information rather than inventing it.
+- Stop for approval before major structural, content or deployment decisions.
+
+## 21. First task — do not build the website yet
+
+Start by inspecting the current GitHub repository and determining what files, pages and assets already exist.
+
+Then inspect the available website and keyword research.
+
+Produce a discovery report containing:
+
+1. Existing repository assessment.
+2. Live website accessibility and audit limitations.
+3. Existing page and URL inventory.
+4. Keyword workbook analysis.
+5. Initial competitor benchmark.
+6. Keyword cannibalization risks.
+7. Recommended final website sitemap.
+8. Missing business information and assets.
+9. Prioritized implementation roadmap.
+
+Do not delete, replace or rewrite existing website files during this first task.
+
+Do not claim that a test, crawl, plagiarism check, schema validation or performance audit has been completed unless it has actually been run.
+
+Finish by showing the owner the discovery report and asking for approval to proceed to Stage 2.
+
+**Final objective:** Build BahrainRealtor.bh into a premium, trustworthy, fast, accessible and search-competitive Bahrain real estate website with original content, clear keyword ownership, strong local relevance and an excellent user experience.

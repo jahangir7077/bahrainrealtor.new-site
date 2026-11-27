@@ -1,0 +1,23 @@
+---
+import Detail from '../../server/properties/Detail.astro';
+import { getProperty, listRelatedProperties, parsePropertyPath, propertyPath, type PublicProperty } from '../../server/properties/repository.ts';
+
+const path = parsePropertyPath(Astro.params.property);
+let property: Awaited<ReturnType<typeof getProperty>> = null;
+let related: PublicProperty[] = [];
+let unavailable = false;
+if (!path || ![propertyPath(path, 'en'), propertyPath(path, 'en').slice(0, -1)].includes(Astro.url.pathname)) {
+  Astro.response.status = 404;
+} else {
+  try {
+    property = await getProperty('en', path);
+    if (!property) Astro.response.status = 404;
+    else related = await listRelatedProperties('en', property);
+  } catch { unavailable = true; Astro.response.status = 503; }
+}
+Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
+if (process.env.SEO_INDEXING_ENABLED !== 'true' || !property) {
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
+---
+<Detail language="en" property={property} related={related} unavailable={unavailable} />

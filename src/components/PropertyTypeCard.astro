@@ -1,0 +1,42 @@
+---
+import Card from './ui/Card.astro';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  title: string;
+  description?: string;
+}
+
+const { language, title, description } = Astro.props;
+---
+
+<Card variant="white" bordered>
+  <article lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <span class="type-card__ornament" aria-hidden="true"></span>
+    <h3>{title}</h3>
+    {description && <p>{description}</p>}
+  </article>
+</Card>
+
+<style>
+  .type-card__ornament {
+    display: block;
+    width: 2rem;
+    height: 2px;
+    margin-block-end: var(--space-4);
+    background: var(--color-gold);
+  }
+
+  h3 {
+    margin-block: 0 var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--type-h4);
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--type-small);
+  }
+</style>

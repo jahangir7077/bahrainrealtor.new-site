@@ -1,0 +1,25 @@
+---
+export const prerender = false;
+
+const slug = Astro.params.slug ?? 'missing';
+const generatedAt = new Date().toISOString();
+Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>SSR test: {slug}</title>
+  </head>
+  <body>
+    <main>
+      <h1>Server-rendered test page</h1>
+      <p>Route parameter rendered on the server: <strong>{slug}</strong></p>
+      <p>Generated at request time: <time datetime={generatedAt}>{generatedAt}</time></p>
+      <a href="/">Back to test homepage</a>
+    </main>
+  </body>
+</html>

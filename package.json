@@ -1,0 +1,30 @@
+{
+  "name": "bahrainrealtor-foundation",
+  "version": "1.0.0",
+  "description": "new site bahrainrealtor.com",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "start": "node ./dist/server/entry.mjs",
+    "check": "astro check"
+  },
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "dependencies": {
+    "@astrojs/node": "11.1.14",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.119.2",
+    "astro": "7.4.13",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}

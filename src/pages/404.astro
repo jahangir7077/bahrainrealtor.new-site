@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DEFAULT_LANGUAGE } from '../i18n/config';
+import { detectLanguage } from '../i18n/routes';
+import { translate } from '../i18n/translate';
+
+const language = detectLanguage(Astro.url.pathname) ?? DEFAULT_LANGUAGE;
+const homePath = language === 'ar' ? '/ar/' : '/';
+---
+
+<BaseLayout
+  title={translate(language, 'notFound.title')}
+  description={translate(language, 'notFound.description')}
+  language={language}
+>
+  <h1>{translate(language, 'notFound.title')}</h1>
+  <p>{translate(language, 'notFound.description')}</p>
+  <a href={homePath}>{translate(language, 'notFound.homeLink')}</a>
+</BaseLayout>

@@ -1,0 +1,85 @@
+---
+import ArticleTemplate from '../../components/templates/ArticleTemplate.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublicationEligibility } from '../../i18n/publication.ts';
+import type { Language } from '../../i18n/config.ts';
+import type { ArticleRecord } from '../../types/content.ts';
+import { articleSchema, breadcrumbSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
+import { contentMetadata } from '../../utils/seo/content-metadata.ts';
+import { getPublishedArticle } from './repository.ts';
+import { hreflangForEquivalentPages } from '../../utils/seo/hreflang.ts';
+
+interface Props {
+  language: Language;
+  article: ArticleRecord | null;
+}
+
+const { language, article } = Astro.props;
+const content = article?.content[language];
+const publication = article?.publication[language];
+const eligible = Boolean(publication && getPublicationEligibility(publication, language).indexingEligible);
+const alternateLanguage = language === 'ar' ? 'en' : 'ar';
+let equivalent: ArticleRecord | null = null;
+if (eligible && article) {
+  try {
+    const candidate = await getPublishedArticle(alternateLanguage, article.slug);
+    if (candidate?.id === article.id) equivalent = candidate;
+  } catch {
+    equivalent = null;
+  }
+}
+const equivalentPublication = equivalent?.publication[alternateLanguage];
+const englishPublication = language === 'en' ? publication : equivalentPublication;
+const arabicPublication = language === 'ar' ? publication : equivalentPublication;
+const alternates = englishPublication && arabicPublication
+  ? hreflangForEquivalentPages([
+      { language: 'en', publication: englishPublication },
+      { language: 'ar', publication: arabicPublication },
+    ])
+  : [];
+const metadata = content
+  ? contentMetadata({
+      title: content.title,
+      description: content.summary || content.body,
+      seoTitle: content.seoTitle,
+      seoDescription: content.seoDescription,
+    })
+  : {
+      title: language === 'ar' ? 'المقال غير متاح' : 'Article unavailable',
+      description: language === 'ar' ? 'هذا المقال غير متاح حالياً.' : 'This article is currently unavailable.',
+    };
+const path = article
+  ? `${language === 'ar' ? '/ar' : ''}/guides/${article.slug}/`
+  : '';
+const schema = article && publication && article.publishedAt
+  ? articleSchema({
+      title: metadata.title,
+      path,
+      authorName: article.authorName,
+      publishedAt: article.publishedAt,
+      publication,
+      language,
+    })
+  : null;
+const breadcrumbs = article
+  ? breadcrumbSchema([
+      { name: language === 'ar' ? 'الرئيسية' : 'Home', path: language === 'ar' ? '/ar/' : '/' },
+      { name: language === 'ar' ? 'المقالات' : 'Articles', path: language === 'ar' ? '/ar/blog/articles/' : '/blog/articles/' },
+      { name: metadata.title, path },
+    ])
+  : null;
+---
+
+<BaseLayout
+  title={metadata.title}
+  description={metadata.description}
+  language={language}
+  indexingEligible={eligible}
+  enableCanonical={eligible}
+  showOpenGraph
+  alternates={alternates}
+>
+  {schema && <script type="application/ld+json" set:html={safeJsonLd(schema)} />}
+  {breadcrumbs && <script type="application/ld+json" set:html={safeJsonLd(breadcrumbs)} />}
+  <ArticleTemplate language={language} article={article ?? undefined} preview={false} />
+</BaseLayout>

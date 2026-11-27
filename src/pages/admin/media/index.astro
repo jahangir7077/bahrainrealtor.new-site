@@ -1,0 +1,89 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session';
+import { protectedRedirect, protectResponse } from '../../../server/auth/security';
+import { listMediaRevisions } from '../../../server/media/admin';
+
+protectResponse(Astro.response);
+Astro.response.headers.set(
+  'Content-Security-Policy',
+  "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+);
+
+let revisions: Awaited<ReturnType<typeof listMediaRevisions>> = [];
+let selectedRevision = '';
+let message = '';
+const config = settings();
+
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Media administration is unavailable.';
+} else if (Astro.request.method !== 'GET') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    const user = await membership(client);
+    if (!user) return protectedRedirect(Astro.redirect('/admin/login', 303));
+    const mfa = await mfaState(client);
+    if (!mfa) throw new Error('MFA unavailable');
+    if (!mfa.authorized) return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+    revisions = await listMediaRevisions(client);
+    const requested = Astro.url.searchParams.getAll('revision');
+    if (requested.length > 1 || (requested.length === 1 && !revisions.some((row) => row.id === requested[0]))) {
+      Astro.response.status = 400;
+      message = 'Choose a content revision from the list.';
+    } else {
+      selectedRevision = requested[0] ?? '';
+    }
+  } catch {
+    Astro.response.status = 503;
+    message = 'Media administration is unavailable.';
+  }
+}
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Property media administration</title>
+  </head>
+  <body>
+    <main>
+      <h1>Content media administration</h1>
+      <p><a href="/admin/">Administration</a></p>
+      <p>Manage images attached to a specific content revision: property, article, or FAQ. Media is private until that exact locale and revision is published.</p>
+      {message && <p role="alert">{message}</p>}
+      {revisions.length === 0
+        ? <p>No property, article, or FAQ revisions are available yet.</p>
+        : <section data-media-manager>
+          <label for="media-revision">Content revision</label>
+          <select id="media-revision" data-media-revision>
+            <option value="">Choose a content revision</option>
+            {revisions.map((revision) => (
+              <option value={revision.id} selected={selectedRevision === revision.id}>
+                {revision.content_kind} — {revision.title} — {revision.locale} — {revision.id}
+              </option>
+            ))}
+          </select>
+          <p>Alternative text is saved separately for each locale and revision. Use concise, descriptive text that matches the image.</p>
+          <form data-media-upload>
+            <input type="hidden" name="revision" value={selectedRevision} data-upload-revision />
+            <p><label>Image (JPEG, PNG, or WebP; maximum 8 MiB) <input name="file" type="file" accept="image/jpeg,image/png,image/webp" required /></label></p>
+            <p><label>Alternative text <input name="alt_text" maxlength="500" required /></label></p>
+            <button type="submit">Upload image</button>
+          </form>
+          <p data-media-status role="status" aria-live="polite"></p>
+          <h2>Images in this revision</h2>
+          <ol data-media-list aria-live="polite"></ol>
+        </section>}
+    </main>
+  </body>
+</html>
+
+<script>
+  import { initializePropertyMediaManager } from '../../../scripts/admin-media';
+  initializePropertyMediaManager();
+</script>

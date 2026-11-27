@@ -1,0 +1,227 @@
+---
+import {
+  archiveSiteContent,
+  createSiteContentDraft,
+  getSiteContentRevision,
+  isSiteContentUuid,
+  listSiteContentRevisions,
+  parseSiteContentArchive,
+  parseSiteContentDraft,
+  parseSiteContentTransition,
+  reviseSiteContentDraft,
+  SITE_CONTENT_ROUTES,
+  transitionSiteContent,
+} from '../../../server/admin-site-content/workflow.ts';
+import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session.ts';
+import {
+  issueCsrfToken,
+  one,
+  protectedRedirect,
+  protectResponse,
+  readForm,
+  validCsrfToken,
+  validMutation,
+} from '../../../server/auth/security.ts';
+
+protectResponse(Astro.response);
+const config = settings();
+let message = '';
+let available = false;
+let csrfToken = '';
+let revisions: Awaited<ReturnType<typeof listSiteContentRevisions>> = [];
+let detail: Awaited<ReturnType<typeof getSiteContentRevision>> = null;
+
+if (!config) {
+  Astro.response.status = 503;
+  message = 'Site content administration is unavailable.';
+} else if (Astro.request.method !== 'GET' && Astro.request.method !== 'POST') {
+  Astro.response.status = 405;
+  message = 'Request could not be completed.';
+} else if (Astro.request.method === 'POST' && !validMutation(Astro.request, config.origin)) {
+  Astro.response.status = 403;
+  message = 'Request could not be completed.';
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    const user = await membership(client);
+    if (!user) {
+      if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/login', 303));
+      Astro.response.status = 403;
+      message = 'Request could not be completed.';
+    } else {
+      const mfa = await mfaState(client);
+      if (!mfa) throw new Error('MFA unavailable');
+      if (!mfa.authorized) {
+        if (Astro.request.method === 'GET') return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+        Astro.response.status = 403;
+        message = 'Request could not be completed.';
+      } else if (Astro.request.method === 'POST') {
+        const form = await readForm(Astro.request, 220000);
+        const action = form && one(form, 'action', 16);
+        let target: string | null = null;
+        let completed = false;
+        if (!form || !validCsrfToken(form, Astro.cookies)) {
+          Astro.response.status = 403;
+          message = 'Request could not be completed.';
+        } else if (action === 'new') {
+          const draft = parseSiteContentDraft(form, 'new');
+          if (draft) target = await createSiteContentDraft(client, draft);
+        } else if (action === 'draft') {
+          const draft = parseSiteContentDraft(form, 'draft');
+          if (draft) target = await reviseSiteContentDraft(client, draft);
+        } else if (action === 'archive') {
+          const input = parseSiteContentArchive(form);
+          if (input) completed = await archiveSiteContent(client, input);
+        } else if (action === 'review' || action === 'approve' ||
+                   action === 'publish' || action === 'unpublish') {
+          const input = parseSiteContentTransition(form, action);
+          if (input) target = await transitionSiteContent(client, action, input) ? input.revision : null;
+        }
+        if (target) return protectedRedirect(Astro.redirect(`/admin/site-content/?revision=${target}`, 303));
+        if (completed) return protectedRedirect(Astro.redirect('/admin/site-content/', 303));
+        if (Astro.response.status !== 403) Astro.response.status = 400;
+        if (!message) message = 'Request could not be completed. Check the submitted fields and current record state.';
+        csrfToken = issueCsrfToken(Astro.cookies);
+        revisions = await listSiteContentRevisions(client);
+        available = true;
+      } else {
+        csrfToken = issueCsrfToken(Astro.cookies);
+        const requested = Astro.url.searchParams.getAll('revision');
+        if (requested.length > 1 || (requested.length === 1 && !isSiteContentUuid(requested[0]))) {
+          Astro.response.status = 400;
+          message = 'Invalid revision.';
+        } else {
+          revisions = await listSiteContentRevisions(client);
+          if (requested.length === 1) {
+            detail = await getSiteContentRevision(client, requested[0]);
+            if (!detail) {
+              Astro.response.status = 404;
+              message = 'Site content revision not found.';
+            }
+          }
+          available = true;
+        }
+      }
+    }
+  } catch {
+    Astro.response.status = Astro.request.method === 'POST' ? 409 : 503;
+    message = Astro.request.method === 'POST'
+      ? 'The operation failed or the record changed. No success was recorded; reload and check the current state.'
+      : 'Site content administration is unavailable.';
+  }
+}
+---
+
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Areas, projects and site settings</title></head>
+<body><main>
+  <h1>Areas, projects and site settings</h1>
+  <p><a href="/admin/">Administration</a></p>
+  {message && <p role="alert">{message}</p>}
+  {available && <>
+    <p>These are private, localized drafts with immutable revision history. Creating or revising a draft never publishes it; only pre-approved routes can be assigned.</p>
+    <section>
+      <h2>Recent revisions</h2>
+      <p>Showing at most the 50 newest revisions.</p>
+      <ul>{revisions.map((entry) => <li>
+        <a href={`/admin/site-content/?revision=${entry.id}`}>{entry.title}</a>
+        ({entry.locale}, {entry.kind}, {entry.item?.slug}, {entry.item?.archived_at ? 'archived' : 'active'})
+      </li>)}</ul>
+    </section>
+
+    {detail && <section>
+      <h2>Private revision preview</h2>
+      <dl>
+        <dt>Record type</dt><dd>{detail.item.kind}</dd>
+        <dt>Stable key</dt><dd>{detail.item.slug}</dd>
+        <dt>Public route</dt><dd>{detail.item.route_path ?? 'Private setting — no public route'}</dd>
+        <dt>Record ID</dt><dd>{detail.item.id}</dd>
+        <dt>Revision ID</dt><dd>{detail.revision.id}</dd>
+        <dt>Language</dt><dd>{detail.revision.locale}</dd>
+        <dt>Title / setting name</dt><dd>{detail.revision.title}</dd>
+        <dt>Content / setting value</dt><dd style="white-space: pre-wrap">{detail.revision.body}</dd>
+        <dt>Summary</dt><dd>{detail.revision.summary ?? '—'}</dd>
+        <dt>SEO title</dt><dd>{detail.revision.seo_title ?? '—'}</dd>
+        <dt>SEO description</dt><dd>{detail.revision.seo_description ?? '—'}</dd>
+        <dt>Created</dt><dd>{detail.revision.created_at}</dd>
+        <dt>Record state</dt><dd>{detail.item.archived_at ? 'archived' : 'active'}</dd>
+      </dl>
+      {detail.item.route_path && <>
+        <p>Arabic exact-revision human review: {detail.revision.locale === 'ar'
+          ? (detail.state.reviewed ? 'reviewed' : 'not reviewed')
+          : 'not required'}.
+          Approval: {detail.state.approved ? 'approved' : 'not approved'}.
+          Published revision: {detail.state.current ?? 'none'}.
+        </p>
+        {detail.revision.locale === 'ar' && !detail.state.reviewed && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="review" />
+          <input type="hidden" name="revision" value={detail.revision.id} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> I reviewed the complete Arabic text for this exact revision.</label>
+          <button type="submit">Record Arabic human review</button>
+        </form>}
+        {!detail.state.approved && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="approve" />
+          <input type="hidden" name="revision" value={detail.revision.id} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> I approve this complete revision for its selected language.</label>
+          <button type="submit">Approve revision</button>
+        </form>}
+        {detail.state.approved && detail.state.current !== detail.revision.id &&
+          (detail.revision.locale !== 'ar' || detail.state.reviewed) && <form method="post">
+            <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="publish" />
+            <input type="hidden" name="revision" value={detail.revision.id} />
+            <input type="hidden" name="expected" value={detail.state.current ?? 'none'} />
+            <label><input type="checkbox" name="confirm" value="yes" required /> Publish this approved language revision.</label>
+            <button type="submit">Publish</button>
+          </form>}
+        {detail.state.current && <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="unpublish" />
+          <input type="hidden" name="revision" value={detail.revision.id} /><input type="hidden" name="expected" value={detail.state.current} />
+          <label><input type="checkbox" name="confirm" value="yes" required /> Unpublish this locale's current revision.</label>
+          <button type="submit">Unpublish</button>
+        </form>}
+      </>}
+      <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="archive" />
+        <input type="hidden" name="item_id" value={detail.item.id} />
+        <input type="hidden" name="expected_archived" value={detail.item.archived_at ? 'true' : 'false'} />
+        <input type="hidden" name="archived" value={detail.item.archived_at ? 'false' : 'true'} />
+        <label><input type="checkbox" name="confirm" value="yes" required />
+          {detail.item.archived_at ? 'Restore this private record.' : 'Archive this record; revisions and audit history are retained.'}
+        </label>
+        <button type="submit">{detail.item.archived_at ? 'Restore record' : 'Archive record'}</button>
+      </form>
+
+      {!detail.item.archived_at && <section>
+        <h3>Create a new localized revision</h3>
+        <form method="post">
+          <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="draft" />
+          <input type="hidden" name="revision" value={detail.revision.id} /><input type="hidden" name="kind" value={detail.item.kind} />
+          <p><label>Language <select name="locale"><option value="en" selected={detail.revision.locale === 'en'}>English</option><option value="ar" selected={detail.revision.locale === 'ar'}>Arabic</option></select></label></p>
+          <p><label>Title / setting name <input name="title" value={detail.revision.title} maxlength="200" required /></label></p>
+          <p><label>Content / setting value <textarea name="body" maxlength="20000" required>{detail.revision.body}</textarea></label></p>
+          <p><label>Summary <textarea name="summary" maxlength="1000">{detail.revision.summary ?? ''}</textarea></label></p>
+          <p><label>SEO title <input name="seo_title" value={detail.revision.seo_title ?? ''} maxlength="200" /></label></p>
+          <p><label>SEO description <textarea name="seo_description" maxlength="500">{detail.revision.seo_description ?? ''}</textarea></label></p>
+          <button type="submit">Save new private revision</button>
+        </form>
+      </section>}
+    </section>}
+
+    <section>
+      <h2>Create a private record</h2>
+      <form method="post">
+        <input type="hidden" name="csrf" value={csrfToken} /><input type="hidden" name="action" value="new" />
+        <p><label>Record type <select name="kind"><option value="landing">Landing page</option><option value="area">Area</option><option value="project">Projects hub</option><option value="setting">Website setting</option></select></label></p>
+        <p><label>Stable key (slug) <input name="slug" maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" required /></label></p>
+        <p><label>Approved public route <select name="route_path"><option value="">Private setting — no public route</option>{SITE_CONTENT_ROUTES.map((path) => <option value={path}>{path}</option>)}</select></label></p>
+        <p><label>Language <select name="locale"><option value="en">English</option><option value="ar">Arabic</option></select></label></p>
+        <p><label>Title / setting name <input name="title" maxlength="200" required /></label></p>
+        <p><label>Content / setting value <textarea name="body" maxlength="20000" required></textarea></label></p>
+        <p><label>Summary <textarea name="summary" maxlength="1000"></textarea></label></p>
+        <p><label>SEO title <input name="seo_title" maxlength="200" /></label></p>
+        <p><label>SEO description <textarea name="seo_description" maxlength="500"></textarea></label></p>
+        <button type="submit">Create private draft</button>
+      </form>
+    </section>
+  </>}
+</main></body></html>

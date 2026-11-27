@@ -1,0 +1,106 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/ui/Container.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import PropertyStatus from '../../components/PropertyStatus.astro';
+import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
+import { translate } from '../../i18n/translate.ts';
+import type { Language } from '../../i18n/config.ts';
+import { propertyPath, type PublicProperty } from './repository.ts';
+import { contentMetadata } from '../../utils/seo/content-metadata.ts';
+import { breadcrumbSchema, safeJsonLd } from '../../utils/seo/structured-data.ts';
+
+interface Props {
+  language: Language;
+  property: PublicProperty | null;
+  related: PublicProperty[];
+  unavailable: boolean;
+}
+const { language, property, related, unavailable } = Astro.props;
+const arabic = language === 'ar';
+const title = property?.title ?? (unavailable
+  ? (arabic ? 'العقار غير متاح حالياً' : 'Property temporarily unavailable')
+  : translate(language, 'notFound.title'));
+const metadata = property
+  ? contentMetadata({
+      title: property.title,
+      description: property.summary ?? property.body,
+      seoTitle: property.seoTitle,
+      seoDescription: property.seoDescription,
+    })
+  : { title, description: title };
+const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true' &&
+  Boolean(property) && language === 'en';
+const breadcrumbs = property ? breadcrumbSchema([
+  { name: translate(language, 'navigation.home'), path: language === 'ar' ? '/ar/' : '/' },
+  { name: arabic ? 'العقارات' : 'Properties', path: arabic ? '/ar/properties/' : '/properties/' },
+  { name: property.title, path: propertyPath(property, language) },
+]) : null;
+---
+<BaseLayout
+  title={metadata.title}
+  description={metadata.description}
+  language={language}
+  indexingEligible={indexingEnabled}
+  enableCanonical={indexingEnabled}
+  showOpenGraph
+>
+  {breadcrumbs && <script type="application/ld+json" set:html={safeJsonLd(breadcrumbs)} />}
+  <Container width="wide">
+    <section class="detail">
+      {property ? (
+        <article>
+          <Breadcrumbs language={language} items={[
+            { label: translate(language, 'navigation.home'), href: arabic ? '/ar/' : '/' },
+            { label: arabic ? 'العقارات' : 'Properties', href: arabic ? '/ar/properties/' : '/properties/' },
+            { label: property.title },
+          ]} />
+          {property.images.length > 0 && <ul class="gallery" aria-label={arabic ? 'صور العقار' : 'Property images'}>
+            {property.images.map((image) => <li>
+              <img src={`/api/media/${image.id}`} alt={image.altText} width={image.width} height={image.height} loading="lazy" />
+            </li>)}
+          </ul>}
+          <h1>{property.title}</h1>
+          <PropertyStatus language={language} status={property.availability} />
+          <p>{property.areaName}</p>
+          {property.priceBhd !== undefined && <p><bdi dir="ltr">{formatCurrency(property.priceBhd, language)}</bdi></p>}
+          <p class="description">{property.body}</p>
+          <dl>
+            <dt>{translate(language, 'search.propertyType')}</dt><dd>{property.propertyType}</dd>
+            <dt>{translate(language, 'search.location')}</dt><dd>{property.locationName}</dd>
+            {property.bedrooms !== undefined && <><dt>{translate(language, 'vocabulary.bedrooms')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi></dd></>}
+            {property.bathrooms !== undefined && <><dt>{translate(language, 'vocabulary.bathrooms')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.bathrooms, language, 0)}</bdi></dd></>}
+            {property.sizeSquareMeters !== undefined && <><dt>{translate(language, 'vocabulary.size')}</dt><dd><bdi dir="ltr">{formatPropertyNumber(property.sizeSquareMeters, language)}</bdi> m²</dd></>}
+          </dl>
+        </article>
+      ) : (
+        <><h1>{title}</h1><p>{unavailable
+          ? (arabic ? 'يرجى المحاولة لاحقاً.' : 'Please try again later.')
+          : translate(language, 'notFound.description')}</p></>
+      )}
+      {property && related.length > 0 && <section aria-labelledby="related-title">
+        <h2 id="related-title">{arabic ? 'عقارات ذات صلة' : 'Related properties'}</h2>
+        <ul class="related">
+          {related.map((item) => <li>
+            <PropertyStatus language={language} status={item.availability} />
+            <h3><a href={propertyPath(item, language)}>{item.title}</a></h3>
+            <p>{item.areaName}</p>
+            {item.priceBhd !== undefined && <p><bdi dir="ltr">{formatCurrency(item.priceBhd, language)}</bdi></p>}
+          </li>)}
+        </ul>
+      </section>}
+    </section>
+  </Container>
+</BaseLayout>
+<style>
+  .detail { padding-block: var(--space-10) var(--space-20); }
+  h1 { font-family: var(--font-display); }
+  .description { white-space: pre-wrap; }
+  dl { display: grid; grid-template-columns: minmax(8rem, 0.3fr) 1fr; gap: var(--space-3); }
+  dt { font-weight: 700; }
+  dd { margin: 0; }
+  .related { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-5); padding: 0; list-style: none; }
+  .related li { border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: var(--space-5); }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--space-4); padding: 0; list-style: none; }
+  .gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-card); }
+</style>

@@ -1,0 +1,40 @@
+---
+import EmptyState from './EmptyState.astro';
+import PropertyCard from './PropertyCard.astro';
+import type { Language } from '../i18n/config.ts';
+import type { PropertyRecord } from '../types/content.ts';
+import { translate } from '../i18n/translate.ts';
+import { getPublicationEligibility } from '../i18n/publication.ts';
+
+interface Props {
+  language: Language;
+  properties: readonly PropertyRecord[];
+}
+
+const { language, properties } = Astro.props;
+const eligibleProperties = properties.filter((property) => {
+  const publication = property.publication[language];
+  return Boolean(publication && getPublicationEligibility(publication, language).routeAvailable);
+});
+---
+
+{eligibleProperties.length ? (
+  <div class="property-grid">
+    {eligibleProperties.map((property) => <PropertyCard property={property} language={language} />)}
+  </div>
+) : (
+  <EmptyState
+    language={language}
+    title={translate(language, 'content.noProperties')}
+    description={translate(language, 'content.inventoryPending')}
+  />
+)}
+
+<style>
+  .property-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+    gap: var(--space-5);
+    align-items: start;
+  }
+</style>

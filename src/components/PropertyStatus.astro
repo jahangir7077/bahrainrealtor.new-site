@@ -1,0 +1,47 @@
+---
+import { translate } from '../i18n/translate.ts';
+import type { Language } from '../i18n/config.ts';
+import type { PropertyAvailability } from '../types/content.ts';
+
+interface Props {
+  language: Language;
+  status: PropertyAvailability;
+}
+
+const { language, status } = Astro.props;
+---
+
+<span class:list={['property-status', `property-status--${status}`]} lang={language}>
+  {translate(language, `propertyStatus.${status}`)}
+</span>
+
+<style>
+  .property-status {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    padding-inline: var(--space-3);
+    border-radius: 999px;
+    background: var(--color-surface-subtle);
+    color: var(--color-text-primary);
+    font-size: var(--type-small);
+    font-weight: 700;
+  }
+
+  .property-status--available {
+    color: var(--color-success-text);
+    background: var(--color-success-surface);
+  }
+
+  .property-status--reserved {
+    color: var(--color-warning-text);
+    background: var(--color-warning-surface);
+  }
+
+  .property-status--sold,
+  .property-status--rented,
+  .property-status--unavailable {
+    color: var(--color-text-secondary);
+    background: var(--color-disabled-surface);
+  }
+</style>

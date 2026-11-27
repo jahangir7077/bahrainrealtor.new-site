@@ -1,0 +1,28 @@
+---
+import { createAuthClient, membership, mfaState, settings } from '../../server/auth/session';
+import { protectedRedirect, protectResponse } from '../../server/auth/security';
+
+protectResponse(Astro.response);
+const config = settings();
+let available = false;
+if (!config) {
+  Astro.response.status = 503;
+} else {
+  try {
+    const client = createAuthClient(Astro.request, Astro.cookies, config);
+    if (!await membership(client)) return protectedRedirect(Astro.redirect('/admin/login', 303));
+    const state = await mfaState(client);
+    if (!state) throw new Error('MFA unavailable');
+    if (!state.authorized) return protectedRedirect(Astro.redirect('/admin/mfa', 303));
+    available = true;
+  } catch {
+    Astro.response.status = 503;
+  }
+}
+---
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="robots" content="noindex, nofollow" /><title>Administration</title></head>
+<body><main>
+  <h1>Administration</h1>
+  {available ? <><p>Signed in.</p><ul><li><a href="/admin/properties/">Property administration</a></li><li><a href="/admin/media/">Property media administration</a></li><li><a href="/admin/editorial/">Article and FAQ administration</a></li><li><a href="/admin/site-content/">Areas, projects and site settings</a></li><li><a href="/admin/enquiries/">Enquiry administration</a></li></ul><form method="post" action="/admin/logout"><button type="submit">Sign out</button></form></> : <p>Administration is unavailable.</p>}
+</main></body></html>

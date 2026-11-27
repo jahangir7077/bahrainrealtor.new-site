@@ -1,0 +1,25 @@
+---
+const generatedAt = new Date().toISOString();
+Astro.response.headers.set('Cache-Control', 'no-store, max-age=0');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Astro SSR Compatibility Test</title>
+  </head>
+  <body>
+    <main>
+      <h1>Bahrain Realtor — Astro SSR Compatibility Test</h1>
+      <p>This isolated experiment tests Astro on-demand rendering with Node.js.</p>
+      <p>Server-rendered at: <time datetime={generatedAt}>{generatedAt}</time></p>
+      <ul>
+        <li><a href="/api/time.json">Timestamp endpoint</a></li>
+        <li><a href="/ssr/hostinger">Dynamic SSR test page</a></li>
+      </ul>
+    </main>
+  </body>
+</html>
