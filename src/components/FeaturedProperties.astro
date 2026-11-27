@@ -1,0 +1,59 @@
+---
+import PropertyStatus from './PropertyStatus.astro';
+import Container from './ui/Container.astro';
+import SectionHeading from './ui/SectionHeading.astro';
+import { formatCurrency, formatPropertyNumber } from '../i18n/formatting.ts';
+import { translate } from '../i18n/translate.ts';
+import { propertyPath, type PublicProperty } from '../server/properties/repository.ts';
+import type { Language } from '../i18n/config.ts';
+
+interface Props {
+  language: Language;
+  properties: PublicProperty[];
+}
+
+const { language, properties } = Astro.props;
+---
+
+{properties.length > 0 && (
+  <section class="section featured" aria-labelledby={`featured-title-${language}`} lang={language} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <Container width="wide">
+      <SectionHeading level={2}><span id={`featured-title-${language}`}>{translate(language, 'home.featuredTitle')}</span></SectionHeading>
+      <div class="featured__grid">
+        {properties.map((property) => (
+          <article class="featured__card">
+            <a class="featured__link" href={propertyPath(property, language)}>
+              {property.images[0] && <img
+                src={`/api/media/${property.images[0].id}`}
+                alt={property.images[0].altText}
+                width={property.images[0].width}
+                height={property.images[0].height}
+                loading="lazy"
+              />}
+              <div class="featured__body">
+                <PropertyStatus language={language} status={property.availability} />
+                <h3>{property.title}</h3>
+                <p>{property.areaName}</p>
+                {property.priceBhd && <p class="featured__price"><bdi dir="ltr">{formatCurrency(property.priceBhd, language)}</bdi></p>}
+                <p>{property.bedrooms !== undefined && <><bdi dir="ltr">{formatPropertyNumber(property.bedrooms, language, 0)}</bdi> {translate(language, 'vocabulary.bedrooms')}</>}</p>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </Container>
+  </section>
+)}
+
+<style>
+  .featured { background: var(--color-surface); }
+  .featured__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: var(--space-5); }
+  .featured__card { overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-white); box-shadow: var(--shadow-card); }
+  .featured__link { display: block; height: 100%; color: var(--color-text-primary); text-decoration: none; }
+  .featured__link img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .featured__body { display: grid; justify-items: start; gap: var(--space-3); padding: var(--space-5); }
+  .featured__body h3, .featured__body p { margin: 0; }
+  .featured__body h3 { font-family: var(--font-display); }
+  .featured__price { color: var(--color-navy); font-weight: 700; }
+  .featured__link:hover h3 { text-decoration: underline; text-underline-offset: .15em; }
+</style>

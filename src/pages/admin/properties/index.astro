@@ -1,7 +1,7 @@
 ---
 import { createAuthClient, membership, mfaState, settings } from '../../../server/auth/session';
 import { one, protectedRedirect, protectResponse, readForm, validMutation } from '../../../server/auth/security';
-import { contentArchived, createDraft, createFactsDraft, createNewDraft, getPropertyRevision, isUuid, listRevisions, parseDraft, parseFactsDraft, parseLifecycleTransition, parseNewDraft, parseTransition, publicationState, transition, transitionLifecycle } from '../../../server/admin-properties/workflow';
+import { contentArchived, createDraft, createFactsDraft, createNewDraft, getPropertyRevision, isUuid, listRevisions, parseDraft, parseFactsDraft, parseFeaturedSelection, parseLifecycleTransition, parseNewDraft, parseTransition, publicationState, setPropertyFeatured, transition, transitionLifecycle } from '../../../server/admin-properties/workflow';
 
 protectResponse(Astro.response);
 const config = settings();
@@ -46,6 +46,12 @@ if (!config) {
         } else if (form && action === 'facts') {
           const facts = parseFactsDraft(form);
           if (facts) target = await createFactsDraft(client, facts);
+        } else if (form && action === 'feature') {
+          const selection = parseFeaturedSelection(form);
+          if (selection) {
+            await setPropertyFeatured(client, selection.item, selection.featured);
+            target = selection.revision;
+          }
         } else if (form && action === 'draft') {
           const draft = parseDraft(form);
           if (draft) target = await createDraft(client, user.id, draft);
@@ -67,7 +73,7 @@ if (!config) {
         } else {
           revisions = await listRevisions(client);
           if (requested.length === 1) {
-            detail = await getPropertyRevision(client, requested[0]);
+            detail = await getPropertyRevision(client, requested[0], true);
             if (!detail) {
               Astro.response.status = 404;
               message = 'Property revision not found.';
@@ -116,6 +122,20 @@ if (!config) {
       </dl>
       <p>Approval: {state.approved ? 'approved' : 'not approved'}. Current published revision: {state.current ?? 'none'}.</p>
       <p>Archive status: {archived ? 'archived' : 'active'}.</p>
+      <h3>Homepage featured property</h3>
+      <form method="post">
+        <input type="hidden" name="action" value="feature" />
+        <input type="hidden" name="item" value={detail.item.id} />
+        <input type="hidden" name="revision" value={detail.revision.id} />
+        <p><label>Homepage display
+          <select name="featured">
+            <option value="yes" selected={detail.item.isFeatured}>Featured</option>
+            <option value="no" selected={!detail.item.isFeatured}>Not featured</option>
+          </select>
+        </label></p>
+        <label><input type="checkbox" name="confirm" value="yes" required /> Confirm homepage selection change. Up to six properties can be featured.</label>
+        <button type="submit">Save homepage selection</button>
+      </form>
       <h3>Create a new shared property facts and status revision</h3>
       <p>Unpublish every language before saving new shared facts. Each language needs independent review and publication afterward.</p>
       <form method="post">

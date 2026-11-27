@@ -54,6 +54,17 @@ export function parseLifecycleTransition(
   return { item, revision, ...(action === 'unpublish' ? { locale } : {}) };
 }
 
+export function parseFeaturedSelection(form: URLSearchParams) {
+  const allowed = new Set(['action', 'item', 'revision', 'featured', 'confirm']);
+  if ([...form.keys()].some((key) => !allowed.has(key)) || one(form, 'action', 16) !== 'feature' ||
+      one(form, 'confirm', 3) !== 'yes') return null;
+  const item = one(form, 'item', 36);
+  const revision = one(form, 'revision', 36);
+  const featured = one(form, 'featured', 3);
+  if (!isUuid(item) || !isUuid(revision) || (featured !== 'yes' && featured !== 'no')) return null;
+  return { item, revision, featured: featured === 'yes' };
+}
+
 function decimal(form: URLSearchParams, name: string, integerDigits: number, decimals: number, positive = false): string | null | undefined {
   const value = text(form, name, integerDigits + decimals + 1);
   if (value === undefined || value === null) return value;
@@ -151,6 +162,14 @@ export async function createFactsDraft(client: AuthClient, facts: NonNullable<Re
   return revisionId;
 }
 
+export async function setPropertyFeatured(client: AuthClient, itemId: string, featured: boolean) {
+  const result = await client.rpc('set_property_featured', {
+    p_item_id: itemId,
+    p_featured: featured,
+  });
+  if (result.error) throw result.error;
+}
+
 export async function listRevisions(client: AuthClient) {
   const result = await client.from('content_revisions')
     .select('id,item_id,locale,title,created_at,content_items!inner(kind,slug)')
@@ -159,7 +178,7 @@ export async function listRevisions(client: AuthClient) {
   return result.data;
 }
 
-export async function getPropertyRevision(client: AuthClient, id: string) {
+export async function getPropertyRevision(client: AuthClient, id: string, includeFeatured = false) {
   if (!isUuid(id)) return null;
   const revision = await client.from('content_revisions')
     .select('id,item_id,locale,property_version_id,title,body,summary,area_name,property_type,seo_title,seo_description,created_at')
@@ -170,12 +189,18 @@ export async function getPropertyRevision(client: AuthClient, id: string) {
     .eq('id', revision.data.item_id).eq('kind', 'property').maybeSingle();
   if (item.error) throw item.error;
   if (!item.data) return null;
+  let isFeatured = false;
+  if (includeFeatured) {
+    const featured = await client.rpc('is_property_featured', { p_item_id: item.data.id });
+    if (featured.error || typeof featured.data !== 'boolean') throw featured.error ?? new Error('Featured selection unavailable');
+    isFeatured = featured.data;
+  }
   const version = await client.from('property_versions')
     .select('id,transaction_type,availability,price_bhd::text,bedrooms,bathrooms,size_square_meters,location_name')
     .eq('id', revision.data.property_version_id).eq('item_id', item.data.id).maybeSingle();
   if (version.error) throw version.error;
   if (!version.data) return null;
-  return { revision: revision.data, item: item.data, version: version.data };
+  return { revision: revision.data, item: { ...item.data, isFeatured }, version: version.data };
 }
 
 export async function publicationState(client: AuthClient, itemId: string, locale: string, revisionId: string) {

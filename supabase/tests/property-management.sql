@@ -32,8 +32,13 @@ select set_config('request.jwt.claims', '{"aal":"aal2","amr":[{"method":"totp"}]
 set local role authenticated;
 select public.approve_revision('30000000-0000-0000-0000-000000000051');
 select public.publish_revision_if_current('30000000-0000-0000-0000-000000000051', null);
+select public.set_property_featured('10000000-0000-0000-0000-000000000051', true);
 
 set local role anon;
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.published_featured_content
+    where id = '10000000-0000-0000-0000-000000000051' and locale = 'en'),
+  'featured selection exposes only the published English property through the public view');
 select pg_temp.assert_true(
   (select price_bhd = '125000.125' and price_bhd_numeric = 125000.125
     and pg_typeof(price_bhd_numeric) = 'numeric'::regtype
@@ -50,6 +55,13 @@ set local role service_role;
 select pg_temp.assert_true(
   public.is_enquiry_property_published('10000000-0000-0000-0000-000000000051', 'en'),
   'an active published property is eligible for an enquiry');
+set local role authenticated;
+select public.set_property_featured('10000000-0000-0000-0000-000000000051', false);
+set local role anon;
+select pg_temp.assert_true(
+  not exists (select 1 from public.published_featured_content
+    where id = '10000000-0000-0000-0000-000000000051'),
+  'removing the CMS selection hides the featured property');
 set local role authenticated;
 select public.archive_content('10000000-0000-0000-0000-000000000051');
 do $$ begin

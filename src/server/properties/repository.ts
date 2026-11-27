@@ -47,6 +47,7 @@ export interface Filters {
   transaction?: PropertyTransaction;
   bedrooms?: number;
   query?: string;
+  area?: string;
   location?: string;
   propertyType?: string;
   minimumPrice?: string;
@@ -65,7 +66,7 @@ export function propertyPath(property: Pick<PublicProperty, 'slug' | 'id'>, lang
 }
 
 export function parseFilters(params: URLSearchParams): Filters | null {
-  const allowed = new Set(['page', 'transaction', 'bedrooms', 'q', 'location', 'propertyType', 'minimumPrice', 'maximumPrice', 'sort']);
+  const allowed = new Set(['page', 'transaction', 'bedrooms', 'q', 'area', 'location', 'propertyType', 'minimumPrice', 'maximumPrice', 'sort']);
   for (const [key] of params) {
     if (!allowed.has(key) || params.getAll(key).length !== 1) return null;
   }
@@ -73,6 +74,7 @@ export function parseFilters(params: URLSearchParams): Filters | null {
   const transaction = params.get('transaction') ?? '';
   const bedrooms = params.get('bedrooms') ?? '';
   const query = params.get('q')?.trim() ?? '';
+  const area = params.get('area')?.trim() ?? '';
   const location = params.get('location')?.trim() ?? '';
   const propertyType = params.get('propertyType')?.trim() ?? '';
   const minimumPrice = params.get('minimumPrice') ?? '';
@@ -84,7 +86,7 @@ export function parseFilters(params: URLSearchParams): Filters | null {
   if (!/^[1-9]\d?$/.test(page) || Number(page) > MAX_PAGE) return null;
   if (transaction && transaction !== 'sale' && transaction !== 'rent') return null;
   if (bedrooms && !/^(?:0|[1-9]|10)$/.test(bedrooms)) return null;
-  if ((query && !safeText(query, 80)) || (location && !safeText(location, 100)) ||
+  if ((query && !safeText(query, 80)) || (area && !safeText(area, 100)) || (location && !safeText(location, 100)) ||
       (propertyType && !safeText(propertyType, 100))) return null;
   if ((minimumPrice && !validPrice(minimumPrice)) || (maximumPrice && !validPrice(maximumPrice))) return null;
   if (minimumPrice && maximumPrice && Number(minimumPrice) > Number(maximumPrice)) return null;
@@ -94,6 +96,7 @@ export function parseFilters(params: URLSearchParams): Filters | null {
     ...(transaction ? { transaction: transaction as PropertyTransaction } : {}),
     ...(bedrooms ? { bedrooms: Number(bedrooms) } : {}),
     ...(query ? { query } : {}),
+    ...(area ? { area } : {}),
     ...(location ? { location } : {}),
     ...(propertyType ? { propertyType } : {}),
     ...(minimumPrice ? { minimumPrice } : {}),
@@ -229,6 +232,7 @@ export async function listProperties(language: Language, filters: Filters) {
     const pattern = `%${filters.query}%`;
     query = query.or(`title.ilike.${pattern},area_name.ilike.${pattern},location_name.ilike.${pattern}`);
   }
+  if (filters.area) query = query.ilike('area_name', `%${filters.area}%`);
   if (filters.location) query = query.ilike('location_name', `%${filters.location}%`);
   if (filters.propertyType) query = query.ilike('property_type', `%${filters.propertyType}%`);
   if (filters.minimumPrice) query = query.gte('price_bhd_numeric', filters.minimumPrice);
@@ -247,6 +251,7 @@ export async function listProperties(language: Language, filters: Filters) {
     (filters.bedrooms !== undefined && (property.bedrooms === undefined || property.bedrooms < filters.bedrooms)) ||
     (filters.minimumPrice && (!property.priceBhd || comparePrices(property.priceBhd, filters.minimumPrice) < 0)) ||
     (filters.maximumPrice && (!property.priceBhd || comparePrices(property.priceBhd, filters.maximumPrice) > 0)) ||
+    (filters.area && !property.areaName.toLocaleLowerCase().includes(filters.area.toLocaleLowerCase())) ||
     (filters.location && !property.locationName.toLocaleLowerCase().includes(filters.location.toLocaleLowerCase())) ||
     (filters.propertyType && !property.propertyType.toLocaleLowerCase().includes(filters.propertyType.toLocaleLowerCase())) ||
     (filters.query && ![property.title, property.areaName, property.locationName]
@@ -259,6 +264,24 @@ export async function listProperties(language: Language, filters: Filters) {
     property.images = images.get(data[index].revision_id as string) ?? [];
   });
   return { properties: visible, hasNext: properties.length > PAGE_SIZE && filters.page < MAX_PAGE };
+}
+
+export async function listFeaturedProperties(language: Language): Promise<PublicProperty[]> {
+  if (language === 'ar') return [];
+  const { data, error } = await client().from('published_featured_content').select(columns)
+    .eq('kind', 'property').eq('locale', language).in('availability', ['available', 'reserved'])
+    .order('published_at', { ascending: false }).limit(6);
+  if (error || !Array.isArray(data) || data.length > 6) throw new Error('Featured properties unavailable');
+  const properties = data.map((row) => propertyFromRow(row, language));
+  if (properties.some((property) => !['available', 'reserved'].includes(property.availability)) ||
+      new Set(properties.map(({ id }) => id)).size !== properties.length) {
+    throw new Error('Invalid featured properties');
+  }
+  const images = await publicImages(data.map((row) => row.revision_id as string), language, true);
+  properties.forEach((property, index) => {
+    property.images = images.get(data[index].revision_id as string) ?? [];
+  });
+  return properties;
 }
 
 export async function getProperty(language: Language, path: { id: string; slug: string }): Promise<PublicProperty | null> {

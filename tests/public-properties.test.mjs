@@ -18,10 +18,10 @@ const row = (overrides = {}) => ({
   area_name: 'Reviewed area', property_type: 'Apartment', transaction_type: 'sale',
   availability: 'available', price_bhd: '99999999999.999', bedrooms: 2, bathrooms: 1,
   price_bhd_numeric: 99999999999.999, size_square_meters: 100.5,
-  location_name: 'Reviewed location', ...overrides,
+  location_name: 'Reviewed location', is_featured: false, ...overrides,
 });
 const rows = [
-  row(), row({ id: soldId, slug: 'sold-home', availability: 'sold', title: 'Sold property' }),
+  row({ is_featured: true }), row({ id: soldId, slug: 'sold-home', availability: 'sold', title: 'Sold property' }),
   row({ id, locale: 'ar', title: 'عقار منشور', body: 'وصف منشور' }),
   row({
     id: '55555555-5555-4555-8555-555555555555',
@@ -152,7 +152,9 @@ before(async () => {
         return (!locale || locale === `eq.${item.locale}`) &&
           (!revisionIds || revisionIds.includes(item.revision_id));
       })
-      : (url.pathname.endsWith('/published_site_content')
+      : (url.pathname.endsWith('/published_featured_content')
+        ? rows.filter((item) => item.is_featured)
+        : url.pathname.endsWith('/published_site_content')
         ? siteContentRows
         : url.pathname.endsWith('/published_editorial') ? editorialRows : rows).filter((item) => {
       for (const [key, value] of url.searchParams) {
@@ -216,14 +218,19 @@ test('homepage search submits localized filters to published property listings',
     const response = await fetch(`${base}${path}`);
     const html = await response.text();
     assert.match(html, new RegExp(`<form method="get" action="${action}"`));
-    for (const name of ['transaction', 'location', 'propertyType', 'minimumPrice', 'maximumPrice', 'bedrooms']) {
+    for (const name of ['transaction', 'area', 'propertyType', 'minimumPrice', 'maximumPrice', 'bedrooms']) {
       assert.match(html, new RegExp(`name="${name}"`));
     }
     assert.match(html, /type="radio" name="transaction" value="sale" checked/);
     assert.match(html, /type="radio" name="transaction" value="rent"/);
     assert.match(html, /href="tel:\+97332083778"/);
     assert.match(html, /href="https:\/\/wa\.me\/97332083778"/);
-    assert.ok(html.indexOf(translations.home.featuredTitle) > html.indexOf('search-panel'));
+    if (path === '/') {
+      assert.ok(html.indexOf(translations.home.featuredTitle) > html.indexOf('search-panel'));
+      assert.match(html, /Published &lt;home&gt;/);
+    } else {
+      assert.doesNotMatch(html, /Featured Properties|عقارات مميزة/);
+    }
     for (const name of ['home', 'buyProperty', 'rentProperty', 'investBahrain', 'projects', 'financing', 'exploreAreas', 'marketInsights', 'aboutJahangir', 'hotDeals', 'blog', 'contact']) {
       assert.ok(html.includes(translations.navigation[name]), `missing ${name} navigation`);
     }
@@ -234,6 +241,15 @@ test('homepage search submits localized filters to published property listings',
   assert.doesNotMatch(search.html, /Featured Properties|عقارات مميزة/);
   assert.match(search.html, /Rental 0/);
   assert.doesNotMatch(search.html, /Published &lt;home&gt;/);
+});
+
+test('approved area and property-type filters use CMS taxonomy fields', async () => {
+  requests = [];
+  const { response } = await read('/properties/?area=Reviewed%20area&propertyType=Apartment');
+  assert.equal(response.status, 200);
+  const query = latestPropertyQuery();
+  assert.equal(query.params.get('area_name'), 'ilike.%Reviewed area%');
+  assert.equal(query.params.get('property_type'), 'ilike.%Apartment%');
 });
 
 test('listing is bounded, filtered, linked, locale-specific and only queries the public view', async () => {

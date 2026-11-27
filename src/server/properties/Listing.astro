@@ -5,6 +5,7 @@ import PropertyStatus from '../../components/PropertyStatus.astro';
 import { formatCurrency, formatPropertyNumber } from '../../i18n/formatting.ts';
 import { translate } from '../../i18n/translate.ts';
 import { propertyPath, type Filters, type PublicProperty } from './repository.ts';
+import { propertyAreas, propertyTypes } from '../../i18n/property-taxonomy.ts';
 import type { Language } from '../../i18n/config.ts';
 
 interface Props {
@@ -22,6 +23,7 @@ const pageUrl = (page: number) => {
   const query = new URLSearchParams();
   if (filters?.transaction) query.set('transaction', filters.transaction);
   if (filters?.bedrooms !== undefined) query.set('bedrooms', String(filters.bedrooms));
+  if (filters?.area) query.set('area', filters.area);
   if (filters?.query) query.set('q', filters.query);
   if (filters?.location) query.set('location', filters.location);
   if (filters?.propertyType) query.set('propertyType', filters.propertyType);
@@ -63,10 +65,24 @@ const pageUrl = (page: number) => {
               </select>
             </label>
             <label>{translate(language, 'search.location')}
-              <input name="location" value={filters?.location ?? ''} maxlength="100" />
+              <select name="area">
+                <option value="">{translate(language, 'search.chooseLocation')}</option>
+                {propertyAreas.map((area) => {
+                  const name = translate(language, `areas.${area}`);
+                  return <option value={name} selected={filters?.area === name}>{name}</option>;
+                })}
+              </select>
             </label>
             <label>{translate(language, 'search.propertyType')}
-              <input name="propertyType" value={filters?.propertyType ?? ''} maxlength="100" />
+              <select name="propertyType">
+                <option value="">{translate(language, 'search.chooseType')}</option>
+                {propertyTypes.map((propertyType) => (
+                  <option
+                    value={language === 'ar' ? propertyType.ar : propertyType.en}
+                    selected={filters?.propertyType === (language === 'ar' ? propertyType.ar : propertyType.en)}
+                  >{translate(language, propertyType.key)}</option>
+                ))}
+              </select>
             </label>
             <label>{translate(language, 'search.minimumPrice')}
               <input name="minimumPrice" value={filters?.minimumPrice ?? ''} inputmode="decimal" maxlength="15" />

@@ -2,12 +2,17 @@
 import HomePage from '../../components/HomePage.astro';
 import { translate } from '../../i18n/translate.ts';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listFeaturedProperties } from '../../server/properties/repository.ts';
+import type { PublicProperty } from '../../server/properties/repository.ts';
+
+let featuredProperties: PublicProperty[] = [];
+try { featuredProperties = await listFeaturedProperties('ar'); } catch {}
 ---
 
 <BaseLayout
   title={`Bahrain Realtor — ${translate('ar', 'development.banner')}`}
-  description={translate('ar', 'home.introduction')}
+  description={translate('ar', 'home.introductionOne')}
   language="ar"
 >
-  <HomePage language="ar" />
+  <HomePage language="ar" featuredProperties={featuredProperties} />
 </BaseLayout>

@@ -1,5 +1,6 @@
 ---
 import { translate } from '../i18n/translate.ts';
+import { propertyAreas, propertyTypes } from '../i18n/property-taxonomy.ts';
 import type { Language } from '../i18n/config.ts';
 
 interface Props {
@@ -23,11 +24,19 @@ const base = language === 'ar' ? '/ar/properties/' : '/properties/';
     </div>
     <label>
       {translate(language, 'search.location')}
-      <input name="location" maxlength="100" />
+      <select name="area">
+        <option value="">{translate(language, 'search.chooseLocation')}</option>
+        {propertyAreas.map((area) => <option value={translate(language, `areas.${area}`)}>{translate(language, `areas.${area}`)}</option>)}
+      </select>
     </label>
     <label>
       {translate(language, 'search.propertyType')}
-      <input name="propertyType" maxlength="100" />
+      <select name="propertyType">
+        <option value="">{translate(language, 'search.chooseType')}</option>
+        {propertyTypes.map((propertyType) => (
+          <option value={language === 'ar' ? propertyType.ar : propertyType.en}>{translate(language, propertyType.key)}</option>
+        ))}
+      </select>
     </label>
     <label>
       {translate(language, 'search.minimumPrice')}

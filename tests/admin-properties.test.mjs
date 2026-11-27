@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { createDraft, createNewDraft, parseDraft, parseNewDraft, parseTransition, transition } from '../src/server/admin-properties/workflow.ts';
+import { createDraft, createNewDraft, parseDraft, parseFeaturedSelection, parseNewDraft, parseTransition, setPropertyFeatured, transition } from '../src/server/admin-properties/workflow.ts';
 
 const id = '11111111-1111-4111-8111-111111111111';
 const item = '22222222-2222-4222-8222-222222222222';
@@ -104,6 +104,24 @@ test('provider errors are not mistaken for successful changes', async () => {
   client.rpc = async () => ({ error: new Error('conflict') });
   await assert.rejects(createNewDraft(client, parseNewDraft(newForm())));
   await assert.rejects(transition(client, 'publish', parseTransition(form({ action: 'publish', revision: id, expected: 'none', confirm: 'yes' }), 'publish')));
+});
+
+test('homepage feature changes require scoped identity and explicit confirmation', async () => {
+  const valid = parseFeaturedSelection(form({
+    action: 'feature', item, revision: id, featured: 'yes', confirm: 'yes',
+  }));
+  assert.deepEqual(valid, { item, revision: id, featured: true });
+  assert.equal(parseFeaturedSelection(form({
+    action: 'feature', item, revision: id, featured: 'yes',
+  })), null);
+  assert.equal(parseFeaturedSelection(form({
+    action: 'feature', item, revision: id, featured: 'maybe', confirm: 'yes',
+  })), null);
+  const client = clientFor();
+  await setPropertyFeatured(client, item, true);
+  assert.deepEqual(client.calls[0], ['rpc', 'set_property_featured', {
+    p_item_id: item, p_featured: true,
+  }]);
 });
 
 test('route independently applies origin, identity, MFA, and response protections', async () => {
