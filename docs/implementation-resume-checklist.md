@@ -65,6 +65,15 @@ DNS, external account, and publication safeguards are unchanged.
     320px on both English and Arabic invalid-filter pages. Pagination was not
     browser-measured. Full visual, keyboard,
     screen-reader and authenticated admin acceptance remain pending.
+    2026-11-27 homepage work: separate bilingual navigation, Buy/Rent search
+    controls, contact links and homepage-only featured placeholder added.
+    The specified `public/images/` hero asset and an approved portrait/profile
+    were not found; `public/homepage-hero.webp.jpg` exists outside the
+    specified directory and needs owner confirmation before use. Featured and
+    hot-deal selection has no existing published selection marker; do not
+    present arbitrary properties as featured. Arabic wording needs review.
+    Live-site visual comparison could not be completed because the site was
+    unreachable from this environment.
 13. [~] Automatic SEO/tracking — CMS-published content drives metadata,
     eligible alternates and sitemap paths. GA4, conversion events, Search
     Console, Bing and IndexNow remain unconfigured; prerequisites and

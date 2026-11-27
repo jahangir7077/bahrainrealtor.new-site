@@ -223,6 +223,7 @@ test('homepage search submits localized filters to published property listings',
     assert.match(html, /type="radio" name="transaction" value="rent"/);
     assert.match(html, /href="tel:\+97332083778"/);
     assert.match(html, /href="https:\/\/wa\.me\/97332083778"/);
+    assert.ok(html.indexOf(translations.home.featuredTitle) > html.indexOf('search-panel'));
     for (const name of ['home', 'buyProperty', 'rentProperty', 'investBahrain', 'projects', 'financing', 'exploreAreas', 'marketInsights', 'aboutJahangir', 'hotDeals', 'blog', 'contact']) {
       assert.ok(html.includes(translations.navigation[name]), `missing ${name} navigation`);
     }
@@ -230,6 +231,7 @@ test('homepage search submits localized filters to published property listings',
   }
   const search = await read('/properties/?transaction=rent&location=&propertyType=&minimumPrice=&maximumPrice=&bedrooms=3');
   assert.equal(search.response.status, 200);
+  assert.doesNotMatch(search.html, /Featured Properties|عقارات مميزة/);
   assert.match(search.html, /Rental 0/);
   assert.doesNotMatch(search.html, /Published &lt;home&gt;/);
 });

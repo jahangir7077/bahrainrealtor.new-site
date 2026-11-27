@@ -34,19 +34,21 @@ const text = (key: string) => translate(language, key);
           <Button variant="secondary" size="large" href="#contact">{text('home.contact')}</Button>
         </div>
       </div>
-      <div class="home-hero__art" aria-hidden="true">
-        <span class="home-hero__disc"></span>
-        <span class="home-hero__line"></span>
-        <span class="home-hero__label">BAHRAIN · REAL ESTATE</span>
-      </div>
       <PropertySearch language={language} />
+    </Container>
+  </section>
+
+  <section class="section" aria-labelledby={`featured-title-${language}`}>
+    <Container width="wide">
+      <SectionHeading level={2}><span id={`featured-title-${language}`}>{text('home.featuredTitle')}</span></SectionHeading>
+      <EmptyState language={language} title={text('home.featuredPending')} description={text('content.publishedAfterReview')} />
     </Container>
   </section>
 
   <section class="section home-section--soft" id="hot-deals" aria-labelledby={`deals-title-${language}`}>
     <Container width="wide">
       <SectionHeading level={2}><span id={`deals-title-${language}`}>{text('navigation.hotDeals')}</span></SectionHeading>
-      <EmptyState language={language} title={text('content.noProperties')} description={text('content.publishedAfterReview')} />
+      <EmptyState language={language} title={text('home.dealsPending')} description={text('content.publishedAfterReview')} />
     </Container>
   </section>
 
@@ -184,10 +186,10 @@ const text = (key: string) => translate(language, key);
 
   .home-hero__inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.8fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
-    gap: clamp(var(--space-6), 7vw, var(--space-16));
-    padding-block: clamp(var(--space-12), 9vw, 8rem) var(--space-10);
+    gap: var(--space-8);
+    padding-block: clamp(var(--space-12), 7vw, 6rem) var(--space-10);
   }
 
   .home-hero__copy {
@@ -268,43 +270,6 @@ const text = (key: string) => translate(language, key);
     box-shadow: var(--shadow-card);
   }
   .floating-whatsapp:hover { color: #fff; background: #0c5028; }
-
-  .home-hero__art {
-    position: relative;
-    display: grid;
-    min-height: 18rem;
-    place-items: center;
-    overflow: hidden;
-    border: 1px solid rgb(255 255 255 / 24%);
-    border-radius: 50% 50% 0.75rem 0.75rem;
-    background: #193550;
-  }
-
-  .home-hero__disc {
-    width: min(60%, 14rem);
-    aspect-ratio: 1;
-    border: 1px solid rgb(196 163 107 / 72%);
-    border-radius: 50%;
-    box-shadow: 0 0 0 2.5rem rgb(196 163 107 / 8%), 0 0 0 5rem rgb(196 163 107 / 5%);
-  }
-
-  .home-hero__line {
-    position: absolute;
-    width: 140%;
-    height: 1px;
-    transform: rotate(-32deg);
-    background: rgb(255 255 255 / 35%);
-  }
-
-  .home-hero__label {
-    position: absolute;
-    inset-block-end: var(--space-5);
-    inset-inline-start: var(--space-5);
-    color: #e2e8f0;
-    background: #193550;
-    font-size: 0.68rem;
-    letter-spacing: 0.18em;
-  }
 
   .search-panel {
     grid-column: 1 / -1;
@@ -401,11 +366,6 @@ const text = (key: string) => translate(language, key);
   @media (max-width: 52rem) {
     .home-hero__inner {
       grid-template-columns: 1fr;
-    }
-
-    .home-hero__art {
-      min-height: 12rem;
-      border-radius: var(--radius-card);
     }
 
     .home-feature__inner,

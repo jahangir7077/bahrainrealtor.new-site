@@ -17,7 +17,7 @@ const anchor = (id: string) => `${home}#${id}`;
   <Container width="wide">
     <div class="site-footer__grid">
       <div class="site-footer__brand">
-        <a href={home} class="site-footer__wordmark">Bahrain Realtor</a>
+        <a href={home} class="site-footer__wordmark">Jahangir Realtor Bahrain</a>
         <p>{translate(language, 'home.introduction')}</p>
         <LanguageSwitcher language={language} />
       </div>
@@ -32,14 +32,14 @@ const anchor = (id: string) => `${home}#${id}`;
       <nav aria-label={translate(language, 'navigation.insights')}>
         <h2>{translate(language, 'navigation.insights')}</h2>
         <ul>
-          <li><a href={anchor('insights')}>{translate(language, 'navigation.blog')}</a></li>
+          <li><a href={`${language === 'ar' ? '/ar' : ''}/blog/`}>{translate(language, 'navigation.blog')}</a></li>
           <li><a href={anchor('investment')}>{translate(language, 'navigation.investment')}</a></li>
           <li><a href={anchor('financing')}>{translate(language, 'navigation.financing')}</a></li>
         </ul>
       </nav>
       <div>
         <h2>{translate(language, 'navigation.contact')}</h2>
-        <p>{translate(language, 'content.contactPending')}</p>
+        <p><a href="tel:+97332083778">{translate(language, 'home.call')}</a></p>
         <a href={anchor('contact')}>{translate(language, 'navigation.contactAdvisor')}</a>
       </div>
     </div>
